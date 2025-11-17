@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Decoupled Action Head - Jian Zhou</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #fff;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            padding: 60px 20px 40px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+
+        .authors {
+            font-size: 1.1em;
+            margin-bottom: 15px;
+            color: #555;
+        }
+
+        .authors a {
+            color: #2563eb;
+            text-decoration: none;
+        }
+
+        .authors a:hover {
+            text-decoration: underline;
+        }
+
+        .affiliation {
+            font-size: 0.95em;
+            color: #666;
+            margin-bottom: 25px;
+        }
+
+        .venue {
+            font-size: 1em;
+            color: #444;
+            font-style: italic;
+            margin-bottom: 30px;
+        }
+
+        /* Links */
+        .links {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 25px;
+        }
+
+        .links a {
+            display: inline-block;
+            padding: 10px 24px;
+            background-color: #2563eb;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: background-color 0.3s ease;
+        }
+
+        .links a:hover {
+            background-color: #1d4ed8;
+        }
+
+        .links a.secondary {
+            background-color: #64748b;
+        }
+
+        .links a.secondary:hover {
+            background-color: #475569;
+        }
+
+        /* Sections */
+        section {
+            margin: 50px 0;
+            padding: 0 20px;
+        }
+
+        section h2 {
+            font-size: 1.8em;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        section p {
+            margin-bottom: 15px;
+            text-align: justify;
+            color: #444;
+        }
+
+        /* Abstract */
+        .abstract {
+            background-color: #f8f9fa;
+            padding: 30px;
+            border-radius: 8px;
+            border-left: 4px solid #2563eb;
+        }
+
+        /* Video */
+        .video-container {
+            width: 100%;
+            max-width: 800px;
+            margin: 30px auto;
+            text-align: center;
+        }
+
+        .video-container video {
+            width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .video-container iframe {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Highlights */
+        .highlights ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .highlights li {
+            padding: 12px 0 12px 30px;
+            position: relative;
+            color: #444;
+        }
+
+        .highlights li:before {
+            content: "�";
+            position: absolute;
+            left: 0;
+            color: #2563eb;
+            font-weight: bold;
+        }
+
+        /* Method Overview */
+        .method-figure {
+            width: 100%;
+            margin: 30px 0;
+            text-align: center;
+        }
+
+        .method-figure img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .method-figure figcaption {
+            margin-top: 15px;
+            color: #666;
+            font-size: 0.95em;
+            font-style: italic;
+        }
+
+        /* Results */
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .result-item {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .result-item img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+
+        /* Citation */
+        .citation-box {
+            background-color: #f1f5f9;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .citation-box pre {
+            margin: 0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .copy-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 5px 12px;
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85em;
+        }
+
+        .copy-button:hover {
+            background-color: #1d4ed8;
+        }
+
+        /* Navigation */
+        .nav-back {
+            margin: 20px 0;
+            padding: 0 20px;
+        }
+
+        .nav-back a {
+            color: #2563eb;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .nav-back a:hover {
+            text-decoration: underline;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 40px 20px;
+            border-top: 1px solid #e0e0e0;
+            margin-top: 60px;
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            section h2 {
+                font-size: 1.5em;
+            }
+
+            .links {
+                flex-direction: column;
+            }
+
+            .links a {
+                width: 100%;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Navigation -->
+        <div class="nav-back">
+            <a href="../../../index.html">← Back to Main Page</a>
+        </div>
+
+        <!-- Header -->
+        <header class="header">
+            <h1>Decoupled Action Head: Confining Task Knowledge to Conditioning Layers</h1>
+            <div class="authors">
+                <strong>Jian Zhou</strong>, Sihao Lin, Shuai Fu, Qi Wu
+            </div>
+            <div class="affiliation">
+                Australian Institute for Machine Learning (AIML), University of Adelaide
+            </div>
+            <div class="venue">
+                arXiv preprint, 2025
+            </div>
+            <div class="links">
+                <a href="https://arxiv.org/abs/XXXX.XXXXX" target="_blank">Paper (arXiv)</a>
+                <a href="https://github.com/jianzhou0420/DecoupledActionHead" target="_blank">Code (GitHub)</a>
+            </div>
+        </header>
+
+        <!-- Abstract -->
+        <section>
+            <h2>Abstract</h2>
+            <div class="abstract">
+                <p>
+                    Behavior Cloning (BC) is a data-driven supervised learning approach that has gained increasing
+                    attention with the success of scaling laws in language and vision domains. Among its implementations
+                    in robotic manipulation, Diffusion Policy (DP), with its two variants DP-CNN (DP-C) and
+                    DP-Transformer (DP-T), is one of the most effective and widely adopted models, demonstrating the
+                    advantages of predicting continuous action sequences. However, both DP and other BC methods remain
+                    constrained by the scarcity of paired training data, and the internal mechanisms underlying DP's
+                    effectiveness remain insufficiently understood, leading to limited generalization and a lack of
+                    principled design in model development.
+                </p>
+                <p>
+                    In this work, we propose a <strong>decoupled training recipe</strong> that leverages nearly
+                    cost-free kinematics-generated trajectories as observation-free data to pretrain a general action
+                    head (action generator). The pretrained action head is then frozen and adapted to novel tasks
+                    through feature modulation. Our experiments demonstrate the feasibility of this approach in both
+                    in-distribution and out-of-distribution scenarios. As an additional benefit, decoupling improves
+                    training efficiency; for instance, DP-C achieves up to a <strong>41% speedup</strong>. Furthermore,
+                    the confinement of task-specific knowledge to the conditioning components under decoupling, combined
+                    with the near-identical performance of DP-C in both normal and decoupled training, indicates that
+                    the action generation backbone plays a limited role in robotic manipulation. Motivated by this
+                    observation, we introduce <strong>DP-MLP</strong>, which replaces the 244M-parameter U-Net backbone
+                    of DP-C with only 4M parameters of simple MLP blocks, achieving a <strong>83.9% faster training
+                        speed</strong> under normal training and 89.1% under decoupling.
+                </p>
+            </div>
+        </section>
+
+        <!-- Video -->
+        <section>
+            <h2>Video</h2>
+            <div class="video-container">
+                <!-- Replace with your video URL or file path -->
+                <video controls poster="thumbnail.jpg">
+                    <source src="ICRA26_4453_VI_i.mp4" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+                <!-- Alternative: If you have a YouTube video, use this instead:
+                <iframe src="https://www.youtube.com/embed/YOUR_VIDEO_ID"
+                        frameborder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowfullscreen>
+                </iframe>
+                -->
+            </div>
+        </section>
+
+        <!-- Key Highlights -->
+        <section class="highlights">
+            <h2>Key Contributions</h2>
+            <ul>
+                <li>We validate the feasibility of an observation-free decoupled action head, showing that task-specific
+                    knowledge can be confined to the conditioning module</li>
+                <li>We identify feature modulation (FiLM) as the effective conditioning method under decoupling, explain
+                    why cross-attention fails, and propose DP-T-FiLM</li>
+                <li>We demonstrate that the action head is relatively less critical, and design a lightweight DP-MLP
+                    that achieves substantial speedups (83.9% faster training) while preserving performance</li>
+                <li>Our decoupling recipe enables up to 41% training speedup for DP-CNN while maintaining near-identical
+                    performance</li>
+            </ul>
+        </section>
+
+        <!-- Method Overview -->
+        <section>
+            <h2>Method Overview</h2>
+            <h3 style="font-size: 1.3em; margin-top: 20px; margin-bottom: 15px; color: #2563eb;">Two-Stage Decoupling
+                Training Recipe</h3>
+            <p>
+                Our method decouples the action generation process from task-specific conditioning through a two-stage
+                training paradigm:
+            </p>
+            <p>
+                <strong>Stage 1: Pretraining the Action Head</strong><br>
+                We leverage the one-to-one correspondence from joint positions (JP) to end-effector pose (eePose) via
+                forward kinematics. This enables us to train an action generation backbone using only inexpensive
+                trajectory information, without requiring costly observation-action pairs. The action head learns to
+                generate continuous action sequences conditioned on joint positions.
+            </p>
+            <p>
+                <strong>Stage 2: Task-Specific Adaptation</strong><br>
+                The pretrained action generation backbone is frozen, and we replace the conditioning modules to handle
+                features from normal observation encoders (images + low-dimensional state). Only the conditioning layers
+                and observation encoders are trained, while the majority of parameters remain frozen, enabling
+                significant training speedup.
+            </p>
+
+            <h3 style="font-size: 1.3em; margin-top: 30px; margin-bottom: 15px; color: #2563eb;">Key Architectural
+                Insights</h3>
+            <p>
+                <strong>Feature Modulation (FiLM) vs Cross-Attention:</strong> We discovered that feature modulation is
+                critical for the decoupled setting. FiLM parameterizes a continuous feature space through scaling (γ)
+                and shifting (β) operations, allowing the frozen backbone to be adapted to new tasks. In contrast,
+                cross-attention with frozen query/key/value projections forces alignment with pretrained joint position
+                representations, leading to performance degradation.
+            </p>
+            <p>
+                <strong>DP-MLP: A Lightweight Action Head:</strong> Since task-specific knowledge is confined to
+                conditioning modules, the action generation backbone only needs capacity to generate continuous
+                sequences. We demonstrate this by replacing the 244M-parameter U-Net with a simple 4M-parameter MLP
+                architecture, achieving comparable or better performance with 83.9-89.1% faster training.
+            </p>
+        </section>
+
+        <!-- Results -->
+        <section>
+            <h2>Results</h2>
+            <p>
+                We evaluate our method on the MimicGen environment using eight robotic manipulation tasks. Our
+                experiments demonstrate three key findings:
+            </p>
+
+            <h3 style="font-size: 1.3em; margin-top: 25px; margin-bottom: 15px; color: #2563eb;">1. Feasibility of
+                Decoupled Action Head</h3>
+            <p>
+                <strong>In-Distribution Performance:</strong> The decoupled DP-C achieves nearly identical performance
+                to normal training (63.4% vs 64.0% average success rate across 8 tasks), demonstrating that freezing the
+                action generation backbone does not harm performance when using feature modulation.
+            </p>
+            <p>
+                <strong>Out-of-Distribution Generalization:</strong> An action head pretrained on only 3 tasks (A, C, G)
+                transfers successfully to 5 unseen tasks (B, D, E, F, H) with only modest performance degradation
+                (58.92% vs 63.48% for normal training), showing strong cross-task adaptability.
+            </p>
+
+            <h3 style="font-size: 1.3em; margin-top: 25px; margin-bottom: 15px; color: #2563eb;">2. Training Efficiency
+                Gains</h3>
+            <table style="width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 0.95em;">
+                <thead>
+                    <tr style="background-color: #f8f9fa;">
+                        <th style="border: 1px solid #ddd; padding: 12px; text-align: left;">Model</th>
+                        <th style="border: 1px solid #ddd; padding: 12px; text-align: center;">Normal Training</th>
+                        <th style="border: 1px solid #ddd; padding: 12px; text-align: center;">Decoupled Training</th>
+                        <th style="border: 1px solid #ddd; padding: 12px; text-align: center;">Speedup</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="border: 1px solid #ddd; padding: 12px;">DP-C</td>
+                        <td style="border: 1px solid #ddd; padding: 12px; text-align: center;">10.67 it/s</td>
+                        <td style="border: 1px solid #ddd; padding: 12px; text-align: center;">15.06 it/s</td>
+                        <td
+                            style="border: 1px solid #ddd; padding: 12px; text-align: center; color: #059669; font-weight: bold;">
+                            +41.1%</td>
+                    </tr>
+                    <tr style="background-color: #f8f9fa;">
+                        <td style="border: 1px solid #ddd; padding: 12px;">DP-MLP</td>
+                        <td style="border: 1px solid #ddd; padding: 12px; text-align: center;">19.62 it/s</td>
+                        <td style="border: 1px solid #ddd; padding: 12px; text-align: center;">20.18 it/s</td>
+                        <td
+                            style="border: 1px solid #ddd; padding: 12px; text-align: center; color: #059669; font-weight: bold;">
+                            +2.9%</td>
+                    </tr>
+                    <tr>
+                        <td style="border: 1px solid #ddd; padding: 12px;"><strong>DP-MLP vs DP-C</strong></td>
+                        <td style="border: 1px solid #ddd; padding: 12px; text-align: center; font-weight: bold;">83.9%
+                            faster</td>
+                        <td style="border: 1px solid #ddd; padding: 12px; text-align: center; font-weight: bold;">89.1%
+                            faster</td>
+                        <td style="border: 1px solid #ddd; padding: 12px; text-align: center;">—</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p style="margin-top: 15px; font-size: 0.9em; color: #666;">
+                *Measured on RTX 4090 GPU. DP-MLP achieves similar performance to DP-C (64.3% vs 64.0%) while being
+                significantly faster.
+            </p>
+
+            <h3 style="font-size: 1.3em; margin-top: 25px; margin-bottom: 15px; color: #2563eb;">3. Feature Modulation
+                vs Cross-Attention</h3>
+            <p>
+                Our experiments reveal that DP-Transformer with cross-attention suffers severe performance degradation
+                under decoupling (59.8% → 38.7%), while DP-T-FiLM (using feature modulation) maintains acceptable
+                performance (58.6% → 53.4%). This confirms that feature modulation is essential for the decoupled
+                training paradigm.
+            </p>
+        </section>
+
+        <!-- Citation -->
+        <section>
+            <h2>Citation</h2>
+            <div class="citation-box">
+                <button class="copy-button" onclick="copyToClipboard()">Copy</button>
+                <pre id="citation-text">@article{zhou2025decoupled,
+  title={Decoupled Action Head: Confining Task Knowledge to Conditioning Layers},
+  author={Zhou, Jian and Lin, Sihao and Fu, Shuai and Wu, Qi},
+  journal={arXiv preprint arXiv:XXXX.XXXXX},
+  year={2025}
+}</pre>
+            </div>
+        </section>
+
+        <!-- Future Work -->
+        <section>
+            <h2>Limitations and Future Work</h2>
+            <p>
+                While we demonstrate the feasibility of using observation-free data, the design and generation of such
+                low-cost data require careful consideration. Future work includes:
+            </p>
+            <ul style="list-style-position: inside; margin-left: 20px; margin-top: 10px;">
+                <li style="margin-bottom: 8px;">Designing large-scale observation-free datasets with millions or
+                    billions of trajectories to train more generalizable action heads</li>
+                <li style="margin-bottom: 8px;">Exploring the limits of knowledge confinement and determining the
+                    minimal architecture required for effective action generation</li>
+                <li style="margin-bottom: 8px;">Investigating the application of decoupled action heads to multi-modal
+                    observations (e.g., point clouds, tactile sensing)</li>
+            </ul>
+        </section>
+
+        <!-- Footer -->
+        <footer>
+            <p>&copy; 2025 Jian Zhou. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <script>
+        function copyToClipboard() {
+            const citationText = document.getElementById('citation-text').innerText;
+            navigator.clipboard.writeText(citationText).then(() => {
+                const button = document.querySelector('.copy-button');
+                button.textContent = 'Copied!';
+                setTimeout(() => {
+                    button.textContent = 'Copy';
+                }, 2000);
+            });
+        }
+    </script>
+</body>
+
+</html>

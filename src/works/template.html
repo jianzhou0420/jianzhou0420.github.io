@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Decoupled Action Head - Jian Zhou</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #fff;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            padding: 60px 20px 40px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+
+        .authors {
+            font-size: 1.1em;
+            margin-bottom: 15px;
+            color: #555;
+        }
+
+        .authors a {
+            color: #2563eb;
+            text-decoration: none;
+        }
+
+        .authors a:hover {
+            text-decoration: underline;
+        }
+
+        .affiliation {
+            font-size: 0.95em;
+            color: #666;
+            margin-bottom: 25px;
+        }
+
+        .venue {
+            font-size: 1em;
+            color: #444;
+            font-style: italic;
+            margin-bottom: 30px;
+        }
+
+        /* Links */
+        .links {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 25px;
+        }
+
+        .links a {
+            display: inline-block;
+            padding: 10px 24px;
+            background-color: #2563eb;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: background-color 0.3s ease;
+        }
+
+        .links a:hover {
+            background-color: #1d4ed8;
+        }
+
+        .links a.secondary {
+            background-color: #64748b;
+        }
+
+        .links a.secondary:hover {
+            background-color: #475569;
+        }
+
+        /* Sections */
+        section {
+            margin: 50px 0;
+            padding: 0 20px;
+        }
+
+        section h2 {
+            font-size: 1.8em;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        section p {
+            margin-bottom: 15px;
+            text-align: justify;
+            color: #444;
+        }
+
+        /* Abstract */
+        .abstract {
+            background-color: #f8f9fa;
+            padding: 30px;
+            border-radius: 8px;
+            border-left: 4px solid #2563eb;
+        }
+
+        /* Highlights */
+        .highlights ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .highlights li {
+            padding: 12px 0 12px 30px;
+            position: relative;
+            color: #444;
+        }
+
+        .highlights li:before {
+            content: "í";
+            position: absolute;
+            left: 0;
+            color: #2563eb;
+            font-weight: bold;
+        }
+
+        /* Method Overview */
+        .method-figure {
+            width: 100%;
+            margin: 30px 0;
+            text-align: center;
+        }
+
+        .method-figure img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .method-figure figcaption {
+            margin-top: 15px;
+            color: #666;
+            font-size: 0.95em;
+            font-style: italic;
+        }
+
+        /* Results */
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .result-item {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .result-item img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+
+        /* Citation */
+        .citation-box {
+            background-color: #f1f5f9;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .citation-box pre {
+            margin: 0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .copy-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 5px 12px;
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85em;
+        }
+
+        .copy-button:hover {
+            background-color: #1d4ed8;
+        }
+
+        /* Navigation */
+        .nav-back {
+            margin: 20px 0;
+            padding: 0 20px;
+        }
+
+        .nav-back a {
+            color: #2563eb;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .nav-back a:hover {
+            text-decoration: underline;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 40px 20px;
+            border-top: 1px solid #e0e0e0;
+            margin-top: 60px;
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            section h2 {
+                font-size: 1.5em;
+            }
+
+            .links {
+                flex-direction: column;
+            }
+
+            .links a {
+                width: 100%;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Navigation -->
+        <div class="nav-back">
+            <a href="../../index.html">ê Back to Main Page</a>
+        </div>
+
+        <!-- Header -->
+        <header class="header">
+            <h1>Decoupled Action Head: Confining Task Knowledge to Conditioning Layers</h1>
+            <div class="authors">
+                <strong>Jian Zhou</strong>, Sihao Lin, Shuai Fu, Qi Wu
+            </div>
+            <div class="affiliation">
+                Australian Institute for Machine Learning (AIML), University of Adelaide
+            </div>
+            <div class="venue">
+                arXiv preprint, 2025
+            </div>
+            <div class="links">
+                <a href="#" target="_blank">Paper (arXiv)</a>
+                <a href="https://github.com/jianzhou0420/DecoupledActionHead" target="_blank">Code (GitHub)</a>
+                <a href="#" class="secondary">Poster</a>
+                <a href="#" class="secondary">Slides</a>
+            </div>
+        </header>
+
+        <!-- Abstract -->
+        <section>
+            <h2>Abstract</h2>
+            <div class="abstract">
+                <p>
+                    [Your abstract goes here. Explain the problem you're solving, your approach, and the key results.
+                    For example:]
+                </p>
+                <p>
+                    We introduce the Decoupled Action Head, a novel architecture that confines task-specific knowledge
+                    to conditioning layers while maintaining a shared representation space. Our approach addresses the
+                    challenge of multi-task learning in robotic manipulation by separating task-agnostic features from
+                    task-specific conditioning, enabling more efficient knowledge transfer and improved generalization
+                    across diverse manipulation tasks.
+                </p>
+            </div>
+        </section>
+
+        <!-- Key Highlights -->
+        <section class="highlights">
+            <h2>Key Contributions</h2>
+            <ul>
+                <li>Novel decoupled architecture that separates task knowledge into conditioning layers</li>
+                <li>Improved sample efficiency in multi-task imitation learning scenarios</li>
+                <li>State-of-the-art performance on benchmark robotic manipulation tasks</li>
+                <li>Extensive ablation studies demonstrating the effectiveness of the decoupling strategy</li>
+            </ul>
+        </section>
+
+        <!-- Method Overview -->
+        <section>
+            <h2>Method Overview</h2>
+            <p>
+                [Describe your method here. You can include diagrams, architecture figures, etc.]
+            </p>
+            <figure class="method-figure">
+                <img src="placeholder-architecture.png" alt="Architecture diagram">
+                <figcaption>Figure 1: Overview of the Decoupled Action Head architecture</figcaption>
+            </figure>
+            <p>
+                Our approach consists of three main components: (1) a shared encoder that processes observations, (2)
+                task-specific conditioning layers that modulate the representation based on task information, and (3) a
+                shared action decoder that produces actions from the conditioned representations.
+            </p>
+        </section>
+
+        <!-- Results -->
+        <section>
+            <h2>Results</h2>
+            <p>
+                We evaluate our method on several benchmark tasks and demonstrate significant improvements over baseline
+                approaches.
+            </p>
+            <div class="results-grid">
+                <div class="result-item">
+                    <img src="placeholder-result1.png" alt="Result 1">
+                    <p><strong>Task Performance</strong><br>Comparison across different manipulation tasks</p>
+                </div>
+                <div class="result-item">
+                    <img src="placeholder-result2.png" alt="Result 2">
+                    <p><strong>Sample Efficiency</strong><br>Learning curves showing faster convergence</p>
+                </div>
+                <div class="result-item">
+                    <img src="placeholder-result3.png" alt="Result 3">
+                    <p><strong>Generalization</strong><br>Performance on unseen task variations</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Citation -->
+        <section>
+            <h2>Citation</h2>
+            <div class="citation-box">
+                <button class="copy-button" onclick="copyToClipboard()">Copy</button>
+                <pre id="citation-text">@article{zhou2025decoupled,
+  title={Decoupled Action Head: Confining Task Knowledge to Conditioning Layers},
+  author={Zhou, Jian and Lin, Sihao and Fu, Shuai and Wu, Qi},
+  journal={arXiv preprint arXiv:XXXX.XXXXX},
+  year={2025}
+}</pre>
+            </div>
+        </section>
+
+        <!-- Acknowledgments -->
+        <section>
+            <h2>Acknowledgments</h2>
+            <p>
+                [Add your acknowledgments here, including funding sources, collaborators, etc.]
+            </p>
+        </section>
+
+        <!-- Footer -->
+        <footer>
+            <p>&copy; 2025 Jian Zhou. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <script>
+        function copyToClipboard() {
+            const citationText = document.getElementById('citation-text').innerText;
+            navigator.clipboard.writeText(citationText).then(() => {
+                const button = document.querySelector('.copy-button');
+                button.textContent = 'Copied!';
+                setTimeout(() => {
+                    button.textContent = 'Copy';
+                }, 2000);
+            });
+        }
+    </script>
+</body>
+
+</html>
