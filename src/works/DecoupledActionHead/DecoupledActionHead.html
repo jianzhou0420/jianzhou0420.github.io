@@ -305,7 +305,10 @@
 
         <!-- Header -->
         <header class="header">
-            <h1>Decoupled Action Head: Confining Task Knowledge to Conditioning Layers</h1>
+            <h1>
+                <span style="font-size: 1.15em; color: #2563eb; font-weight: 800;">Decoupled Action Head</span><br>
+                <span style="font-size: 0.85em; font-weight: 600;">Confining Task Knowledge to Conditioning Layers</span>
+            </h1>
             <div class="authors">
                 <strong>Jian Zhou</strong>, Sihao Lin, Shuai Fu, Qi Wu
             </div>
@@ -326,29 +329,40 @@
             <h2>Abstract</h2>
             <div class="abstract">
                 <p>
-                    Behavior Cloning (BC) is a data-driven supervised learning approach that has gained increasing
-                    attention with the success of scaling laws in language and vision domains. Among its implementations
-                    in robotic manipulation, Diffusion Policy (DP), with its two variants DP-CNN (DP-C) and
-                    DP-Transformer (DP-T), is one of the most effective and widely adopted models, demonstrating the
-                    advantages of predicting continuous action sequences. However, both DP and other BC methods remain
-                    constrained by the scarcity of paired training data, and the internal mechanisms underlying DP's
-                    effectiveness remain insufficiently understood, leading to limited generalization and a lack of
-                    principled design in model development.
+                    Behavior Cloning (BC) is a data-driven supervised
+                    learning approach that has gained increasing attention with
+                    the success of scaling laws in language and vision domains.
+                    Among its implementations in robotic manipulation, Diffusion
+                    Policy (DP), with its two variants DP-CNN (DP-C) and DP-
+                    Transformer (DP-T), is one of the most effective and widely
+                    adopted models, demonstrating the advantages of predicting
+                    continuous action sequences. However, both DP and other
+                    BC methods remain constrained by the scarcity of paired
+                    training data, and the internal mechanisms underlying DP's
+                    effectiveness remain insufficiently understood, leading to limited
+                    generalization and a lack of principled design in model development.
                 </p>
                 <p>
-                    In this work, we propose a <strong>decoupled training recipe</strong> that leverages nearly
-                    cost-free kinematics-generated trajectories as observation-free data to pretrain a general action
-                    head (action generator). The pretrained action head is then frozen and adapted to novel tasks
-                    through feature modulation. Our experiments demonstrate the feasibility of this approach in both
-                    in-distribution and out-of-distribution scenarios. As an additional benefit, decoupling improves
-                    training efficiency; for instance, DP-C achieves up to a <strong>41% speedup</strong>. Furthermore,
-                    the confinement of task-specific knowledge to the conditioning components under decoupling, combined
-                    with the near-identical performance of DP-C in both normal and decoupled training, indicates that
-                    the action generation backbone plays a limited role in robotic manipulation. Motivated by this
-                    observation, we introduce <strong>DP-MLP</strong>, which replaces the 244M-parameter U-Net backbone
-                    of DP-C with only 4M parameters of simple MLP blocks, achieving a <strong>83.9% faster training
-                        speed</strong> under normal training and 89.1% under decoupling.
+                    In this work, we propose a <strong>decoupled training recipe</strong>
+                    that leverages nearly cost-free kinematics-generated trajectories
+                    as observation-free data to pretrain a general action head
+                    (action generator). The pretrained action head is then frozen
+                    and adapted to novel tasks through feature modulation. Our
+                    experiments demonstrate the feasibility of this approach in
+                    both in-distribution and out-of-distribution scenarios. As an
+                    additional benefit, decoupling improves training efficiency; for
+                    instance, DP-C achieves up to a <strong>41% speedup</strong>. Furthermore,
+                    the confinement of task-specific knowledge to the conditioning
+                    components under decoupling, combined with the near-identical
+                    performance of DP-C in both normal and decoupled training,
+                    indicates that the action generation backbone plays a limited
+                    role in robotic manipulation. Motivated by this observation, we
+                    introduce <strong>DP-MLP</strong>, which replaces the 244M-parameter U-Net
+                    backbone of DP-C with only 4M parameters of simple MLP
+                    blocks, achieving a <strong>83.9% faster training speed</strong> under normal
+                    training and 89.1% under decoupling.
                 </p>
+
             </div>
         </section>
 
@@ -429,26 +443,102 @@
 
         <!-- Results -->
         <section>
-            <h2>Results</h2>
+            <h2>Experiments</h2>
+
+            <h3 style="font-size: 1.4em; margin-top: 20px; margin-bottom: 15px; color: #1a1a1a;">Experimental Setup</h3>
             <p>
-                We evaluate our method on the MimicGen environment using eight robotic manipulation tasks. Our
-                experiments demonstrate three key findings:
+                We conduct experiments on the <strong>MimicGen environment</strong>, an extension of the robomimic
+                benchmark. Following Equivariant Diffusion Policy (EDP), we select eight tasks based on their average
+                demonstration length:
+            </p>
+            <ul style="list-style-position: inside; margin-left: 20px; margin-top: 10px; margin-bottom: 15px;">
+                <li><strong>Task A:</strong> Stack D1</li>
+                <li><strong>Task B:</strong> Square D2</li>
+                <li><strong>Task C:</strong> Coffee D2</li>
+                <li><strong>Task D:</strong> Threading D2</li>
+                <li><strong>Task E:</strong> Stack Three D1</li>
+                <li><strong>Task F:</strong> Hammer Cleanup D1</li>
+                <li><strong>Task G:</strong> Three Piece Assembly D2</li>
+                <li><strong>Task H:</strong> Mug Cleanup D1</li>
+            </ul>
+            <p>
+                Each task uses 1000 demonstrations generated by MimicGen. Observations consist of two camera views
+                (front-view and hand-view) encoded by ResNet-18, concatenated with low-dimensional state features
+                (end-effector position, orientation quaternion, gripper openness). For evaluation, we sample scenes
+                beyond the training set and execute policies, computing success rates over 50 rollouts per task,
+                averaged across 3 random seeds.
             </p>
 
-            <h3 style="font-size: 1.3em; margin-top: 25px; margin-bottom: 15px; color: #2563eb;">1. Feasibility of
+            <h3 style="font-size: 1.4em; margin-top: 30px; margin-bottom: 15px; color: #1a1a1a;">Feasibility of
                 Decoupled Action Head</h3>
-            <p>
-                <strong>In-Distribution Performance:</strong> The decoupled DP-C achieves nearly identical performance
-                to normal training (63.4% vs 64.0% average success rate across 8 tasks), demonstrating that freezing the
-                action generation backbone does not harm performance when using feature modulation.
+
+            <p style="margin-top: 15px;">
+                <strong>In-Distribution Performance:</strong> We first train an action head solely on actions from a
+                single task, then freeze it and train only conditioning layers with full observation-action pairs. Table
+                I shows that the decoupled action head achieves nearly identical performance to normal training across
+                all variants:
             </p>
+            <ul style="list-style-position: inside; margin-left: 20px; margin-top: 10px; margin-bottom: 15px;">
+                <li><strong>DP-C:</strong> 63.4% (decoupled) vs 64.0% (normal)</li>
+                <li><strong>DP-MLP:</strong> 61.1% (decoupled) vs 64.3% (normal)</li>
+            </ul>
+
             <p>
-                <strong>Out-of-Distribution Generalization:</strong> An action head pretrained on only 3 tasks (A, C, G)
-                transfers successfully to 5 unseen tasks (B, D, E, F, H) with only modest performance degradation
-                (58.92% vs 63.48% for normal training), showing strong cross-task adaptability.
+                <strong>Out-of-Distribution Generalization:</strong> To investigate cross-distribution adaptability, we
+                train an action head on trajectories from three tasks (A, C, G) and apply it to five unseen tasks (B, D,
+                E, F, H). Despite trajectories from B, D, E, F, H not fully overlapping with ACG distribution (see
+                Figure 2 in paper), the results demonstrate feasibility with only modest performance degradation (58.92%
+                vs 63.48% for normal training).
             </p>
 
-            <h3 style="font-size: 1.3em; margin-top: 25px; margin-bottom: 15px; color: #2563eb;">2. Training Efficiency
+            <p>
+                <strong>Multi-Task Learning:</strong> We train a single policy jointly on tasks A, C, and G. The
+                decoupled approach shows comparable or slightly improved performance (63.1% vs 61.3% average),
+                suggesting that concentrating task-specific knowledge in conditioning modules may benefit multi-task
+                scenarios.
+            </p>
+
+            <h3 style="font-size: 1.4em; margin-top: 30px; margin-bottom: 15px; color: #1a1a1a;">Feature Modulation vs
+                Cross-Attention</h3>
+            <p>
+                A critical finding is that <strong>feature modulation (FiLM) significantly outperforms
+                    cross-attention</strong> in the decoupled setting. While DP-C maintains performance under
+                decoupling, DP-T suffers severe degradation:
+            </p>
+            <ul style="list-style-position: inside; margin-left: 20px; margin-top: 10px; margin-bottom: 15px;">
+                <li><strong>DP-T (cross-attention):</strong> 59.8% → 38.7%</li>
+                <li><strong>DP-T-FiLM:</strong> 58.6% → 53.4%</li>
+            </ul>
+            <p>
+                This occurs because feature modulation parameterizes a continuous space via γ and β, allowing adaptation
+                through fitting these parameters. In contrast, frozen cross-attention forces alignment with pretrained
+                joint position representations. Based on this insight, we propose <strong>DP-T-FiLM</strong>, which
+                replaces cross-attention with FiLM in the transformer decoder, recovering performance while enabling
+                decoupled training.
+            </p>
+
+            <h3 style="font-size: 1.4em; margin-top: 30px; margin-bottom: 15px; color: #1a1a1a;">Lightweight DP-MLP:
+                Knowledge Confinement</h3>
+            <p>
+                Since decoupling confines task knowledge to conditioning modules, we hypothesize that the action
+                generation backbone requires minimal capacity. We validate this by introducing <strong>DP-MLP</strong>,
+                which replaces DP-C's 244M-parameter U-Net with only <strong>4M parameters of simple MLP
+                    blocks</strong>:
+            </p>
+            <ul style="list-style-position: inside; margin-left: 20px; margin-top: 10px; margin-bottom: 15px;">
+                <li><strong>Performance:</strong> DP-MLP achieves 64.3% (normal) and 61.1% (decoupled), comparable to
+                    DP-C's 64.0% and 63.4%</li>
+                <li><strong>Parameters:</strong> 4M vs 244M (61× reduction)</li>
+                <li><strong>Training speed:</strong> 83.9% faster under normal training, 89.1% faster under decoupling
+                </li>
+            </ul>
+            <p>
+                This demonstrates that <strong>action generation backbones play a limited role</strong> when task
+                knowledge is properly confined to conditioning layers, providing insights for scaling large general
+                manipulation policies.
+            </p>
+
+            <h3 style="font-size: 1.4em; margin-top: 30px; margin-bottom: 15px; color: #1a1a1a;">Training Efficiency
                 Gains</h3>
             <table style="width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 0.95em;">
                 <thead>
@@ -478,27 +568,38 @@
                     </tr>
                     <tr>
                         <td style="border: 1px solid #ddd; padding: 12px;"><strong>DP-MLP vs DP-C</strong></td>
-                        <td style="border: 1px solid #ddd; padding: 12px; text-align: center; font-weight: bold;">83.9%
-                            faster</td>
-                        <td style="border: 1px solid #ddd; padding: 12px; text-align: center; font-weight: bold;">89.1%
-                            faster</td>
+                        <td style="border: 1px solid #ddd; padding: 12px; text-align: center; color: #059669; font-weight: bold;">
+                            +83.9%</td>
+                        <td style="border: 1px solid #ddd; padding: 12px; text-align: center; color: #059669; font-weight: bold;">
+                            +89.1%</td>
                         <td style="border: 1px solid #ddd; padding: 12px; text-align: center;">—</td>
                     </tr>
                 </tbody>
             </table>
             <p style="margin-top: 15px; font-size: 0.9em; color: #666;">
-                *Measured on RTX 4090 GPU. DP-MLP achieves similar performance to DP-C (64.3% vs 64.0%) while being
-                significantly faster.
+                <strong>Table V:</strong> Training speed comparison on RTX 4090 GPU (iterations/second). The decoupled
+                recipe provides substantial speedups for DP-C (41.1%) by freezing the majority of parameters. DP-MLP
+                offers dramatic efficiency gains in both settings while maintaining comparable performance.
+            </p>
+            <p style="margin-top: 10px;">
+                As an additional benefit, decoupling improves training efficiency. DP-C achieves <strong>41.1%
+                    speedup</strong> when the action generation backbone is frozen during Stage-2 training. The proposed
+                DP-MLP is <strong>83.9% faster than DP-C</strong> under normal training and <strong>89.1% faster under
+                    decoupling</strong>, making it highly practical for rapid experimentation and deployment.
             </p>
 
-            <h3 style="font-size: 1.3em; margin-top: 25px; margin-bottom: 15px; color: #2563eb;">3. Feature Modulation
-                vs Cross-Attention</h3>
-            <p>
-                Our experiments reveal that DP-Transformer with cross-attention suffers severe performance degradation
-                under decoupling (59.8% → 38.7%), while DP-T-FiLM (using feature modulation) maintains acceptable
-                performance (58.6% → 53.4%). This confirms that feature modulation is essential for the decoupled
-                training paradigm.
-            </p>
+            <h3 style="font-size: 1.4em; margin-top: 30px; margin-bottom: 15px; color: #1a1a1a;">Key Takeaways</h3>
+            <ul style="list-style-position: inside; margin-left: 20px; margin-top: 10px; margin-bottom: 15px;">
+                <li><strong>Observation-free pretraining is feasible:</strong> Action heads can be pretrained on
+                    kinematics-generated trajectories and successfully transfer to observation-based tasks</li>
+                <li><strong>Feature modulation is critical:</strong> FiLM enables effective decoupling, while
+                    cross-attention fails due to frozen query/key/value projections</li>
+                <li><strong>Action heads can be lightweight:</strong> A 4M-parameter MLP matches 244M-parameter U-Net
+                    performance, suggesting action generation requires minimal capacity when task knowledge is properly
+                    confined</li>
+                <li><strong>Significant efficiency gains:</strong> Decoupling provides 41% speedup for DP-C; DP-MLP
+                    offers up to 89% faster training</li>
+            </ul>
         </section>
 
         <!-- Citation -->
@@ -515,20 +616,46 @@
             </div>
         </section>
 
-        <!-- Future Work -->
+        <!-- Limitations and Future Work -->
         <section>
             <h2>Limitations and Future Work</h2>
             <p>
-                While we demonstrate the feasibility of using observation-free data, the design and generation of such
-                low-cost data require careful consideration. Future work includes:
+                This work introduces a decoupled action head training recipe that enables the use of observation-free
+                data, identifies the critical role of feature modulation in the decoupled setting, and reveals that a
+                lightweight 4M-parameter MLP backbone can replace a 244M-parameter CNN U-Net while achieving substantial
+                speedups and preserving performance. However, alongside these contributions, the limitations of our
+                experiments give rise to several important open problems:
             </p>
-            <ul style="list-style-position: inside; margin-left: 20px; margin-top: 10px;">
-                <li style="margin-bottom: 8px;">Designing large-scale observation-free datasets with millions or
-                    billions of trajectories to train more generalizable action heads</li>
-                <li style="margin-bottom: 8px;">Exploring the limits of knowledge confinement and determining the
-                    minimal architecture required for effective action generation</li>
-                <li style="margin-bottom: 8px;">Investigating the application of decoupled action heads to multi-modal
-                    observations (e.g., point clouds, tactile sensing)</li>
+
+            <h3 style="font-size: 1.2em; margin-top: 25px; margin-bottom: 15px; color: #2563eb;">Observation-Free Data
+                Design</h3>
+            <p>
+                While we demonstrate the feasibility of using observation-free data, <strong>the design and generation
+                    of such low-cost data require careful consideration</strong>, and the effort involved could itself
+                constitute an independent line of research. Key open questions include:
+            </p>
+            <ul style="list-style-position: inside; margin-left: 20px; margin-top: 10px; margin-bottom: 15px;">
+                <li style="margin-bottom: 8px;">How to systematically design large-scale observation-free datasets with
+                    millions or billions of trajectories that cover diverse manipulation scenarios?</li>
+                <li style="margin-bottom: 8px;">What is the <strong>upper bound</strong> of this approach? How much can
+                    observation-free pretraining improve performance and generalization?</li>
+                <li style="margin-bottom: 8px;">What trajectory properties (diversity, kinematic feasibility, task
+                    coverage) are most critical for pretraining effective action heads?</li>
+            </ul>
+
+            <h3 style="font-size: 1.2em; margin-top: 25px; margin-bottom: 15px; color: #2563eb;">Limits of Knowledge
+                Confinement</h3>
+            <p>
+                Although we show the effectiveness of an MLP backbone, <strong>the limits of knowledge confinement have
+                    not been fully explored</strong>. Several fundamental questions remain:
+            </p>
+            <ul style="list-style-position: inside; margin-left: 20px; margin-top: 10px; margin-bottom: 15px;">
+                <li style="margin-bottom: 8px;">How simple can a neural network be while still generating continuous
+                    action sequences effectively?</li>
+                <li style="margin-bottom: 8px;">What trade-offs does such simplification introduce in terms of
+                    expressiveness, sample efficiency, or generalization?</li>
+                <li style="margin-bottom: 8px;">Where should we scale when building large general BC policies—the action
+                    head, conditioning modules, or observation encoders?</li>
             </ul>
         </section>
 
