@@ -311,7 +311,7 @@
                     Layers</span>
             </h1>
             <div class="authors">
-                <strong>Jian Zhou</strong>, Sihao Lin, Shuai Fu, Qi Wu
+                Jian Zhou, Sihao Lin, Shuai Fu, Qi Wu
             </div>
             <div class="affiliation">
                 Australian Institute for Machine Learning (AIML), University of Adelaide
@@ -583,36 +583,6 @@
                 DP-MLP is <strong>83.9% faster than DP-C</strong> under normal training and <strong>89.1% faster under
                     decoupling</strong>, making it highly practical for rapid experimentation and deployment.
             </p>
-
-            <h3 style="font-size: 1.4em; margin-top: 30px; margin-bottom: 15px; color: #1a1a1a;">Key Takeaways</h3>
-            <ul style="list-style-position: inside; margin-left: 20px; margin-top: 10px; margin-bottom: 15px;">
-                <li><strong>Observation-free pretraining is feasible:</strong> Action heads can be pretrained on
-                    kinematics-generated trajectories and successfully transfer to observation-based tasks</li>
-                <li><strong>Feature modulation is critical:</strong> FiLM enables effective decoupling, while
-                    cross-attention fails due to frozen query/key/value projections</li>
-                <li><strong>Action heads can be lightweight:</strong> A 4M-parameter MLP matches 244M-parameter U-Net
-                    performance, suggesting action generation requires minimal capacity when task knowledge is properly
-                    confined</li>
-                <li><strong>Significant efficiency gains:</strong> Decoupling provides 41% speedup for DP-C; DP-MLP
-                    offers up to 89% faster training</li>
-            </ul>
-        </section>
-
-        <!-- Citation -->
-        <section>
-            <h2>Citation</h2>
-            <div class="citation-box">
-                <button class="copy-button" onclick="copyToClipboard()">Copy</button>
-                <pre id="citation-text">@misc{jiandecouple2025,
-                title={Decoupled Action Head: Confining Task Knowledge to Conditioning Layers},
-                author={Jian Zhou and Sihao Lin and Shuai Fu and Qi WU},
-                year={2025},
-                eprint={2511.12101},
-                archivePrefix={arXiv},
-                primaryClass={cs.RO},
-                url={https://arxiv.org/abs/2511.12101},
-                }</pre>
-            </div>
         </section>
 
         <!-- Limitations and Future Work -->
@@ -657,6 +627,23 @@
                     role, and that conditioning layers should be the primary focus for scaling. However, this hypothesis
                     requires further verification.</li>
             </ul>
+        </section>
+
+        <!-- Citation -->
+        <section>
+            <h2>Citation</h2>
+            <div class="citation-box">
+                <button class="copy-button" onclick="copyToClipboard()">Copy</button>
+                <pre id="citation-text">@misc{jiandecouple2025,
+                title={Decoupled Action Head: Confining Task Knowledge to Conditioning Layers},
+                author={Jian Zhou and Sihao Lin and Shuai Fu and Qi WU},
+                year={2025},
+                eprint={2511.12101},
+                archivePrefix={arXiv},
+                primaryClass={cs.RO},
+                url={https://arxiv.org/abs/2511.12101},
+                }</pre>
+            </div>
         </section>
 
         <!-- Footer -->
