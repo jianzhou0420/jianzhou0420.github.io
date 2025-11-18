@@ -418,6 +418,16 @@
                 significant training speedup.
             </p>
 
+            <div class="method-figure">
+                <img src="DecoupledActionHead.png" alt="Decoupled Action Head Architecture">
+                <figcaption>
+                    <strong>Figure 1:</strong> Overview of the decoupled action head approach. <em>Left:</em> Comparison
+                    between normal training and decoupled training. In decoupled training, the action head G is frozen
+                    and only the conditioning part is trained. <em>Right:</em> Architecture of DP-MLP showing the
+                    lightweight MLP backbone with FiLM conditioning layers.
+                </figcaption>
+            </div>
+
             <h3 style="font-size: 1.3em; margin-top: 30px; margin-bottom: 15px; color: #2563eb;">Key Architectural
                 Insights</h3>
             <p>
@@ -467,18 +477,166 @@
                 Decoupled Action Head</h3>
 
             <p style="margin-top: 15px;">
-                <strong>In-Distribution Performance:</strong> We first train an action head solely on actions from a
+                <strong>In-Distribution Feasibility:</strong> We first train an action head solely on actions from a
                 single task, then freeze it and train only conditioning layers with full observation-action pairs. Table
-                I shows that the decoupled action head achieves nearly identical performance to normal training across
-                all variants:
+                I shows the complete performance comparison across all eight tasks. The decoupled action head achieves
+                nearly identical performance to normal training across all
+                variants:
             </p>
-            <ul style="list-style-position: inside; margin-left: 20px; margin-top: 10px; margin-bottom: 15px;">
-                <li><strong>DP-C:</strong> 63.4% (decoupled) vs 64.0% (normal)</li>
-                <li><strong>DP-MLP:</strong> 61.1% (decoupled) vs 64.3% (normal)</li>
-            </ul>
+            <table
+                style="width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 0.85em; overflow-x: auto;">
+                <thead>
+                    <tr style="background-color: #f8f9fa;">
+                        <th rowspan="2"
+                            style="border: 1px solid #ddd; padding: 8px; text-align: left; vertical-align: middle;">
+                            Model</th>
+                        <th colspan="2" style="border: 1px solid #ddd; padding: 8px; text-align: center;">A</th>
+                        <th colspan="2" style="border: 1px solid #ddd; padding: 8px; text-align: center;">B</th>
+                        <th colspan="2" style="border: 1px solid #ddd; padding: 8px; text-align: center;">C</th>
+                        <th colspan="2" style="border: 1px solid #ddd; padding: 8px; text-align: center;">D</th>
+                        <th colspan="2" style="border: 1px solid #ddd; padding: 8px; text-align: center;">E</th>
+                        <th colspan="2" style="border: 1px solid #ddd; padding: 8px; text-align: center;">F</th>
+                        <th colspan="2" style="border: 1px solid #ddd; padding: 8px; text-align: center;">G</th>
+                        <th colspan="2" style="border: 1px solid #ddd; padding: 8px; text-align: center;">H</th>
+                        <th colspan="2" style="border: 1px solid #ddd; padding: 8px; text-align: center;">Avg</th>
+                        <th colspan="2" style="border: 1px solid #ddd; padding: 8px; text-align: center;">Speed</th>
+                    </tr>
+                    <tr style="background-color: #f8f9fa;">
+                        <th style="border: 1px solid #ddd; padding: 6px; text-align: center; font-size: 0.9em;">Norm
+                        </th>
+                        <th style="border: 1px solid #ddd; padding: 6px; text-align: center; font-size: 0.9em;">Dec</th>
+                        <th style="border: 1px solid #ddd; padding: 6px; text-align: center; font-size: 0.9em;">Norm
+                        </th>
+                        <th style="border: 1px solid #ddd; padding: 6px; text-align: center; font-size: 0.9em;">Dec</th>
+                        <th style="border: 1px solid #ddd; padding: 6px; text-align: center; font-size: 0.9em;">Norm
+                        </th>
+                        <th style="border: 1px solid #ddd; padding: 6px; text-align: center; font-size: 0.9em;">Dec</th>
+                        <th style="border: 1px solid #ddd; padding: 6px; text-align: center; font-size: 0.9em;">Norm
+                        </th>
+                        <th style="border: 1px solid #ddd; padding: 6px; text-align: center; font-size: 0.9em;">Dec</th>
+                        <th style="border: 1px solid #ddd; padding: 6px; text-align: center; font-size: 0.9em;">Norm
+                        </th>
+                        <th style="border: 1px solid #ddd; padding: 6px; text-align: center; font-size: 0.9em;">Dec</th>
+                        <th style="border: 1px solid #ddd; padding: 6px; text-align: center; font-size: 0.9em;">Norm
+                        </th>
+                        <th style="border: 1px solid #ddd; padding: 6px; text-align: center; font-size: 0.9em;">Dec</th>
+                        <th style="border: 1px solid #ddd; padding: 6px; text-align: center; font-size: 0.9em;">Norm
+                        </th>
+                        <th style="border: 1px solid #ddd; padding: 6px; text-align: center; font-size: 0.9em;">Dec</th>
+                        <th style="border: 1px solid #ddd; padding: 6px; text-align: center; font-size: 0.9em;">Norm
+                        </th>
+                        <th style="border: 1px solid #ddd; padding: 6px; text-align: center; font-size: 0.9em;">Dec</th>
+                        <th style="border: 1px solid #ddd; padding: 6px; text-align: center; font-size: 0.9em;">Norm
+                        </th>
+                        <th style="border: 1px solid #ddd; padding: 6px; text-align: center; font-size: 0.9em;">Dec</th>
+                        <th style="border: 1px solid #ddd; padding: 6px; text-align: center; font-size: 0.9em;">Norm
+                        </th>
+                        <th style="border: 1px solid #ddd; padding: 6px; text-align: center; font-size: 0.9em;">Dec</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="border: 1px solid #ddd; padding: 8px;">DP-C</td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: center;">100</td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: center;">100</td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: center;">51.3</td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: center;">47.3</td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: center;">70.7</td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: center;">73.3</td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: center;">44.7</td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: center;">46.7</td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: center;">92.7</td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: center;">87.3</td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: center;">58.7</td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: center;">60.0</td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: center;">24.0</td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: center;">25.3</td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: center;">70.0</td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: center;">67.3</td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: center;"><strong>64.0</strong></td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: center;"><strong>63.4</strong></td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: center;">1.00</td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: center;">1.41</td>
+                    </tr>
+                    <tr style="background-color: #f8f9fa;">
+                        <td style="border: 1px solid #ddd; padding: 8px;">DP-MLP</td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: center;">100</td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: center;">100</td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: center;">49.3</td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: center;">36.0</td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: center;">71.3</td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: center;">72.7</td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: center;">42.0</td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: center;">40.7</td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: center;">85.3</td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: center;">80.7</td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: center;">58.0</td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: center;">58.0</td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: center;">40.7</td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: center;">28.0</td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: center;">68.0</td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: center;">72.7</td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: center;"><strong>64.3</strong></td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: center;"><strong>61.1</strong></td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: center;">1.83</td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: center;">1.89</td>
+                    </tr>
+                    <tr>
+                        <td style="border: 1px solid #ddd; padding: 8px;">DP-T</td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: center;">98.0</td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: center;">86.0</td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: center;">39.3</td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: center;">19.3</td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: center;">66.7</td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: center;">35.3</td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: center;">24.7</td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: center;">18.0</td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: center;">78.0</td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: center;">44.0</td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: center;">63.3</td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: center;">52.7</td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: center;">26.0</td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: center;">8.7</td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: center;">70.0</td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: center;">45.3</td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: center;"><strong>59.8</strong></td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: center;"><strong>38.7</strong></td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: center;">1.00</td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: center;">1.17</td>
+                    </tr>
+                    <tr style="background-color: #f8f9fa;">
+                        <td style="border: 1px solid #ddd; padding: 8px;">DP-T-FiLM</td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: center;">98.0</td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: center;">98.7</td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: center;">48.7</td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: center;">41.3</td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: center;">61.3</td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: center;">54.0</td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: center;">30.0</td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: center;">28.0</td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: center;">85.3</td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: center;">76.0</td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: center;">58.7</td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: center;">57.3</td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: center;">23.3</td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: center;">14.0</td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: center;">63.3</td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: center;">58.0</td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: center;"><strong>58.6</strong></td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: center;"><strong>53.4</strong></td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: center;">1.06</td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: center;">1.16</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p style="margin-top: 15px; font-size: 0.9em; color: #666; text-align: center;">
+                <strong>Table I:</strong> Performance and speed comparison between normal (Norm) and decoupled action
+                heads (Dec) across all eight manipulation tasks. Success rates (%) averaged over 3 seeds, 50 rollouts
+                per task. Speed shows relative training speed (normalized to DP-C/DP-T normal training = 1.00).
+            </p>
 
             <p>
-                <strong>Out-of-Distribution Generalization:</strong> To investigate cross-distribution adaptability, we
+                <strong>Out-of-Distribution Feasibility:</strong> To investigate cross-distribution adaptability, we
                 train an action head on trajectories from three tasks (A, C, G) and apply it to five unseen tasks (B, D,
                 E, F, H). Despite trajectories from B, D, E, F, H not fully overlapping with ACG distribution (see
                 Figure 2 in paper), the results demonstrate feasibility with only modest performance degradation (58.92%
@@ -486,7 +644,7 @@
             </p>
 
             <p>
-                <strong>Multi-Task Learning:</strong> We train a single policy jointly on tasks A, C, and G. The
+                <strong>Multi-Task Feasibility:</strong> We train a single policy jointly on tasks A, C, and G. The
                 decoupled approach shows comparable or slightly improved performance (63.1% vs 61.3% average),
                 suggesting that concentrating task-specific knowledge in conditioning modules may benefit multi-task
                 scenarios.
@@ -499,11 +657,46 @@
                     cross-attention</strong> in the decoupled setting. While DP-C maintains performance under
                 decoupling, DP-T suffers severe degradation:
             </p>
-            <ul style="list-style-position: inside; margin-left: 20px; margin-top: 10px; margin-bottom: 15px;">
-                <li><strong>DP-T (cross-attention):</strong> 59.8% → 38.7%</li>
-                <li><strong>DP-T-FiLM:</strong> 58.6% → 53.4%</li>
-            </ul>
-            <p>
+            <table style="width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 0.95em;">
+                <thead>
+                    <tr style="background-color: #f8f9fa;">
+                        <th style="border: 1px solid #ddd; padding: 12px; text-align: left;">Model</th>
+                        <th style="border: 1px solid #ddd; padding: 12px; text-align: center;">Normal Training</th>
+                        <th style="border: 1px solid #ddd; padding: 12px; text-align: center;">Decoupled Training</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="border: 1px solid #ddd; padding: 12px;">DP-T (cross-attention)</td>
+                        <td style="border: 1px solid #ddd; padding: 12px; text-align: center;">59.8%</td>
+                        <td style="border: 1px solid #ddd; padding: 12px; text-align: center;">38.7%</td>
+                    </tr>
+                    <tr style="background-color: #f8f9fa;">
+                        <td style="border: 1px solid #ddd; padding: 12px;">DP-T-FiLM</td>
+                        <td style="border: 1px solid #ddd; padding: 12px; text-align: center;">58.6%</td>
+                        <td style="border: 1px solid #ddd; padding: 12px; text-align: center;">53.4%</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="results-grid" style="margin-top: 30px;">
+                <div class="method-figure">
+                    <img src="DP_T_vs_DP_T_FILM_Normal-1.png" alt="DP-T vs DP-T-FiLM Normal Training">
+                    <figcaption>
+                        <strong>Figure 2a:</strong> Training curves comparing DP-T and DP-T-FiLM under normal training.
+                        Both achieve similar performance (~59%).
+                    </figcaption>
+                </div>
+                <div class="method-figure">
+                    <img src="DP_T_vs_DP_T_FILM_Decoupled-1.png" alt="DP-T vs DP-T-FiLM Decoupled Training">
+                    <figcaption>
+                        <strong>Figure 2b:</strong> Training curves under decoupled training. DP-T-FiLM (53.4%)
+                        significantly outperforms DP-T with cross-attention (38.7%).
+                    </figcaption>
+                </div>
+            </div>
+
+            <p style="margin-top: 20px;">
                 This occurs because feature modulation parameterizes a continuous space via γ and β, allowing adaptation
                 through fitting these parameters. In contrast, frozen cross-attention forces alignment with pretrained
                 joint position representations. Based on this insight, we propose <strong>DP-T-FiLM</strong>, which
@@ -519,14 +712,49 @@
                 which replaces DP-C's 244M-parameter U-Net with only <strong>4M parameters of simple MLP
                     blocks</strong>:
             </p>
-            <ul style="list-style-position: inside; margin-left: 20px; margin-top: 10px; margin-bottom: 15px;">
-                <li><strong>Performance:</strong> DP-MLP achieves 64.3% (normal) and 61.1% (decoupled), comparable to
-                    DP-C's 64.0% and 63.4%</li>
-                <li><strong>Parameters:</strong> 4M vs 244M (61× reduction)</li>
-                <li><strong>Training speed:</strong> 83.9% faster under normal training, 89.1% faster under decoupling
-                </li>
-            </ul>
-            <p>
+            <table style="width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 0.95em;">
+                <thead>
+                    <tr style="background-color: #f8f9fa;">
+                        <th style="border: 1px solid #ddd; padding: 12px; text-align: left;">Model</th>
+                        <th style="border: 1px solid #ddd; padding: 12px; text-align: center;">Parameters</th>
+                        <th style="border: 1px solid #ddd; padding: 12px; text-align: center;">Normal Training</th>
+                        <th style="border: 1px solid #ddd; padding: 12px; text-align: center;">Decoupled Training</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="border: 1px solid #ddd; padding: 12px;">DP-C</td>
+                        <td style="border: 1px solid #ddd; padding: 12px; text-align: center;">244M</td>
+                        <td style="border: 1px solid #ddd; padding: 12px; text-align: center;">64.0%</td>
+                        <td style="border: 1px solid #ddd; padding: 12px; text-align: center;">63.4%</td>
+                    </tr>
+                    <tr style="background-color: #f8f9fa;">
+                        <td style="border: 1px solid #ddd; padding: 12px;">DP-MLP</td>
+                        <td style="border: 1px solid #ddd; padding: 12px; text-align: center;">4M</td>
+                        <td style="border: 1px solid #ddd; padding: 12px; text-align: center;">64.3%</td>
+                        <td style="border: 1px solid #ddd; padding: 12px; text-align: center;">61.1%</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="results-grid" style="margin-top: 30px;">
+                <div class="method-figure">
+                    <img src="DP_C_vs_DP_MLP_Normal-1.png" alt="DP-C vs DP-MLP Normal Training">
+                    <figcaption>
+                        <strong>Figure 3a:</strong> Training curves comparing DP-C (244M params) and DP-MLP (4M params)
+                        under normal training. DP-MLP achieves comparable performance (64.3% vs 64.0%).
+                    </figcaption>
+                </div>
+                <div class="method-figure">
+                    <img src="DP_C_vs_DP_MLP_Decoupled-1.png" alt="DP-C vs DP-MLP Decoupled Training">
+                    <figcaption>
+                        <strong>Figure 3b:</strong> Training curves under decoupled training. DP-MLP maintains strong
+                        performance (61.1%) compared to DP-C (63.4%) despite 61× fewer parameters.
+                    </figcaption>
+                </div>
+            </div>
+
+            <p style="margin-top: 20px;">
                 This demonstrates that <strong>action generation backbones play a limited role</strong> when task
                 knowledge is properly confined to conditioning layers, providing insights for scaling large general
                 manipulation policies.
