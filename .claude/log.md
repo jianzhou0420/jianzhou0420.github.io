@@ -4,6 +4,18 @@ This file tracks all code modifications, bug fixes, and feature additions.
 
 ---
 
+## [2026-03-31 23:13] Show DAE entry on main page without project page link
+
+### Summary
+Unhide the Decoupled Action Expert entry in works.html. Show paper and code links but remove the project page link. Teaser image used as cover, linking to arxiv.
+
+### Files Modified
+| File | Change Type | Description |
+|------|-------------|-------------|
+| `src/works.html` | Modified | Uncommented DAE entry, removed project page link, cover links to arxiv |
+
+---
+
 ## [2026-03-31 20:48] Refactor DecoupledActionHead to DecoupledActionExpert
 
 ### Summary
