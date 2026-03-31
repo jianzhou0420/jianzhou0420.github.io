@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-17341V1NQ5"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-17341V1NQ5');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Decoupled Action Expert - Jian Zhou</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #fff;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            padding: 60px 20px 40px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+
+        .authors {
+            font-size: 1.1em;
+            margin-bottom: 15px;
+            color: #555;
+        }
+
+        .authors a {
+            color: #2563eb;
+            text-decoration: none;
+        }
+
+        .authors a:hover {
+            text-decoration: underline;
+        }
+
+        .affiliation {
+            font-size: 0.95em;
+            color: #666;
+            margin-bottom: 25px;
+        }
+
+        .venue {
+            font-size: 1em;
+            color: #444;
+            font-style: italic;
+            margin-bottom: 30px;
+        }
+
+        /* Links */
+        .links {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 25px;
+        }
+
+        .links a {
+            display: inline-block;
+            padding: 10px 24px;
+            background-color: #2563eb;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: background-color 0.3s ease;
+        }
+
+        .links a:hover {
+            background-color: #1d4ed8;
+        }
+
+        .links a.secondary {
+            background-color: #64748b;
+        }
+
+        .links a.secondary:hover {
+            background-color: #475569;
+        }
+
+        /* Sections */
+        section {
+            margin: 50px 0;
+            padding: 0 20px;
+        }
+
+        section h2 {
+            font-size: 1.8em;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        section p {
+            margin-bottom: 15px;
+            text-align: justify;
+            color: #444;
+        }
+
+        /* Abstract */
+        .abstract {
+            background-color: #f8f9fa;
+            padding: 30px;
+            border-radius: 8px;
+            border-left: 4px solid #2563eb;
+        }
+
+        /* Highlights */
+        .highlights ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .highlights li {
+            padding: 12px 0 12px 30px;
+            position: relative;
+            color: #444;
+        }
+
+        .highlights li:before {
+            content: "\2192";
+            position: absolute;
+            left: 0;
+            color: #2563eb;
+            font-weight: bold;
+        }
+
+        /* Method Overview */
+        .method-figure {
+            width: 100%;
+            margin: 30px 0;
+            text-align: center;
+        }
+
+        .method-figure img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .method-figure figcaption {
+            margin-top: 15px;
+            color: #666;
+            font-size: 0.95em;
+            font-style: italic;
+        }
+
+        /* Citation */
+        .citation-box {
+            background-color: #f1f5f9;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .citation-box pre {
+            margin: 0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .copy-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 5px 12px;
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85em;
+        }
+
+        .copy-button:hover {
+            background-color: #1d4ed8;
+        }
+
+        /* Navigation */
+        .nav-back {
+            margin: 20px 0;
+            padding: 0 20px;
+        }
+
+        .nav-back a {
+            color: #2563eb;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .nav-back a:hover {
+            text-decoration: underline;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 40px 20px;
+            border-top: 1px solid #e0e0e0;
+            margin-top: 60px;
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            section h2 {
+                font-size: 1.5em;
+            }
+
+            .links {
+                flex-direction: column;
+            }
+
+            .links a {
+                width: 100%;
+                text-align: center;
+            }
+
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Navigation -->
+        <div class="nav-back">
+            <a href="../../index.html">&larr; Back to Main Page</a>
+        </div>
+
+        <!-- Header -->
+        <header class="header">
+            <h1>Decoupled Action Expert: Confining Task Knowledge to the Conditioning Pathway</h1>
+            <div class="authors">
+                <strong>Jian Zhou</strong>, Sihao Lin, Shuai Fu, Zerui Li, Gengze Zhou, Qi Wu
+            </div>
+            <div class="affiliation">
+                Australian Institute for Machine Learning (AIML), University of Adelaide
+            </div>
+            <div class="venue">
+                Submitted to IROS 2026
+            </div>
+            <div class="links">
+                <a href="https://arxiv.org/abs/2511.12101" target="_blank">Paper (arXiv)</a>
+                <a href="https://github.com/jianzhou0420/DecoupledActionExpert" target="_blank">Code (GitHub)</a>
+            </div>
+        </header>
+
+        <!-- Abstract -->
+        <section>
+            <h2>Abstract</h2>
+            <div class="abstract">
+                <p>
+                    Many recent Vision-Language-Action models employ diffusion or flow-matching backbones with hundreds
+                    of millions of parameters for action generation. However, unlike image synthesis where the output
+                    spans millions of diverse pixels, a manipulation policy generates only short sequences of
+                    low-dimensional, physically correlated action values, a far simpler target that should not demand
+                    such capacity. We confirm this intuition and show that task-specific knowledge in these policies can
+                    be fully confined to the conditioning pathway, leaving the action backbone task-agnostic.
+                </p>
+                <p>
+                    To establish this, we introduce a decoupled training recipe: a general-purpose action head is first
+                    pretrained on observation-free forward-kinematics data, then frozen while only the conditioning
+                    pathway is trained for downstream tasks. Using Diffusion Policy as a testbed, we show that on both
+                    MimicGen and LIBERO, a single frozen backbone shared across all tasks matches normally trained
+                    counterparts. This confirms that the action expert encodes little task-specific knowledge. Ablations
+                    show that the specific pretraining signal (joint positions, end-effector poses, or no conditioning at
+                    all) has no effect on downstream performance, indicating that the backbone learns only general
+                    trajectory structure. Pushing this finding further, we replace the 244M U-Net in Diffusion Policy
+                    with a 5M-parameter MLP backbone that matches or exceeds its performance, calling into question the
+                    large capacity budgets allocated to action generation in current VLA designs.
+                </p>
+            </div>
+        </section>
+
+        <!-- Key Highlights -->
+        <section class="highlights">
+            <h2>Key Findings</h2>
+            <ul>
+                <li><strong>Task knowledge lives in conditioning, not the backbone.</strong> A frozen, pretrained action
+                    backbone shared across all tasks matches end-to-end trained counterparts on MimicGen and LIBERO.
+                </li>
+                <li><strong>Pretraining signal doesn't matter.</strong> Joint positions, end-effector poses, or no
+                    conditioning at all &mdash; the backbone learns only general trajectory structure regardless of the
+                    pretraining signal.</li>
+                <li><strong>5M MLP replaces 244M U-Net.</strong> A lightweight MLP backbone matches or exceeds the
+                    performance of the much larger U-Net in Diffusion Policy (65.9% vs 63.6% on MimicGen).</li>
+                <li><strong>Modulation-based conditioning is key.</strong> Methods like AdaLN-Zero maintain effectiveness
+                    when backbones are frozen, while token-based approaches fail.</li>
+                <li><strong>Out-of-distribution pretraining helps.</strong> Forward-kinematics data from DROID yields
+                    performance improvements despite distribution mismatch with downstream tasks.</li>
+            </ul>
+        </section>
+
+        <!-- Method Overview -->
+        <section>
+            <h2>Method Overview</h2>
+            <p>
+                We propose a two-stage decoupled training recipe that separates the action backbone from task-specific
+                conditioning:
+            </p>
+            <figure class="method-figure">
+                <img src="method.png" alt="Decoupled Action Expert architecture overview">
+                <figcaption>Figure 1: Overview of the Decoupled Action Expert. Stage 1 pretrains the action backbone on
+                    observation-free forward-kinematics data. Stage 2 freezes the backbone and trains only the
+                    conditioning pathway for downstream manipulation tasks.</figcaption>
+            </figure>
+            <p>
+                <strong>Stage 1 &mdash; Pretrain:</strong> A general-purpose action expert is trained on
+                observation-free forward-kinematics data, learning general trajectory structure without any
+                task-specific information.
+            </p>
+            <p>
+                <strong>Stage 2 &mdash; Adapt:</strong> The pretrained action backbone is frozen, and only the
+                conditioning pathway (which ingests visual observations and language instructions) is trained for
+                downstream manipulation tasks.
+            </p>
+        </section>
+
+        <!-- Teaser -->
+        <section>
+            <h2>Motivation</h2>
+            <figure class="method-figure">
+                <img src="teaser.png" alt="Motivation: scale mismatch between image diffusion and manipulation policies">
+                <figcaption>Image diffusion models generate millions of diverse pixel values, yet manipulation policies
+                    produce only short sequences of low-dimensional, physically correlated actions &mdash; a far simpler
+                    target that should not demand the same capacity.</figcaption>
+            </figure>
+        </section>
+
+        <!-- Results -->
+        <section class="highlights">
+            <h2>Results</h2>
+            <p>
+                We evaluate on MimicGen (8 manipulation tasks) and LIBERO (4 task suites), comparing normally trained
+                policies against our decoupled approach with frozen backbones.
+            </p>
+            <ul>
+                <li><strong>Decoupled matches end-to-end:</strong> A single frozen backbone shared across all tasks
+                    achieves 62.2% on MimicGen, comparable to 63.6% with standard end-to-end training.</li>
+                <li><strong>Lightweight MLP outperforms U-Net:</strong> Replacing the 244M-parameter U-Net with a
+                    5M-parameter MLP yields 65.9% on MimicGen, exceeding the U-Net baseline.</li>
+                <li><strong>Pretraining signal is irrelevant:</strong> Whether pretrained on joint positions,
+                    end-effector poses, or with no conditioning at all, downstream performance remains the same.</li>
+                <li><strong>Out-of-distribution data helps:</strong> Pretraining on DROID forward-kinematics data
+                    improves performance despite distribution mismatch with downstream benchmarks.</li>
+            </ul>
+        </section>
+
+        <!-- Ablation -->
+        <section>
+            <h2>Conditioning Ablation</h2>
+            <p>
+                We ablate 7 conditioning mechanisms to understand which approaches survive backbone freezing.
+            </p>
+            <figure class="method-figure" style="max-width: 500px; margin-left: auto; margin-right: auto;">
+                <img src="cond_ablation.png" alt="Conditioning mechanism ablation">
+                <figcaption>Modulation-based methods (e.g., AdaLN-Zero, FiLM) maintain effectiveness with frozen
+                    backbones, while token-based approaches degrade significantly.</figcaption>
+            </figure>
+        </section>
+
+        <!-- Citation -->
+        <section>
+            <h2>Citation</h2>
+            <div class="citation-box">
+                <button class="copy-button" onclick="copyToClipboard()">Copy</button>
+                <pre id="citation-text">@article{zhou2025decoupled,
+  title={Decoupled Action Expert: Confining Task Knowledge to the Conditioning Pathway},
+  author={Zhou, Jian and Lin, Sihao and Fu, Shuai and Li, Zerui and Zhou, Gengze and Wu, Qi},
+  journal={arXiv preprint arXiv:2511.12101},
+  year={2025}
+}</pre>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer>
+            <p>&copy; 2025 Jian Zhou. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <script>
+        function copyToClipboard() {
+            const citationText = document.getElementById('citation-text').innerText;
+            navigator.clipboard.writeText(citationText).then(() => {
+                const button = document.querySelector('.copy-button');
+                button.textContent = 'Copied!';
+                setTimeout(() => {
+                    button.textContent = 'Copy';
+                }, 2000);
+            });
+        }
+    </script>
+</body>
+
+</html>
