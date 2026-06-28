@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <title>Jian Zhou</title>
   <meta name="author" content="Jian Zhou">
-  <meta name="description" content="Jian Zhou — MPhil candidate at AIML, researching imitation learning, RL, and VLA models for generalist household robots.">
+  <meta name="description" content="Jian Zhou — MPhil student at AIML, researching imitation learning, RL, and VLA models for generalist household robots.">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -37,22 +37,27 @@
       <!-- Hero -->
       <header class="hero">
         <div class="hero__text">
-          <h1 class="hero__name">Jian Zhou</h1>
+          <h1 data-eid="h1-1" class="hero__name">Jian Zhou</h1>
           <div class="hero__intro" id="intro"></div>
           <nav class="hero__links">
             <a href="mailto:jianzhou0420@outlook.com">Email</a>
             <a href="https://github.com/jianzhou0420">GitHub</a>
-            <a href="https://scholar.google.com/">Scholar</a>
           </nav>
-          <p class="hero__meta">Last updated: 2025-11-18</p>
+          <p data-eid="p-1" class="hero__meta">Last updated: 2026-06-22</p>
         </div>
         <img class="hero__photo" alt="Jian Zhou" src="./Jian Zhou_files/jian_zhou.jpg">
       </header>
 
-      <!-- Works -->
+      <!-- Projects -->
       <section class="section">
-        <h2 class="section__title">Publications &amp; Works</h2>
-        <div id="works"></div>
+        <h2 class="section__title">Projects</h2>
+        <div id="projects"></div>
+      </section>
+
+      <!-- Papers -->
+      <section class="section">
+        <h2 class="section__title">Papers</h2>
+        <div id="papers"></div>
       </section>
 
     </section>
@@ -60,8 +65,8 @@
     <!-- ========== BLOG TAB ========== -->
     <section class="tab" id="tab-blog" role="tabpanel" aria-labelledby="blog" hidden>
       <header class="tab__header">
-        <h1 class="tab__title">Blog</h1>
-        <p class="tab__lede">Notes on imitation learning, VLA models, and research in progress.</p>
+        <h1 data-eid="h1-2" class="tab__title">Blog</h1>
+        <p data-eid="p-2" class="tab__lede">Notes on imitation learning, VLA models, and research in progress.</p>
       </header>
       <div id="blog"></div>
     </section>
@@ -103,15 +108,33 @@
       .then(html => { document.getElementById('intro').innerHTML = html; })
       .catch(err => console.error('Failed to load intro.html:', err));
 
-    fetch('src/works.html')
+    fetch('src/projects.html')
       .then(r => r.text())
-      .then(html => { document.getElementById('works').innerHTML = html; })
-      .catch(err => console.error('Failed to load works.html:', err));
+      .then(html => { document.getElementById('projects').innerHTML = html; })
+      .catch(err => console.error('Failed to load projects.html:', err));
 
+    fetch('src/papers.html')
+      .then(r => r.text())
+      .then(html => { document.getElementById('papers').innerHTML = html; })
+      .catch(err => console.error('Failed to load papers.html:', err));
+
+    // Blog draft control (see src/blog.html): locally — file://, localhost, or a
+    // private-LAN preview — every post shows and drafts get a badge; on the public
+    // site any <a class="post" data-draft> is removed before render.
     fetch('src/blog.html')
       .then(r => r.text())
-      .then(html => { document.getElementById('blog').innerHTML = html; })
+      .then(html => {
+        const blog = document.getElementById('blog');
+        blog.innerHTML = html;
+        const h = location.hostname;
+        const isLocal = location.protocol === 'file:'
+          || ['localhost', '127.0.0.1', '::1'].includes(h)
+          || /^(10\.|192\.168\.|172\.(1[6-9]|2[0-9]|3[01])\.)/.test(h);
+        document.body.classList.toggle('is-local', isLocal);
+        if (!isLocal) blog.querySelectorAll('.post[data-draft]').forEach(el => el.remove());
+      })
       .catch(err => console.error('Failed to load blog.html:', err));
   </script>
+  <script src="/_edit/inline-edit.js" defer></script>
 </body>
 </html>

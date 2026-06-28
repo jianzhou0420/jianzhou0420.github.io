@@ -9,7 +9,7 @@
   --shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 4px 12px rgba(15, 23, 42, 0.04);
   --shadow-hover: 0 2px 4px rgba(15, 23, 42, 0.06), 0 12px 28px rgba(15, 23, 42, 0.08);
   --radius: 10px;
-  --maxw: 860px;
+  --maxw: 960px;
 }
 
 * { box-sizing: border-box; }
@@ -306,6 +306,32 @@ a:hover, a:focus { color: var(--accent-hover); }
   font-size: 13px;
 }
 
+/* ---------- Blog publish status (badges visible only in local preview) ---------- */
+.post[data-draft] { display: none; }              /* hidden by default — safe on the live site */
+body.is-local .post[data-draft] { display: grid; }
+
+/* In local preview, tag every post with its status so it's clear at a glance
+   which ones go live on the public site and which stay hidden. */
+body.is-local .post .post__title::after {
+  margin-left: 8px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  vertical-align: middle;
+  padding: 1px 7px;
+  border-radius: 999px;
+}
+body.is-local .post:not([data-draft]) .post__title::after {  /* shown on github.io */
+  content: "PUBLIC";
+  color: #2e7d32;
+  background: #e3f0e3;
+}
+body.is-local .post[data-draft] .post__title::after {        /* hidden from github.io */
+  content: "DRAFT";
+  color: #b06a00;
+  background: #fbe7d0;
+}
+
 /* ---------- Simple link list ---------- */
 .linklist {
   display: flex;
@@ -372,6 +398,63 @@ a:hover, a:focus { color: var(--accent-hover); }
   margin: 1em 0;
   color: var(--muted);
 }
+
+/* ---------- Figures & data tables (prose) ---------- */
+.prose figure { margin: 1.8em 0; }
+.prose figure table { margin: 0; }
+.prose figcaption {
+  margin-top: 0.7em;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--muted);
+}
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 1.4em 0;
+}
+.prose thead th {
+  text-align: left;
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--muted);
+  border-bottom: 2px solid var(--border);
+  padding: 8px 12px;
+}
+.prose tbody td {
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+.prose tbody tr.group-head td {
+  font-weight: 600;
+  color: var(--text);
+  background: #f2f2ec;
+  font-size: 12px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+.prose td .num {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 1px 7px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.badge--official { background: #e3f0e3; color: #2e7d32; }
+.badge--leaked   { background: #fbe7d0; color: #b06a00; }
+.badge--estimate { background: #f0e1e1; color: #b03535; }
+.badge--none     { background: #e9e9e4; color: #5c6370; }
 
 /* ---------- Footer ---------- */
 .footer {
