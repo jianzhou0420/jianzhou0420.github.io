@@ -1,0 +1,1199 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgentCanvas — Automating the Design of Embodied Agent Architectures</title>
+    <meta name="author" content="Jian Zhou">
+    <meta name="description"
+        content="AgentCanvas: a typed-graph runtime that turns embodied agents into editable node-and-wire programs, plus KDLoop, a coding-agent search that rewrites them and validates the result in simulation.">
+
+    <!-- Social preview (OpenGraph / Twitter card) -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="AgentCanvas — Automating the Design of Embodied Agent Architectures">
+    <meta property="og:description"
+        content="A typed-graph runtime + coding-agent search (KDLoop) that edits embodied agents and validates them in simulation. Submitted to CoRL 2026.">
+    <meta property="og:image" content="https://jianzhou0420.github.io/src/works/AgentCanvas/teaser.png">
+    <meta property="og:url" content="https://jianzhou0420.github.io/src/works/AgentCanvas/paper.html">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="AgentCanvas — Automating the Design of Embodied Agent Architectures">
+    <meta name="twitter:description"
+        content="A typed-graph runtime + coding-agent search (KDLoop) that edits embodied agents and validates them in simulation.">
+    <meta name="twitter:image" content="https://jianzhou0420.github.io/src/works/AgentCanvas/teaser.png">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800;900&family=Hanken+Grotesk:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Shared page layout (centered column + sticky outliner). Single source of truth; see the file header. -->
+    <link rel="stylesheet" href="../../assets/page-layout.css">
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-17341V1NQ5"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-17341V1NQ5');
+    </script>
+
+    <style>
+        :root {
+            --canvas: #090c13;
+            --canvas-2: #0c1019;
+            --node: #111726;
+            --node-2: #0e1422;
+            --line: #212c44;
+            --ink: #eef1f7;
+            --muted: #8b94ab;
+            --faint: #586079;
+            --amber: #ff6a3d;
+            --amber-2: #ff8a5c;
+            --amber-soft: #ff6a3d22;
+            --teal: #34e0bf;
+            --blue: #5b8cff;
+            --violet: #a98bff;
+            /* layout tokens (--maxw/--rail/--measure/--lean) live in assets/page-layout.css */
+            --r: 12px;
+            --ease: cubic-bezier(.22, .61, .36, 1);
+            --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+            --body: 'Hanken Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+            --display: 'Archivo', var(--body);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: var(--body);
+            background: var(--canvas);
+            color: var(--ink);
+            line-height: 1.65;
+            -webkit-font-smoothing: antialiased;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            background-image: radial-gradient(circle, rgba(255, 255, 255, .045) 1px, transparent 1px);
+            background-size: 26px 26px;
+            background-position: -1px -1px;
+            mask-image: radial-gradient(ellipse 120% 90% at 50% 0%, #000 35%, transparent 100%);
+        }
+
+        body::after {
+            content: "";
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            background:
+                radial-gradient(60% 45% at 78% 8%, rgba(255, 106, 61, .10), transparent 70%),
+                radial-gradient(50% 40% at 12% 22%, rgba(52, 224, 191, .07), transparent 70%);
+        }
+
+        /* .wrap / .layout / .rail base / p measure → assets/page-layout.css */
+
+        /* Top bar */
+        .topbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 22px 0 14px; position: relative; z-index: 3; }
+        .brand { display: inline-flex; align-items: center; gap: 10px; font-family: var(--mono); font-weight: 700; letter-spacing: .02em; font-size: 15px; color: var(--ink); text-decoration: none; }
+        .brand b { color: var(--amber); }
+        .brand svg { display: block; }
+        .back { font-family: var(--mono); font-size: 12.5px; color: var(--muted); text-decoration: none; border: 1px solid var(--line); padding: 7px 12px; border-radius: 8px; transition: .25s var(--ease); white-space: nowrap; }
+        .back:hover { color: var(--ink); border-color: var(--amber); background: var(--amber-soft); }
+
+        /* Layout */
+        .rail__title { color: var(--faint); text-transform: uppercase; letter-spacing: .18em; font-size: 10px; margin-bottom: 14px; }
+        .rail__list { list-style: none; position: relative; }
+        .rail__list::before { content: ""; position: absolute; left: 4px; top: 8px; bottom: 8px; width: 1px; background: linear-gradient(var(--line), transparent); }
+        .rail a { display: flex; align-items: center; gap: 11px; color: var(--muted); text-decoration: none; padding: 6px 0; transition: color .2s var(--ease); }
+        .rail a .dot { width: 9px; height: 9px; border-radius: 50%; border: 1.5px solid var(--line); background: var(--canvas); flex: none; position: relative; z-index: 1; transition: .25s var(--ease); }
+        .rail a:hover { color: var(--ink); }
+        .rail a.active { color: var(--ink); }
+        .rail a.active .dot { border-color: var(--amber); background: var(--amber); box-shadow: 0 0 0 4px var(--amber-soft); }
+        .rail a .idx { color: var(--faint); }
+
+        /* Sections */
+        section { scroll-margin-top: 24px; margin-bottom: 82px; }
+        .eyebrow { display: inline-flex; align-items: center; gap: 9px; font-family: var(--mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin-bottom: 18px; }
+        .eyebrow .port { width: 8px; height: 8px; border-radius: 50%; background: var(--amber); box-shadow: 0 0 0 4px var(--amber-soft); }
+        .eyebrow .port.teal { background: var(--teal); box-shadow: 0 0 0 4px #34e0bf22; }
+        .eyebrow .port.blue { background: var(--blue); box-shadow: 0 0 0 4px #5b8cff22; }
+        .eyebrow .port.violet { background: var(--violet); box-shadow: 0 0 0 4px #a98bff22; }
+        h2 { font-family: var(--display); font-weight: 800; font-size: clamp(1.55rem, 3.3vw, 2.2rem); letter-spacing: -.02em; line-height: 1.08; margin-bottom: 18px; }
+        h3 { font-family: var(--display); font-weight: 700; font-size: 1.06rem; letter-spacing: -.01em; margin-bottom: 6px; }
+        p { color: #c5ccdd; margin-bottom: 16px; }
+        strong { color: var(--ink); font-weight: 600; }
+        .accent { color: var(--amber-2); }
+        .accent-t { color: var(--teal); }
+
+        /* Node card primitive */
+        .node { position: relative; background: linear-gradient(180deg, var(--node) 0%, var(--node-2) 100%); border: 1px solid var(--line); border-radius: var(--r); box-shadow: 0 24px 60px -32px rgba(0, 0, 0, .9), inset 0 1px 0 rgba(255, 255, 255, .03); }
+        .node__bar { display: flex; align-items: center; gap: 10px; padding: 11px 14px; border-bottom: 1px solid var(--line); font-family: var(--mono); font-size: 12px; color: var(--muted); letter-spacing: .02em; }
+        .node__bar .tdot { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+        .tdot.a { background: var(--amber); } .tdot.t { background: var(--teal); } .tdot.b { background: var(--blue); } .tdot.v { background: var(--violet); }
+        .node__bar .grow { margin-left: auto; color: var(--faint); }
+        .port-pin { position: absolute; width: 11px; height: 11px; border-radius: 50%; background: var(--canvas); border: 2px solid var(--amber); top: 50%; transform: translateY(-50%); z-index: 2; }
+        .port-pin.r { right: -6px; border-color: var(--teal); }
+        .port-pin.l2 { left: -6px; top: 34%; }
+        .port-pin.l3 { left: -6px; top: 66%; }
+
+        /* Hero */
+        .hero { margin: 14px 0 70px; }
+        .hero__brandline { font-family: var(--mono); font-size: 12px; letter-spacing: .26em; text-transform: uppercase; color: var(--amber); margin-bottom: 20px; }
+        .hero h1 { font-family: var(--display); font-weight: 900; font-size: clamp(2.1rem, 6vw, 4.05rem); line-height: 1.02; letter-spacing: -.035em; margin-bottom: 22px; max-width: 16ch; }
+        .hero h1 .em { color: var(--amber); }
+        .hero__tldr { font-size: clamp(1.02rem, 1.7vw, 1.22rem); color: #cfd6e6; max-width: 60ch; margin-bottom: 14px; }
+        .hero__sub { color: var(--muted); font-size: .98rem; max-width: 60ch; margin-bottom: 22px; }
+        .hero__sub a { color: var(--amber-2); text-decoration: none; border-bottom: 1px solid #ff6a3d44; transition: .2s var(--ease); }
+        .hero__sub a:hover { border-color: var(--amber); color: var(--amber); }
+        .hero__stats { display: flex; flex-wrap: wrap; gap: 9px 24px; margin-bottom: 30px; font-family: var(--mono); font-size: 12.5px; color: var(--muted); }
+        .hero__stats span { display: inline-flex; align-items: center; gap: 8px; }
+        .hero__stats span::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--amber); box-shadow: 0 0 0 3px var(--amber-soft); flex: none; }
+        .hero__stats b { color: var(--ink); font-weight: 700; }
+        .meta-row { display: flex; flex-wrap: wrap; gap: 10px 26px; align-items: baseline; margin-bottom: 26px; font-family: var(--mono); font-size: 12.5px; color: var(--muted); }
+        .meta-row b { color: var(--ink); font-weight: 600; }
+        .meta-row .tag { color: var(--amber-2); border: 1px solid var(--line); border-radius: 6px; padding: 3px 9px; }
+        .links { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 44px; }
+        .btn { display: inline-flex; align-items: center; gap: 9px; font-family: var(--mono); font-size: 13px; font-weight: 600; text-decoration: none; padding: 11px 18px; border-radius: 9px; border: 1px solid var(--line); color: var(--ink); background: var(--node); transition: .22s var(--ease); }
+        .btn .pdot { width: 7px; height: 7px; border-radius: 50%; background: var(--teal); }
+        .btn:hover { transform: translateY(-2px); border-color: var(--teal); box-shadow: 0 14px 30px -18px #34e0bf99; }
+        .btn.primary { background: var(--amber); border-color: var(--amber); color: #1a0c06; }
+        .btn.primary .pdot { background: #1a0c06; }
+        .btn.primary:hover { box-shadow: 0 16px 34px -16px var(--amber); border-color: var(--amber); }
+        .btn.ghost { opacity: .55; cursor: not-allowed; }
+        .btn.ghost:hover { transform: none; border-color: var(--line); box-shadow: none; }
+        .btn small { color: var(--muted); font-weight: 400; }
+        .hero-node { margin-top: 8px; }
+        .hero-node video { display: block; width: 100%; height: auto; background: #05070c; }
+        .caption { font-family: var(--mono); font-size: 12px; color: var(--muted); padding: 12px 16px; border-top: 1px solid var(--line); display: flex; gap: 10px; align-items: flex-start; line-height: 1.55; }
+        .caption .ico { color: var(--amber); flex: none; }
+
+        /* Figures */
+        .figure { margin: 26px 0 0; }
+        .figure img { display: block; width: 100%; height: auto; background: #0a0d14; }
+        .figure.padimg img { padding: 18px; }
+
+        /* Result strip (section 01) */
+        .result-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 8px; }
+        .gaincard { border: 1px solid var(--line); border-radius: var(--r); background: linear-gradient(180deg, #0f1523, #0c111c); padding: 18px; position: relative; overflow: hidden; }
+        .gaincard::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: linear-gradient(90deg, var(--amber), transparent); }
+        .gaincard .exec { font-family: var(--display); font-weight: 700; font-size: 1.05rem; }
+        .gaincard .dom { font-family: var(--mono); font-size: 10.5px; color: var(--faint); letter-spacing: .08em; text-transform: uppercase; margin-bottom: 12px; }
+        .gaincard .delta { font-family: var(--display); font-weight: 800; font-size: 2rem; color: var(--amber-2); line-height: 1; }
+        .gaincard .from { font-family: var(--mono); font-size: 11.5px; color: var(--muted); margin-top: 4px; }
+        .gaincard .by { font-family: var(--mono); font-size: 11px; color: var(--teal); margin-top: 8px; }
+
+        /* Findings */
+        .findings { display: grid; gap: 14px; margin-top: 8px; }
+        .finding { display: grid; grid-template-columns: auto 1fr; gap: 16px; align-items: start; padding: 18px 20px; border: 1px solid var(--line); border-radius: var(--r); background: linear-gradient(180deg, #0f1523, #0c111c); transition: .25s var(--ease); }
+        .finding:hover { border-color: #2d3b5a; transform: translateX(3px); }
+        .finding .n { font-family: var(--mono); font-size: 12px; color: var(--amber); border: 1px solid var(--amber); border-radius: 6px; padding: 2px 8px; line-height: 1.5; }
+        .finding p { margin: 0; font-size: .97rem; max-width: none; }
+
+        /* Objective / prompt-as-communication card */
+        .objective { border: 1px solid var(--line); border-left: 3px solid var(--amber); border-radius: var(--r); background: var(--node-2); padding: 20px 22px; margin-top: 8px; }
+        .objective .lbl { font-family: var(--mono); font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: var(--faint); margin-bottom: 10px; }
+        .objective .quote { font-family: var(--mono); font-size: 13px; color: #d7dcea; line-height: 1.7; }
+        .objective .quote em { color: var(--amber-2); font-style: normal; }
+        .objective .src { font-family: var(--mono); font-size: 11px; color: var(--faint); margin-top: 10px; }
+
+        /* Proposer comparison grid (section 05) */
+        .proposer-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 8px; }
+        .pcard { border: 1px solid var(--line); border-radius: var(--r); background: linear-gradient(180deg, #0f1523, #0c111c); padding: 18px 18px 20px; }
+        .pcard .ptop { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-bottom: 6px; }
+        .pcard .pname { font-family: var(--display); font-weight: 800; font-size: 1.15rem; }
+        .pcard .ptag { font-family: var(--mono); font-size: 10px; padding: 2px 7px; border-radius: 5px; border: 1px solid var(--line); color: var(--muted); white-space: nowrap; }
+        .pcard.ours { border-color: #ff6a3d55; }
+        .pcard.ours .ptag { color: var(--amber); border-color: var(--amber); }
+        .pcard .pref { font-family: var(--mono); font-size: 11px; color: var(--faint); margin-bottom: 12px; }
+        .pcard p { font-size: .92rem; margin: 0; max-width: none; }
+        .pcard .axisrow { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 12px; }
+        .pcard .ax { font-family: var(--mono); font-size: 10px; color: var(--teal); border: 1px solid #34e0bf33; background: #34e0bf10; border-radius: 5px; padding: 2px 6px; }
+
+        /* "port" mark — ADAS / AFlow are our reimplementations (LLM-core iteration → coding-agent session) */
+        .pm { color: var(--amber); font-weight: 700; font-size: .72em; margin-left: 2px; vertical-align: super; cursor: help; font-family: var(--mono); }
+        .port-note { font-family: var(--mono); font-size: 11.5px; color: var(--muted); margin-top: 12px; width: 100%; }
+        .port-note b { color: var(--amber); }
+        .port-callout { border: 1px solid var(--line); border-left: 3px solid var(--amber); border-radius: var(--r); background: #ff6a3d0d; padding: 15px 18px; margin: 0 0 20px; font-size: .95rem; color: #cdd4e4; max-width: none; }
+        .port-callout strong { color: var(--ink); }
+        .port-callout em { color: var(--amber-2); font-style: normal; }
+
+        /* Executor diversity cards (section 07) */
+        .exec-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 8px; }
+        .ecard { border: 1px solid var(--line); border-radius: var(--r); background: var(--node-2); padding: 16px; }
+        .ecard .en { font-family: var(--display); font-weight: 700; font-size: 1.02rem; }
+        .ecard .efam { font-family: var(--mono); font-size: 10px; letter-spacing: .06em; text-transform: uppercase; margin: 6px 0 10px; }
+        .ecard .efam.vln { color: var(--amber-2); } .ecard .efam.eqa { color: var(--teal); } .ecard .efam.man { color: var(--blue); }
+        .ecard .ebench { font-family: var(--mono); font-size: 11px; color: var(--muted); line-height: 1.6; }
+        .ecard .ebench b { font-weight: 700; }
+        .ecard.vln .ebench b { color: var(--amber-2); } .ecard.eqa .ebench b { color: var(--teal); } .ecard.man .ebench b { color: var(--blue); }
+        .ecard .ebase { font-family: var(--mono); font-size: 10.5px; color: var(--muted); margin-top: 13px; padding-top: 11px; border-top: 1px solid var(--line); letter-spacing: .02em; }
+        .ecard .ebase b { color: var(--ink); font-weight: 700; }
+        /* per-executor env clip (top of each card) — autoplay/muted/loop; placeholder shows until the mp4 lands */
+        .ecard .eclip { position: relative; margin: -16px -16px 14px; border-radius: var(--r) var(--r) 0 0; overflow: hidden; border-bottom: 1px solid var(--line); }
+        .ecard .eclip video { display: block; width: 100%; aspect-ratio: 16 / 10; object-fit: cover; background: transparent; position: relative; z-index: 1; }
+        .ecard .eclip .eclip-ph { position: absolute; inset: 0; z-index: 0; display: flex; align-items: center; justify-content: center; gap: 6px; font-family: var(--mono); font-size: 9.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--faint); background: #05070c radial-gradient(circle at 1px 1px, #ffffff0a 1px, transparent 0) 0 0 / 11px 11px; }
+        .ecard.vln .eclip-ph { color: var(--amber-2); } .ecard.eqa .eclip-ph { color: var(--teal); } .ecard.man .eclip-ph { color: var(--blue); }
+
+        /* ===== Search tree widget (section 03 — centerpiece) ===== */
+        .tree-controls { display: flex; flex-wrap: wrap; gap: 18px 28px; align-items: center; margin: 4px 0 16px; }
+        .ctl { display: flex; align-items: center; gap: 10px; }
+        .ctl .clabel { font-family: var(--mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--faint); }
+        .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+        .seg button { font-family: var(--mono); font-size: 12px; color: var(--muted); background: transparent; border: none; border-right: 1px solid var(--line); padding: 7px 13px; cursor: pointer; transition: .18s var(--ease); }
+        .seg button:last-child { border-right: none; }
+        .seg button:hover { color: var(--ink); background: #ffffff08; }
+        .seg button.on { color: #1a0c06; background: var(--amber); font-weight: 600; }
+        .seg button.on.ours { background: var(--amber); }
+        .tree-stage { display: grid; grid-template-columns: 1.5fr .9fr; gap: 18px; align-items: stretch; }
+        .tree-svg-wrap { border: 1px solid var(--line); border-radius: var(--r); background: radial-gradient(120% 100% at 50% 0%, #0f1626, #0b0f1a); overflow: hidden; }
+        #tree-svg { display: block; width: 100%; height: auto; }
+        .tree-svg-wrap .ttitle { font-family: var(--mono); font-size: 12px; color: var(--muted); padding: 11px 14px; border-bottom: 1px solid var(--line); display: flex; align-items: center; gap: 8px; }
+        .tree-svg-wrap .ttitle b { color: var(--ink); font-weight: 600; }
+        .tree-svg-wrap .ttitle .best { margin-left: auto; color: var(--amber-2); }
+        .tnode { cursor: pointer; transition: .12s; }
+        .tnode:hover { filter: brightness(1.25); }
+        .tree-inspector { display: flex; flex-direction: column; }
+        .tree-inspector .node__body { padding: 16px 18px; flex: 1; }
+        .ti-iter { font-family: var(--mono); font-size: 11px; color: var(--amber); letter-spacing: .08em; text-transform: uppercase; margin-bottom: 10px; }
+        .ti-delta { font-family: var(--display); font-weight: 800; font-size: 2rem; line-height: 1; margin-bottom: 3px; }
+        .ti-sub { font-family: var(--mono); font-size: 11.5px; color: var(--muted); margin-bottom: 14px; }
+        .ti-lbl { font-family: var(--mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--faint); margin-bottom: 5px; }
+        .ti-mech { color: #c9d0e1; font-size: .94rem; margin-bottom: 13px; }
+        .ti-flags { display: flex; flex-wrap: wrap; gap: 6px; }
+        .ti-chip { font-family: var(--mono); font-size: 10.5px; border-radius: 6px; padding: 3px 8px; border: 1px solid var(--line); color: var(--muted); }
+        .ti-chip.axis { color: var(--teal); border-color: #34e0bf44; background: #34e0bf10; }
+        .ti-chip.best { color: var(--amber); border-color: var(--amber); }
+        .ti-chip.leak { color: #ff7a7a; border-color: #ff7a7a66; }
+        .ti-chip.warn { color: var(--violet); border-color: #a98bff55; }
+        .tree-legend { display: flex; flex-wrap: wrap; gap: 8px 16px; margin-top: 16px; font-family: var(--mono); font-size: 11px; color: var(--muted); }
+        .tree-legend span { display: inline-flex; align-items: center; gap: 7px; }
+        .tree-legend i { width: 13px; height: 13px; border-radius: 50%; display: inline-block; flex: none; }
+        .lg-gain { background: var(--amber); } .lg-faint { background: #ff6a3d44; } .lg-reg { background: #44537a; }
+        .lg-best { background: var(--amber); box-shadow: 0 0 0 2px var(--canvas), 0 0 0 4px var(--amber); }
+        .lg-leak { background: #ff6a3d33; border: 1px solid #ff7a7a; }
+        .lg-rev { background: transparent; border: 1px dashed var(--muted); }
+
+        /* Matrix (section 06) */
+        .matrix-shell { display: grid; grid-template-columns: 1.35fr .95fr; gap: 22px; align-items: start; }
+        .matrix-wrap { overflow-x: auto; }
+        .matrix { width: 100%; border-collapse: separate; border-spacing: 6px; font-family: var(--mono); min-width: 420px; }
+        .matrix th { font-weight: 600; font-size: 12px; color: var(--muted); text-align: center; padding: 4px 0 8px; }
+        .matrix th.exec { text-align: left; padding-left: 4px; }
+        .matrix td.exec { text-align: left; font-size: 12.5px; color: var(--ink); white-space: nowrap; padding-right: 6px; }
+        .matrix td.exec small { display: block; color: var(--faint); font-weight: 400; font-size: 11px; }
+        .cell { text-align: center; border-radius: 9px; border: 1px solid var(--line); padding: 14px 6px; font-size: 15px; font-weight: 700; color: var(--ink); cursor: pointer; transition: .18s var(--ease); position: relative; background: var(--node-2); }
+        .cell:hover, .cell:focus-visible, .cell.sel { transform: translateY(-2px); border-color: var(--amber); outline: none; box-shadow: 0 10px 24px -14px var(--amber); }
+        .cell.s-strong { background: linear-gradient(180deg, #ff6a3d, #e5491f); border-color: #ff8a5c; color: #1c0a04; }
+        .cell.s-mid { background: #ff6a3d44; border-color: #ff6a3d77; color: #ffd9c9; }
+        .cell.s-low { background: #ff6a3d1f; border-color: #ff6a3d3d; color: #ffc6b1; }
+        .cell.s-none { background: repeating-linear-gradient(135deg, #ffffff05 0 6px, transparent 6px 12px); border-style: dashed; color: var(--faint); font-weight: 500; }
+        .cell.s-leak { background: #ff6a3d33; border-color: var(--amber); color: #ffd9c9; }
+        .cell.s-leak::after { content: ""; position: absolute; inset: 0; border-radius: 8px; background: repeating-linear-gradient(45deg, #ff3b3b22 0 5px, transparent 5px 10px); pointer-events: none; }
+        .cell.s-exit { background: transparent; border-style: dashed; border-color: var(--teal); color: var(--teal); font-weight: 500; }
+        .cell .mark { font-size: 10px; vertical-align: super; }
+        .readout { position: sticky; top: 22px; min-height: 220px; }
+        .readout .node__body { padding: 16px 18px 18px; }
+        .ro-coord { font-family: var(--mono); font-size: 11px; color: var(--amber); letter-spacing: .08em; text-transform: uppercase; margin-bottom: 10px; }
+        .ro-delta { font-family: var(--display); font-weight: 800; font-size: 2.1rem; line-height: 1; margin-bottom: 4px; }
+        .ro-best { font-family: var(--mono); font-size: 12px; color: var(--muted); margin-bottom: 14px; }
+        .ro-label { font-family: var(--mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--faint); margin-bottom: 5px; }
+        .ro-change { color: #c9d0e1; font-size: .95rem; margin-bottom: 14px; }
+        .ro-axes { display: flex; flex-wrap: wrap; gap: 6px; }
+        .chip { font-family: var(--mono); font-size: 11px; color: var(--teal); border: 1px solid #34e0bf44; background: #34e0bf12; border-radius: 6px; padding: 3px 8px; }
+        .legend { display: flex; flex-wrap: wrap; gap: 8px 16px; margin-top: 18px; font-family: var(--mono); font-size: 11px; color: var(--muted); }
+        .legend span { display: inline-flex; align-items: center; gap: 7px; }
+        .legend i { width: 12px; height: 12px; border-radius: 4px; border: 1px solid var(--line); display: inline-block; }
+        .lg-strong2 { background: #ff6a3d; border-color: #ff8a5c; } .lg-mid2 { background: #ff6a3d44; }
+        .lg-leak2 { background: #ff6a3d33; border-color: var(--amber); } .lg-exit2 { background: transparent; border: 1px dashed var(--teal); }
+        .lg-none2 { background: repeating-linear-gradient(135deg, #ffffff10 0 4px, transparent 4px 8px); border-style: dashed; }
+
+        /* Gallery placeholder */
+        .gallery { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-top: 22px; }
+        .gallery.three { grid-template-columns: repeat(3, 1fr); }
+        .slot { border: 1px dashed var(--line); border-radius: var(--r); background: repeating-linear-gradient(135deg, #ffffff04 0 9px, transparent 9px 18px); min-height: 160px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 20px; gap: 8px; transition: .25s var(--ease); }
+        .slot:hover { border-color: var(--amber); background: var(--amber-soft); }
+        .slot .label { font-family: var(--display); font-weight: 700; font-size: 1.02rem; color: var(--ink); }
+        .slot .todo { font-family: var(--mono); font-size: 11px; color: var(--muted); line-height: 1.5; max-width: 28ch; }
+        .slot .ph { font-family: var(--mono); font-size: 10px; letter-spacing: .16em; color: var(--amber); border: 1px solid var(--amber); border-radius: 20px; padding: 3px 11px; }
+
+        /* Citation */
+        .cite-box { position: relative; border: 1px solid var(--line); border-radius: var(--r); background: var(--node-2); overflow: hidden; }
+        .cite-box pre { font-family: var(--mono); font-size: 12.5px; color: #c9d0e1; padding: 22px; overflow-x: auto; line-height: 1.7; }
+        .cite-box .copy { position: absolute; top: 12px; right: 12px; font-family: var(--mono); font-size: 11px; color: var(--ink); background: var(--node); border: 1px solid var(--line); border-radius: 7px; padding: 6px 12px; cursor: pointer; transition: .2s var(--ease); }
+        .cite-box .copy:hover { border-color: var(--amber); color: var(--amber); }
+
+        footer { border-top: 1px solid var(--line); padding-top: 26px; margin-top: 30px; display: flex; flex-wrap: wrap; gap: 10px 20px; justify-content: space-between; font-family: var(--mono); font-size: 12px; color: var(--faint); }
+
+        .reveal { opacity: 0; transform: translateY(16px); animation: rise .8s var(--ease) forwards; }
+        @keyframes rise { to { opacity: 1; transform: none; } }
+
+        @media (max-width: 940px) {
+            .matrix-shell, .tree-stage { grid-template-columns: 1fr; }
+            .readout { position: static; }
+            .result-strip, .exec-grid { grid-template-columns: repeat(2, 1fr); }
+            .proposer-grid { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 620px) {
+            .gallery, .gallery.three { grid-template-columns: 1fr; }
+            .result-strip, .exec-grid { grid-template-columns: 1fr; }
+            .tree-controls { gap: 12px 18px; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .reveal { animation: none; opacity: 1; transform: none; }
+            html { scroll-behavior: auto; }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrap">
+        <div class="topbar">
+            <a class="brand" href="../../../index.html#works" aria-label="AgentCanvas home">
+                <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true">
+                    <circle cx="4.5" cy="5.5" r="2.4" stroke="#ff6a3d" stroke-width="1.6" />
+                    <circle cx="17.5" cy="11" r="2.4" stroke="#34e0bf" stroke-width="1.6" />
+                    <circle cx="6" cy="17" r="2.4" stroke="#5b8cff" stroke-width="1.6" />
+                    <path d="M6.6 6.7 15.4 10M15.8 12.6 7.4 15.4" stroke="#3a466a" stroke-width="1.4" />
+                </svg>
+                Agent<b>Canvas</b>
+            </a>
+            <a class="back" href="../../../index.html#works">&larr; index / works</a>
+        </div>
+
+        <div class="layout">
+            <aside class="rail" aria-label="Section navigation">
+                <div class="rail__title">// outliner</div>
+                <ul class="rail__list">
+                    <li data-eid="li-1"><a href="#top" class=""><span class="dot"></span><span class="idx">00</span> intro</a></li>
+                    <li data-eid="li-2"><a href="#motivation" class="active"><span class="dot"></span><span class="idx">01</span> motivation</a></li>
+                    <li data-eid="li-3"><a href="#gains" class=""><span class="dot"></span><span class="idx">02</span> gains</a></li>
+                    <li data-eid="li-4"><a href="#system"><span class="dot"></span><span class="idx">03</span> substrate</a></li>
+                    <li data-eid="li-5"><a href="#loop"><span class="dot"></span><span class="idx">04</span> the optimizer</a></li>
+                    <li data-eid="li-6"><a href="#proposers"><span class="dot"></span><span class="idx">05</span> proposers</a></li>
+                    <li data-eid="li-7"><a href="#search"><span class="dot"></span><span class="idx">06</span> search tree</a></li>
+                    <li data-eid="li-8"><a href="#results"><span class="dot"></span><span class="idx">07</span> results</a></li>
+                    <li data-eid="li-9"><a href="#executors"><span class="dot"></span><span class="idx">08</span> executors</a></li>
+                    <li data-eid="li-10"><a href="#limits"><span class="dot"></span><span class="idx">09</span> limits</a></li>
+                    <li data-eid="li-11"><a href="#cite"><span class="dot"></span><span class="idx">10</span> cite</a></li>
+                </ul>
+            </aside>
+
+            <main>
+                <!-- ===== 00 HERO ===== -->
+                <section id="top" class="hero">
+                    <div class="hero__brandline reveal" style="animation-delay:.02s">Agents that design embodied agents</div>
+                    <h1 data-eid="h1-1" class="reveal" style="animation-delay:.08s">Automating the Design of <span class="em">Embodied Agent</span> Architectures</h1>
+                    <p data-eid="p-1" class="hero__tldr reveal" style="animation-delay:.16s">
+                        <strong>One work, two pillars.</strong> A <strong class="accent-t">substrate</strong> that
+                        standardizes embodied agents &mdash; <span class="accent-t">editable, reproducible, comparable,
+                        experimentable</span> &mdash; so an external optimizer can act on them at all. And a
+                        <strong class="accent">methodology</strong> that uses an off-the-shelf coding agent to carry the
+                        architecture-search algorithm: it <span class="accent">analyzes</span> the problem,
+                        <span class="accent">proposes</span> a change, <span class="accent">implements</span> it in code,
+                        <span class="accent">runs</span> the experiment, and <span class="accent">analyzes</span> again,
+                        loop after loop.
+                    </p>
+                    <p data-eid="p-2" class="hero__sub reveal" style="animation-delay:.20s">
+                        <a href="index.html">AgentCanvas</a> is released as a standalone platform &mdash; a visual
+                        node-graph editor, not just a paper artifact. <a href="index.html">See the substrate&nbsp;&rarr;</a>
+                    </p>
+                    <div class="hero__stats reveal" style="animation-delay:.24s" aria-label="At a glance">
+                        <span><b>12</b>&nbsp;search cells</span>
+                        <span><b>coding-agent</b>&nbsp;AAS</span>
+                        <span><b>rerun-confirmed</b>&nbsp;gains</span>
+                        <span><b>failures</b>&nbsp;mapped</span>
+                    </div>
+                    <div class="meta-row reveal" style="animation-delay:.28s">
+                        <span><b>Jian&nbsp;Zhou</b>, et&nbsp;al. <em style="color:var(--faint)">· author list pending (under review)</em></span>
+                        <span>AIML, University of Adelaide</span>
+                        <span class="tag">Submitted to CoRL 2026</span>
+                    </div>
+                    <div class="links reveal" style="animation-delay:.32s">
+                        <span class="btn ghost" title="arXiv link coming soon"><span class="pdot"></span>Paper <small>arXiv pending</small></span>
+                        <a class="btn" href="index.html"><span class="pdot"></span>AgentCanvas&nbsp;&rarr;</a>
+                        <a class="btn" href="https://jianzhou0420.github.io/AgentCanvas/" target="_blank" rel="noopener"><span class="pdot"></span>Docs</a>
+                        <a class="btn primary" href="https://github.com/jianzhou0420/AgentCanvas" target="_blank" rel="noopener"><span class="pdot"></span>Code</a>
+                        <a class="btn" href="#video"><span class="pdot"></span>Video</a>
+                    </div>
+                    <figure class="node hero-node reveal" id="video" style="animation-delay:.38s">
+                        <span class="port-pin l2" title="obs"></span>
+                        <span class="port-pin l3" title="instr"></span>
+                        <span class="port-pin r" title="ΔSR"></span>
+                        <div class="node__bar">
+                            <span class="tdot a"></span><span class="tdot t"></span><span class="tdot b"></span>
+                            <span style="margin-left:6px">executor.search()</span>
+                            <span class="grow">// teaser · auto-search replay</span>
+                        </div>
+                        <video src="demo.mp4" poster="teaser.png" autoplay muted loop playsinline controls preload="metadata"></video>
+                        <figcaption data-eid="figcaption-1" class="caption"><span class="ico">▶</span>
+                            <span><strong style="color:var(--ink)">Teaser</strong> &mdash; the replay segment from our CoRL
+                                submission video: the coding agent automatically searching over an embodied executor's
+                                graph.</span>
+                        </figcaption>
+                    </figure>
+                </section>
+
+                <!-- ===== 01 MOTIVATION ===== -->
+                <section id="motivation">
+                    <div class="eyebrow"><span class="port"></span>01 — motivation</div>
+                    <h2 data-eid="h2-mot">The first to bring architecture search to real embodied agents</h2>
+                    <p data-eid="p-mot-1">An embodied agent composes foundation models with perception, mapping,
+                        memory, planning, and control. At every join it fixes a choice made by hand for a single
+                        benchmark, from sensor abstractions and map representations to memory state, prompt structure,
+                        planner topology, model placement, and action interfaces. As foundation models and embodied
+                        tools multiply, this space grows faster than manual iteration can cover.
+                        <strong>Could an agent do the searching instead?</strong></p>
+                    <p data-eid="p-mot-2">Automated architecture search already does this for text agents, but the
+                        move to embodied is not a free transfer. Text-domain search runs over cheap, stateless calls and
+                        a mature palette of primitives such as chain-of-thought, debate, and self-refinement. An
+                        embodied agent instead acts in a stateful simulator, scores only through noisy multi-episode
+                        rollouts, and leans on long traces of observations, actions, and planner calls, with no ready
+                        palette of composable embodied primitives to draw on. So we take the first step in
+                        <em>method-seeded</em> form. Each search starts from a published agent such as MapGPT, SmartWay,
+                        ExploreEQA, or VoxPoser, and edits its graph rather than building one from scratch.</p>
+                    <p data-eid="p-mot-3">To make those agents searchable, <strong>AgentCanvas</strong> hosts each as
+                        an editable typed graph, and the search runs as a <strong>coding-agent session</strong> rather
+                        than a single in-context LLM call. A real embodied codebase has to be navigated and edited like
+                        code, not emitted as text in one shot. Each iteration proposes a graph edit, applies it, and
+                        scores it on a simulator rollout. Three optimizers share this harness. <strong>KDLoop</strong>
+                        is our evidence-driven variant, cycling through propose, critique, experiment, distill, and
+                        reflect, while ADAS and AFlow are lifted from their original single-call workflow search into
+                        the same coding-agent setting.</p>
+                    <p data-eid="p-mot-4">This is <strong>not a leaderboard</strong>. We contribute a
+                        <strong>methodology</strong> that uses an off-the-shelf coding agent to carry the architecture
+                        search, a first step toward our ultimate goal of embodied agents designed and optimized by
+                        artificial intelligence rather than by hand. We also characterize what such a search must
+                        overcome in the embodied setting, seen as a conceptual ML-like optimizer. It can stall in
+                        <strong class="accent">local optima</strong>, much as hill climbing does. Its signal can be lost
+                        in the <strong class="accent">evaluation noise</strong> of embodied rollouts. And most
+                        fundamentally, <strong class="accent">credit assignment</strong> has no gradient to rely on.</p>
+                </section>
+
+                <!-- ===== 02 GAINS (lead with results) ===== -->
+                <section id="gains">
+                    <div class="eyebrow"><span class="port"></span>02 — does it work?</div>
+                    <h2 data-eid="h2-1">Searched architectures, deployable gains</h2>
+                    <p data-eid="p-3">Across navigation, embodied question answering, and manipulation, the coding-agent
+                        search setup finds <strong>rerun-confirmed gains on published executors</strong>. Each gain
+                        comes from a chain of graph edits the coding agent proposed, ran, and verified, every edit built
+                        on the one before it. The deltas below are <strong>three-pass reruns</strong>, not single-pass
+                        best-iteration peaks.</p>
+                    <div class="result-strip">
+                        <div class="gaincard"><div class="exec">MapGPT</div><div class="dom">navigation · MP3D</div><div class="delta">+7.6</div><div class="from">46.9 → 54.5 SR</div><div class="by">via stop / anti-revisit + deadband</div></div>
+                        <div class="gaincard"><div class="exec">ExploreEQA</div><div class="dom">EQA · HM-EQA</div><div class="delta">+4.7</div><div class="from">43.0 → 47.7 SR</div><div class="by">via VLM prompt</div></div>
+                        <div class="gaincard"><div class="exec">SmartWay</div><div class="dom">navigation · CE</div><div class="delta">+4.0</div><div class="from">29.7 → 33.7 SR</div><div class="by">via vote planner + stop-gate</div></div>
+                        <div class="gaincard"><div class="exec">VoxPoser</div><div class="dom">manipulation · LIBERO</div><div class="delta">+3.9</div><div class="from">9.0 → 12.9 SR</div><div class="by">via retry + bounds</div></div>
+                    </div>
+                    <p data-eid="p-4" style="margin-top:22px;font-size:.95rem;color:var(--muted)">Gains are clearest when the dominant
+                        failure mode lives inside the editable graph. One apparent <span class="accent">+9.0</span>
+                        SmartWay candidate is rejected as <strong>leak-bearing</strong>. It wired the evaluator's
+                        ground-truth signal into the planner. Honesty about that is part of the result.</p>
+                </section>
+
+                <!-- ===== 03 SUBSTRATE ===== -->
+                <section id="system">
+                    <div class="eyebrow"><span class="port teal"></span>03 — agentcanvas · in brief</div>
+                    <h2 data-eid="h2-3">A typed-graph substrate for embodied agents</h2>
+                    <p data-eid="p-7">AgentCanvas factors any embodied workflow into <strong class="accent-t">typed nodes</strong>
+                        (perception, memory, planning, action, LLM reasoners, neural policies) joined by
+                        <strong class="accent-t">typed wires</strong>, port to port. A loop is just a back-edge &mdash; no
+                        Python control flow needed &mdash; so the same recipe expresses MapGPT, VoxPoser, ExploreEQA, and
+                        SmartWay by dropping the right nodes and wiring their ports. The runtime is simulator-aware:
+                        instead of a global lockstep barrier, elastic foundation-model batching lets workers proceed
+                        independently, lifting throughput from "slowest module" to per-worker speed.</p>
+                    <figure class="node figure padimg">
+                        <div class="node__bar"><span class="tdot t"></span><span style="margin-left:2px">substrate</span><span class="grow">graph + nodeset · execution model</span></div>
+                        <img src="substrate.png" alt="AgentCanvas typed-graph substrate, with sync-lockstep vs per-module-contract execution.">
+                        <figcaption data-eid="figcaption-2" class="caption"><span class="ico">◆</span><span>Any embodied workflow factors into
+                            typed nodes and wires, with a loop as a back-edge (left). A naive sync-lockstep eval idles fast
+                            workers on the slowest module; AgentCanvas's per-module contract batches foundation-model calls so
+                            throughput tracks per-worker speed, not the straggler (right).</span></figcaption>
+                    </figure>
+                    <figure class="node figure">
+                        <div class="node__bar"><span class="tdot b"></span><span style="margin-left:2px">editor.canvas</span><span class="grow">node-and-wire program · episode logs</span></div>
+                        <img src="canvas-ui.png" alt="The AgentCanvas editor showing an executor as a node-and-wire program.">
+                        <figcaption data-eid="figcaption-3" class="caption"><span class="ico">◆</span><span>The editor &mdash; an embodied executor
+                            hosted as an editable node-and-wire program with simulator-aware execution and episode-level
+                            logs.</span></figcaption>
+                    </figure>
+                    <div class="node" style="margin-top:24px;padding:18px 20px;display:flex;flex-wrap:wrap;align-items:center;gap:14px;justify-content:space-between">
+                        <span style="font-family:var(--mono);font-size:.95rem;color:#cdd4e4">This is a brief intro. AgentCanvas is a platform in its own right &mdash; see it in full:</span>
+                        <span style="display:flex;gap:10px;flex-wrap:wrap">
+                            <a class="btn primary" href="index.html"><span class="pdot"></span>AgentCanvas project page&nbsp;&rarr;</a>
+                            <a class="btn" href="https://jianzhou0420.github.io/AgentCanvas/" target="_blank" rel="noopener"><span class="pdot"></span>Documentation&nbsp;&rarr;</a>
+                        </span>
+                    </div>
+                </section>
+
+                <!-- ===== 04 THE OPTIMIZER ===== -->
+                <section id="loop">
+                    <div class="eyebrow"><span class="port"></span>04 — the optimizer</div>
+                    <h2 data-eid="h2-4">The optimizer is an off-the-shelf coding agent</h2>
+                    <p data-eid="p-8">A conventional embodied agent is a hand-built stack of perception, mapping, planning,
+                        and action. AgentCanvas hosts that same agent as an <strong class="accent-t">editable typed
+                        graph</strong>, a workspace of graph JSON, node code, prompts, and episode logs. Improving one means
+                        reading those files, diagnosing failed rollouts, and editing both the graph and the node code, so the
+                        optimizer is an <strong class="accent">off-the-shelf coding agent</strong> searching over the real
+                        codebase. The engineering stays thin. The whole harness is shared across variants, from the
+                        <strong>orchestrator</strong> that runs the loop to the implementer and the evaluator. Only the
+                        <strong>proposer</strong> and its <strong>persistent memory</strong> differ, so each ported algorithm
+                        is reproduced faithfully under one controlled comparison.</p>
+                    <figure class="node figure padimg">
+                        <div class="node__bar"><span class="tdot a"></span><span style="margin-left:2px">harness.loop</span><span class="grow">proposer · implementer · evaluator</span></div>
+                        <img src="harness.png" alt="The shared coding-agent harness and its contract-pinned files layout.">
+                        <figcaption data-eid="figcaption-4" class="caption"><span class="ico">◆</span><span>AAS-specific proposer artifacts (red),
+                            AAS-agnostic workers and universal outputs (green), and an orchestrator (blue) write a
+                            contract-pinned layout every iteration; only the proposer is variant-specific.</span></figcaption>
+                    </figure>
+                </section>
+
+                <!-- ===== 05 PROPOSERS ===== -->
+                <section id="proposers">
+                    <div class="eyebrow"><span class="port violet"></span>05 — three proposers, one harness</div>
+                    <h2 data-eid="h2-5">Same loop, different search minds</h2>
+                    <p data-eid="p-9">All three optimizers plug into the identical harness. <strong>Only the proposer and its
+                        persistent memory differ.</strong> No optimizer dominates, and they concentrate on different
+                        intervention axes.</p>
+                    <div class="port-callout"><strong>ADAS<span class="pm">↻</span> and AFlow<span class="pm">↻</span> are
+                        not the original systems.</strong> We reimplemented both, lifting them from their native
+                        <em>LLM-core iteration</em> &mdash; a meta-agent that edits prompt / workflow <em>text</em> &mdash;
+                        into <em>coding-agent sessions</em> that edit the executor's real code and typed graph inside our
+                        shared harness. Only KDLoop is native. The <span class="pm">↻</span> mark flags a port wherever it
+                        appears on this page.</div>
+                    <div class="proposer-grid">
+                        <div class="pcard">
+                            <div class="ptop"><span class="pname">ADAS<span class="pm" title="Our port — LLM-core iteration → coding-agent session">↻</span></span><span class="ptag">our port</span></div>
+                            <div class="pref">after Hu et al., Automated Design of Agentic Systems</div>
+                            <p data-eid="p-10">A <strong>Reflexion-style</strong> proposer conditioned on a
+                                <strong>flat, append-only archive</strong>, with bootstrap-CI fitness. Each original proposal
+                                call runs as its own tool-augmented sub-agent, so the port keeps the method's sampling
+                                diversity.</p>
+                            <div class="axisrow"><span class="ax">topology</span><span class="ax">model-cfg</span></div>
+                        </div>
+                        <div class="pcard">
+                            <div class="ptop"><span class="pname">AFlow<span class="pm" title="Our port — LLM-core iteration → coding-agent session">↻</span></span><span class="ptag">our port</span></div>
+                            <div class="pref">after Zhang et al., AFlow: Automating Agentic Workflow Generation</div>
+                            <p data-eid="p-11">Selects a parent candidate by <strong>score-softmax</strong> and proposes a
+                                structural edit, with <strong>anti-replay memory</strong> and injected success and failure
+                                experience. The port searches free-form graph edits where the original composed text-workflow
+                                operators.</p>
+                            <div class="axisrow"><span class="ax">observation</span><span class="ax">prompt</span></div>
+                        </div>
+                        <div class="pcard ours">
+                            <div class="ptop"><span class="pname">KDLoop</span><span class="ptag">ours</span></div>
+                            <div class="pref">This work · Think / Critic / Experiment / Distill (+ Reflect)</div>
+                            <p data-eid="p-12">A search loop that <strong>distills</strong> each iteration into a typed
+                                <strong>knowledge base</strong>, built for the embodied setting where every iteration yields
+                                more than a scalar score. The search accumulates knowledge of what works and what fails rather
+                                than maximizing a single noisy number.</p>
+                            <div class="axisrow"><span class="ax">obs</span><span class="ax">prompt</span><span class="ax">control</span><span class="ax">state-mem</span></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ===== 06 SEARCH TREE (centerpiece) ===== -->
+                <section id="search">
+                    <div class="eyebrow"><span class="port"></span>06 — the search, made visible</div>
+                    <h2 data-eid="h2-2">Search-time, iteration by iteration</h2>
+                    <p data-eid="p-5">Pick an executor and an optimizer. <strong>Every committed iteration</strong> is a node,
+                        in search order left to right, and its height is the <strong>single-pass</strong> success-rate change
+                        over the shared baseline, the search-time fitness the optimizer selects on. Reverts and probes are
+                        flagged, and the load-bearing best is ringed. <strong>Click any node</strong> to read what changed.
+                        Across cells you will see improvement, plateau, and noisy best-selection.</p>
+
+                    <div class="tree-controls">
+                        <div class="ctl"><span class="clabel">executor</span>
+                            <div class="seg" id="seg-exec">
+                                <button data-v="MapGPT" class="on">MapGPT</button>
+                                <button data-v="ExploreEQA">ExploreEQA</button>
+                                <button data-v="SmartWay">SmartWay</button>
+                                <button data-v="VoxPoser">VoxPoser</button>
+                            </div>
+                        </div>
+                        <div class="ctl"><span class="clabel">optimizer</span>
+                            <div class="seg" id="seg-opt">
+                                <button data-v="ADAS">ADAS<span class="pm" title="Our port — reimplemented from LLM-core iteration into a coding-agent session">↻</span></button>
+                                <button data-v="AFlow">AFlow<span class="pm" title="Our port — reimplemented from LLM-core iteration into a coding-agent session">↻</span></button>
+                                <button data-v="KDLoop" class="on ours">KDLoop</button>
+                            </div>
+                        </div>
+                        <div class="port-note"><b>↻</b> = our port: ADAS / AFlow reimplemented from LLM-core iteration into a coding-agent session. KDLoop is native.</div>
+                    </div>
+
+                    <div class="tree-stage">
+                        <div class="tree-svg-wrap">
+                            <div class="ttitle"><span class="tdot a"></span><b id="tree-name">KDLoop × MapGPT</b>
+                                <span class="best" id="tree-best">best +9.5 pp</span></div>
+                            <svg id="tree-svg" viewBox="0 0 640 340" preserveAspectRatio="xMidYMid meet" role="img"
+                                aria-label="Search trajectory tree"></svg>
+                        </div>
+                        <figure class="node tree-inspector" aria-live="polite">
+                            <div class="node__bar"><span class="tdot a"></span><span style="margin-left:2px">iter inspector</span><span class="grow">// node</span></div>
+                            <div class="node__body">
+                                <div class="ti-iter" id="ti-iter">iter_8</div>
+                                <div class="ti-delta accent" id="ti-delta">+9.5</div>
+                                <div class="ti-sub" id="ti-sub">pp vs shared baseline · best</div>
+                                <div class="ti-lbl">what changed</div>
+                                <div class="ti-mech" id="ti-mech">—</div>
+                                <div class="ti-flags" id="ti-flags"></div>
+                            </div>
+                        </figure>
+                    </div>
+                    <div class="tree-legend">
+                        <span><i class="lg-gain"></i> gain</span>
+                        <span><i class="lg-faint"></i> small gain</span>
+                        <span><i class="lg-reg"></i> regression</span>
+                        <span><i class="lg-best"></i> load-bearing best</span>
+                        <span><i class="lg-leak"></i> leak-bearing</span>
+                        <span><i class="lg-rev"></i> revert / probe / no-op</span>
+                    </div>
+                    <p data-eid="p-6" style="margin-top:18px;font-size:.92rem;color:var(--muted)">A best iteration is the maximum
+                        over a sequence of noisy single-pass estimates, so it can overstate a candidate's true value. That is
+                        why the search-time peaks here usually run higher than the rerun-confirmed gains in
+                        <a href="#results" style="color:var(--amber-2);text-decoration:none">the matrix</a>, and why selection
+                        and confirmation are not interchangeable. Every committed iteration is shown here, with deeper
+                        per-cell detail in the appendix.</p>
+                </section>
+
+                <!-- ===== 07 RESULTS MATRIX ===== -->
+                <section id="results">
+                    <div class="eyebrow"><span class="port"></span>07 — the 3×4 matrix</div>
+                    <h2 data-eid="h2-6">Confirmation-time, cell by cell</h2>
+                    <p data-eid="p-13"><strong>Hover or tap a cell</strong> to inspect the surviving change and the intervention axes it
+                        touched. &Delta;SR is the mean gain in percentage points over a <strong>three-pass rerun</strong>. These are the
+                        confirmed heights. The single-pass trajectories that selected them are in the
+                        <a href="#search" style="color:var(--amber-2);text-decoration:none">search tree</a> above.</p>
+                    <div class="matrix-shell">
+                        <div>
+                            <div class="matrix-wrap">
+                                <table class="matrix" aria-label="3 by 4 optimizer by executor delta success-rate matrix">
+                                    <thead>
+                                        <tr><th class="exec">executor \ optimizer</th><th>ADAS<span class="pm" title="Our port — coding-agent session">↻</span></th><th>AFlow<span class="pm" title="Our port — coding-agent session">↻</span></th><th>KDLoop</th></tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td class="exec">MapGPT<small>base 46.9 · VLN</small></td>
+                                            <td class="cell s-low" tabindex="0" data-coord="MapGPT × ADAS" data-delta="+2.2" data-best="49.1±3.2 SR" data-change="Step-Back distill + STOP-advisor wire + landmark gate + landmark-prompt sharpen." data-axes="state-memory|topology|prompt">+2.2</td>
+                                            <td class="cell s-strong sel" tabindex="0" data-coord="MapGPT × AFlow" data-delta="+7.6" data-best="54.5±3.1 SR" data-change="Stop / anti-revisit rules + elevation deadband." data-axes="prompt|observation">+7.6</td>
+                                            <td class="cell s-strong" tabindex="0" data-coord="MapGPT × KDLoop" data-delta="+7.1" data-best="54.0±2.3 SR" data-change="Heading-band action gate + stop_after 3→5." data-axes="observation|control">+7.1</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="exec">ExploreEQA<small>base 43.0 · EQA</small></td>
+                                            <td class="cell s-none" tabindex="0" data-coord="ExploreEQA × ADAS" data-delta="—" data-best="no rerun-confirmed gain" data-change="No iteration beat the baseline — the lever is not at the graph layer." data-axes="—">—</td>
+                                            <td class="cell s-mid" tabindex="0" data-coord="ExploreEQA × AFlow" data-delta="+4.7" data-best="47.7±2.1 SR" data-change="VLM single-letter prompt rewrite." data-axes="prompt">+4.7</td>
+                                            <td class="cell s-mid" tabindex="0" data-coord="ExploreEQA × KDLoop" data-delta="+3.0" data-best="46.0±1.0 SR" data-change="Bayesian prior + sentinel MCQ filter + “A/B/C/D-only”." data-axes="state-memory|prompt">+3.0</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="exec">SmartWay<small>base 29.7 · VLN</small></td>
+                                            <td class="cell s-mid" tabindex="0" data-coord="SmartWay × ADAS" data-delta="+4.0" data-best="33.7±2.5 SR" data-change="Plurality-vote planner (n=3) + Stop-Gate." data-axes="model-config|topology">+4.0</td>
+                                            <td class="cell s-leak" tabindex="0" data-coord="SmartWay × AFlow" data-delta="+9.0 †" data-best="38.7±5.9 SR · excluded" data-change="Progress-tracker wired to the evaluator — a LEAK. Excluded from deployable gains; retained as a diagnostic failure mode." data-axes="topology|state-memory">+9.0<span class="mark">†</span></td>
+                                            <td class="cell s-low" tabindex="0" data-coord="SmartWay × KDLoop" data-delta="+1.3" data-best="31.0±4.6 SR" data-change="STOP-lexicon history accumulator." data-axes="state-memory">+1.3</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="exec">VoxPoser<small>base 9.0 · manip</small></td>
+                                            <td class="cell s-mid" tabindex="0" data-coord="VoxPoser × ADAS" data-delta="+3.7" data-best="12.7±0.0 SR" data-change="Composer rewrites + execution-loop tuning." data-axes="model-config|action">+3.7</td>
+                                            <td class="cell s-mid" tabindex="0" data-coord="VoxPoser × AFlow" data-delta="+3.9" data-best="12.9±0.5 SR" data-change="GPT-4o composer swap + retry loop + workspace bounds." data-axes="model-config|control|observation">+3.9</td>
+                                            <td class="cell s-exit" tabindex="0" data-coord="VoxPoser × KDLoop" data-delta="— ‡" data-best="substrate exit · no mutation" data-change="Detected the shared VoxPoser logging fault, diagnosed it below the graph layer, and terminated without mutating." data-axes="—">—<span class="mark">‡</span></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="legend">
+                                <span><i class="lg-strong2"></i> deployable gain</span>
+                                <span><i class="lg-mid2"></i> directional</span>
+                                <span><i class="lg-leak2"></i> † leak-bearing</span>
+                                <span><i class="lg-exit2"></i> ‡ substrate exit</span>
+                                <span><i class="lg-none2"></i> — no graph lever</span>
+                            </div>
+                        </div>
+                        <figure class="node readout" aria-live="polite">
+                            <div class="node__bar"><span class="tdot a"></span><span style="margin-left:2px">inspector</span><span class="grow">// cell</span></div>
+                            <div class="node__body">
+                                <div class="ro-coord" id="ro-coord">MapGPT × AFlow</div>
+                                <div class="ro-delta accent" id="ro-delta">+7.6</div>
+                                <div class="ro-best" id="ro-best">54.5±3.1 SR</div>
+                                <div class="ro-label">surviving change</div>
+                                <div class="ro-change" id="ro-change">Stop / anti-revisit rules + elevation deadband.</div>
+                                <div class="ro-label">intervention axes</div>
+                                <div class="ro-axes" id="ro-axes"></div>
+                            </div>
+                        </figure>
+                    </div>
+                </section>
+
+                <!-- ===== 08 EXECUTORS ===== -->
+                <section id="executors">
+                    <div class="eyebrow"><span class="port teal"></span>08 — coverage</div>
+                    <h2 data-eid="h2-7">Four executors, three task families</h2>
+                    <p data-eid="p-14">The matrix spans four published systems with different geometric, perceptual, and control demands,
+                        so a gain on one is not a one-trick artifact. Each runs unchanged as an AgentCanvas graph, and
+                        search starts from its own frozen baseline.</p>
+                    <div class="exec-grid">
+                        <div class="ecard vln"><div class="eclip"><div class="eclip-ph">▶ env clip</div><video src="exec/mapgpt.mp4" autoplay muted loop playsinline preload="metadata"></video></div><div class="en">MapGPT</div><div class="efam vln">vision-language nav</div><div class="ebench"><b>Matterport3D</b> · discrete<br>topological-map LLM planner</div><div class="ebase">frozen baseline <b>46.9</b> SR</div></div>
+                        <div class="ecard vln"><div class="eclip"><div class="eclip-ph">▶ env clip</div><video src="exec/smartway.mp4" autoplay muted loop playsinline preload="metadata"></video></div><div class="en">SmartWay</div><div class="efam vln">vision-language nav</div><div class="ebench"><b>VLN-CE</b> · Habitat<br>waypoint-predictor planner</div><div class="ebase">frozen baseline <b>29.7</b> SR</div></div>
+                        <div class="ecard eqa"><div class="eclip"><div class="eclip-ph">▶ env clip</div><video src="exec/exploreeqa.mp4" autoplay muted loop playsinline preload="metadata"></video></div><div class="en">ExploreEQA</div><div class="efam eqa">embodied QA</div><div class="ebench"><b>HM-EQA</b> on HM3D<br>frontier exploration + VLM scoring</div><div class="ebase">frozen baseline <b>43.0</b> SR</div></div>
+                        <div class="ecard man"><div class="eclip"><div class="eclip-ph">▶ env clip</div><video src="exec/voxposer.mp4" autoplay muted loop playsinline preload="metadata"></video></div><div class="en">VoxPoser</div><div class="efam man">manipulation</div><div class="ebench"><b>LIBERO</b> · four suites<br>zero-shot LMP + voxel value maps</div><div class="ebase">frozen baseline <b>9.0</b> SR</div></div>
+                    </div>
+                </section>
+
+                <!-- ===== 09 LIMITS ===== -->
+                <section id="limits">
+                    <div class="eyebrow"><span class="port"></span>09 — honest limits</div>
+                    <h2 data-eid="h2-8">What embodied AAS must still handle</h2>
+                    <p data-eid="p-15">Moving architecture search from text programs to perceptual agents acting in 3D exposes three
+                        constraints that stay muted in text-domain AAS. Each is a requirement for the work that follows.</p>
+                    <div class="findings">
+                        <div class="finding"><span class="n">C1</span><div><h3 data-eid="h3-1">Evaluation noise</h3>
+                            <p data-eid="p-16">A best iteration is the maximum over noisy single-pass scores, so it can overstate a
+                                candidate's true value. Variance-overlapping gains are reported as <em>directional</em>,
+                                not confirmed, and every gain is rerun over a three-pass floor.</p></div></div>
+                        <div class="finding"><span class="n">C2</span><div><h3 data-eid="h3-2">Local edit basins</h3>
+                            <p data-eid="p-17">Once a high-scoring pathway is found, search tends to stay near the same mechanism rather
+                                than cover the editable space. Embodied AAS needs memory over the structure of attempted
+                                edits, not just over scalar scores, and it has to reason over that memory to design a
+                                genuinely new experiment instead of resampling the same basin.</p></div></div>
+                        <div class="finding"><span class="n">C3</span><div><h3 data-eid="h3-3">Partial credit assignment</h3>
+                            <p data-eid="p-18">The harness exposes per-episode logs and every optimizer knows they are there, yet the ported
+                                variants keep optimizing the scalar score. Future embodied AAS should make attribution a
+                                first-class step.</p></div></div>
+                    </div>
+                </section>
+
+                <!-- ===== 10 CITE ===== -->
+                <section id="cite">
+                    <div class="eyebrow"><span class="port blue"></span>10 — cite</div>
+                    <h2 data-eid="h2-9">Citation</h2>
+                    <div class="cite-box">
+                        <button class="copy" onclick="copyCite()">copy</button>
+                        <pre id="cite-text">@inproceedings{anonymous2026agentcanvas,
+  title     = {Automating the Design of Embodied Agent Architectures},
+  author    = {Anonymous},
+  booktitle = {Submitted to the Conference on Robot Learning (CoRL)},
+  year      = {2026},
+  note      = {Under review}
+}</pre>
+                    </div>
+                </section>
+
+                <footer>
+                    <span>&copy; 2026 Jian Zhou</span>
+                    <span>built on the AgentCanvas — node-and-wire by design</span>
+                </footer>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        // ===================== Search-tree data (full per-iter, from exp/RESULTS.md §3) =====================
+        // d = search-time Δ (pp) = single-pass primary SR − shared-baseline mean; p = previous iter (search order)
+        const CELLS = {
+            "ADAS/MapGPT": { best: "+5.9", nodes: [
+                { i: 0, p: null, ax: "baseline", d: -1.5, m: "MapGPT baseline (mapgpt_mp3d frozen workspace)" },
+                { i: 1, p: 0, ax: "", d: 0.8, m: "Step-Back Navigation Principles" },
+                { i: 2, p: 1, ax: "", d: 0.8, m: "STOP-Critic Veto Gate" },
+                { i: 3, p: 2, ax: "", d: 2.2, m: "Soft STOP-Critic Advisor" },
+                { i: 4, p: 3, ax: "", d: -6.2, m: "STOP-Decision Self-Consistency with Decision-Faithful Injection" },
+                { i: 5, p: 4, ax: "", d: 1.7, m: "Step-Back with Sharpened STOP Criterion" },
+                { i: 6, p: 5, ax: "", d: -1.5, m: "Planner Action Self-Consistency" },
+                { i: 7, p: 6, ax: "", d: 1.2, m: "Computed Landmark-Progress Gauge" },
+                { i: 8, p: 7, ax: "", d: -4.3, m: "Visually-Grounded Same-Step STOP Evidence" },
+                { i: 9, p: 8, ax: "", d: 5.9, best: true, m: "Landmark-Keyword-Sharpened Step-Back Distillation" },
+                { i: 10, p: 9, ax: "", d: -1.5, m: "Final-STOP-Decision-Sharpened Planner System Prompt" },
+                { i: 11, p: 10, ax: "", d: -4.3, m: "Self-Built Observation Memory" },
+                { i: 12, p: 11, ax: "", d: -1.1, m: "Ordinal Sub-Goal Cursor" },
+                { i: 13, p: 12, ax: "", d: -2.5, m: "Contrastive Confusable-Landmark Distillation" },
+                { i: 14, p: 13, ax: "", d: 0.8, m: "Self-Checking STOP Option" },
+                { i: 15, p: 14, ax: "", d: 0.8, m: "Binary Explore-or-Arrive Option Frame" },
+                { i: 16, p: 15, ax: "", d: 0.8, m: "Direction-Cued Option Annotation" },
+                { i: 17, p: 16, ax: "", d: 4.0, m: "Trajectory-Anchored Arrival Gauge" },
+                { i: 18, p: 17, ax: "", d: 0.8, m: "Sparse Asymmetric Arrival Cue" },
+                { i: 19, p: 18, ax: "", d: 3.1, m: "Scene-Captioned Navigable Options" },
+                { i: 20, p: 19, ax: "", d: 4.0, m: "Sub-Goal Relevance-Ranked Option Highlight" },
+            ]},
+            "AFlow/MapGPT": { best: "+9.6", nodes: [
+                { i: 0, p: null, ax: "baseline", d: 3.6, m: "MapGPT-MP3D baseline (frozen)" },
+                { i: 1, p: 0, ax: "", d: -0.6, m: "Raise STOP availability threshold from step 3 to step 4 (build_opti..." },
+                { i: 2, p: 1, ax: "", d: 2.6, m: "Inject commit-to-stop, anti-revisit, and progress-tracking rules in..." },
+                { i: 3, p: 2, ax: "", d: -4.3, m: "Replace iter_2 rule block with single visual-grounding stop check" },
+                { i: 4, p: 3, ax: "", d: -4.3, m: "update_history: tag revisits + oscillation warnings from topo_map ..." },
+                { i: 5, p: 4, ax: "", d: 5.0, m: "Tag revisits + oscillation warnings on baseline prompt (port iter_..." },
+                { i: 6, p: 5, ax: "", d: 5.9, m: "iter_6: revisit/oscillation history tags on top of iter_2's DECISI..." },
+                { i: 7, p: 6, ax: "", d: 3.6, m: "Stepify trajectory text — arrows + explicit 'you are here' marker" },
+                { i: 8, p: 7, ax: "", d: 3.1, m: "iter_8: stepified trajectory text on iter_6 (DECISION RULES + tags..." },
+                { i: 9, p: 8, ax: "", d: -1.1, m: "Sub-Instructions checklist field — structural clause decomposition..." },
+                { i: 10, p: 9, ax: "", d: 1.2, m: "Content-rich STOP option label" },
+                { i: 11, p: 10, ax: "", d: 5.4, m: "Relax over-strict stop criteria in planner prompt to recover oracl..." },
+                { i: 12, p: 11, ax: "", d: 5.4, m: "mapgpt: persist sub-step progress checklist across steps" },
+                { i: 13, p: 12, ax: "", d: 8.7, m: "mapgpt: ignore elevation noise in candidate direction labeling" },
+                { i: 14, p: 13, ax: "", d: 9.6, best: true, m: "Stack iter_13 elevation-deadband bug-fix on iter_11's state (relax..." },
+                { i: 15, p: 14, ax: "", d: 4.0, m: "parse_action: hard veto STOP at step_count < 5" },
+                { i: 16, p: 15, ax: "", d: -3.8, m: "Stack iter_5 revisit/oscillation tags on iter_13's deadband (no DE..." },
+                { i: 17, p: 16, ax: "", d: 7.7, m: "Stack iter_13 elevation-deadband bug-fix onto iter_6's strict DECI..." },
+                { i: 18, p: 17, ax: "", d: 5.4, m: "iter_13 deadband + iter_2 DECISION RULES (no tags) — minimal-polic..." },
+                { i: 19, p: 18, ax: "", d: 5.9, m: "iter_13 deadband + iter_11 RELAXED DECISION RULES only (no tags) —..." },
+                { i: 20, p: 19, ax: "", d: 3.1, m: "build_options: annotate each Action option with its visit-state" },
+            ]},
+            "KDLoop/MapGPT": { best: "+9.5", nodes: [
+                { i: 0, p: null, ax: "baseline", d: -2.0, m: "MapGPT-MP3D frozen baseline." },
+                { i: 3, p: 0, ax: "control+model-config", d: -0.6, m: "build_options.stop_after 3→5 (control-flow probe)." },
+                { i: 4, p: 3, ax: "topology", d: 4.5, m: "Soft STOP-Critic advisor topology, a parallel-track probe (not promoted)." },
+                { i: 5, p: 4, ax: "prompt+topology", d: 1.7, m: "Topology re-seed plus a prompt-content variant on the stop-verifier stack." },
+                { i: 6, p: 5, ax: "observation+prompt", d: 9.1, m: "Heading-band taxonomy in _get_action_concept, six bands behind a 15° elevation gate." },
+                { i: 7, p: 6, ax: "observation", d: 5.9, m: "Compound probe on the heading-band taxonomy (refuted non-additivity)." },
+                { i: 8, p: 7, ax: "observation+state-memory", d: 9.6, best: true, m: "'turn around' to 'backtrack' in the taxonomy plus build_options.stop_after 3→5." },
+                { i: 9, p: 8, ax: "observation", d: 6.8, m: "Combine iter_8's taxonomy with the iter_8_B state-memory edit (refuted)." },
+            ]},
+            "ADAS/SmartWay": { best: "+6.3", nodes: [
+                { i: 0, p: null, ax: "baseline", d: -1.7, m: "SmartWay-CE baseline" },
+                { i: 1, p: 0, ax: "", d: -0.7, m: "Goal-Recognition Stop-Gate with Hysteresis" },
+                { i: 2, p: 1, ax: "", d: -10.7, m: "Checkpoint-Grounded Navigator" },
+                { i: 3, p: 2, ax: "", d: -1.7, revert: true, m: "Revert Checkpoint Enricher, Keep Stop-Gate" },
+                { i: 4, p: 3, ax: "", d: -7.7, m: "Backtrack-Aware Planner Hint" },
+                { i: 5, p: 4, ax: "", d: -5.7, revert: true, m: "Full Revert to Baseline" },
+                { i: 6, p: 5, ax: "", d: -7.7, m: "Triple-Sample Plurality-Vote Planner" },
+                { i: 7, p: 6, ax: "", d: -19.7, m: "Tag-Anchored Veto Critic v2" },
+                { i: 8, p: 7, ax: "", d: -7.7, m: "Stop-Gate Restoration" },
+                { i: 9, p: 8, ax: "", d: -12.7, noop: true, m: "No-Op Variance Estimation (Self-Replicate iter_8)" },
+                { i: 10, p: 9, ax: "", d: -13.7, m: "Baseline Triangulation (third sample of iter_0 shape)" },
+                { i: 11, p: 10, ax: "", d: -4.7, m: "Vision-Grounded Strong-Model Arrival Critic" },
+                { i: 12, p: 11, ax: "", d: 1.3, m: "Self-Consistent Arrival Critic with Quoted-Frame Evidence" },
+                { i: 13, p: 12, ax: "", d: 2.3, m: "Confidence-Thresholded Arrival Critic" },
+                { i: 14, p: 13, ax: "", d: 1.3, m: "Hybrid Gate Arrival Critic — Count-OR-Threshold Disjunction" },
+                { i: 15, p: 14, ax: "", d: -0.7, m: "Count-Branch Floor Lift" },
+                { i: 16, p: 15, ax: "", d: -8.7, m: "Resurrect Arrival Critic (planner-class max_tokens, n=1)" },
+                { i: 17, p: 16, ax: "", d: -1.7, m: "Path-Completion Arrival Critic with Step-Gate and 2-Step Persistence" },
+                { i: 18, p: 17, ax: "", d: 6.3, best: true, m: "Discrete-Action Self-Consistency Planner (n=3 + plurality vote, sin..." },
+                { i: 19, p: 18, ax: "", d: -2.7, m: "n=5 batched vote + anti-stagnation tie-break (last_picked_index pro..." },
+                { i: 20, p: 19, ax: "", d: -2.7, revert: true, m: "iter_18 Reproducibility Check (revert to n=3 batched vote, sample-0..." },
+            ]},
+            "AFlow/SmartWay": { best: "+13.3", leakcell: true, nodes: [
+                { i: 0, p: null, ax: "baseline", d: 2.3, m: "SmartWay-CE baseline (Phase-2 decomp)" },
+                { i: 1, p: 0, ax: "", d: -5.7, m: "Self-consistency + parse-failure non-stop fallback" },
+                { i: 2, p: 1, ax: "", d: -0.7, m: "Dedicated STOP critic LLM node" },
+                { i: 3, p: 2, ax: "", d: -4.7, m: "Landmark-grounded action critic" },
+                { i: 4, p: 3, ax: "", d: 0.3, m: "Confidence-gated critic + STOP re-fire" },
+                { i: 5, p: 4, ax: "", d: 6.3, leak: true, m: "Inject distance-to-goal progress hint" },
+                { i: 6, p: 5, ax: "", d: 2.3, leak: true, m: "Multi-signal deterministic prompt hints" },
+                { i: 7, p: 6, ax: "", d: -0.7, m: "Sharpen dtg hint wording" },
+                { i: 8, p: 7, ax: "", d: -0.7, m: "Deterministic target-landmark hint" },
+                { i: 9, p: 8, ax: "", d: 9.3, m: "Drop revisit detection from iter_6 hint" },
+                { i: 10, p: 9, ax: "", d: -2.7, m: "Last-picked-letter motion hint" },
+                { i: 11, p: 10, ax: "", d: 13.3, best: true, leak: true, m: "Stall-counter replaces revisit" },
+                { i: 12, p: 11, ax: "", d: 11.3, m: "Escalate stall directive at steps_since≥5" },
+                { i: 13, p: 12, ax: "", d: 9.3, m: "Median-5 trail readout" },
+                { i: 14, p: 13, ax: "", d: 5.3, m: "Per-candidate geometry summary line" },
+                { i: 15, p: 14, ax: "", d: 1.3, m: "Mean forward progress readout" },
+                { i: 16, p: 15, ax: "", d: 1.3, m: "iter_12 + candidates summary" },
+                { i: 17, p: 16, ax: "", d: 0.3, m: "Reorder options by forward-heading" },
+                { i: 18, p: 17, ax: "", d: 8.3, m: "Bump step_budget 15→20" },
+                { i: 19, p: 18, ax: "", d: 11.3, m: "Hybrid trail (last-3 + median-5)" },
+            ]},
+            "KDLoop/SmartWay": { best: "+1.3", nodes: [
+                { i: 0, p: null, ax: "baseline", d: -0.7, m: "SmartWay-CE frozen baseline." },
+                { i: 4, p: 0, ax: "prompt+control", d: -10.7, m: "Escalate the anti-anchor STOP-discourage prompt to the full eval (prompt-content, refuted)." },
+                { i: 5, p: 4, ax: "observation", d: -1.7, m: "Inject a current-view perception tag into the planner prompt (observation-pipeline, refuted)." },
+                { i: 6, p: 5, ax: "state-memory+control", d: -1.7, m: "considered_stop_signals self-deliberation annotation, a silent no-op (undeclared state key)." },
+                { i: 7, p: 6, ax: "state-memory", d: 1.3, best: true, m: "Fix-and-retry: declare the state key and carry the STOP-lexicon history annotation." },
+                { i: 8, p: 7, ax: "state-memory", d: 1.3, m: "Three-pass confirmation re-run of iter_7's state-memory overlay." },
+                { i: 9, p: 8, ax: "action", d: -2.7, m: "Add BACKTRACK as a first-class action-menu option (action-space, refuted)." },
+                { i: 10, p: 9, ax: "observation", d: -6.4, m: "Stack iter_5 observation tags and iter_7 state-memory in one overlay (refuted)." },
+                { i: 11, p: 10, ax: "", d: -2.7, m: "Three-pass frozen-baseline calibration, no patch." },
+            ]},
+            "ADAS/VoxPoser": { best: "+3.5", nodes: [
+                { i: 0, p: null, ax: "baseline", d: 0.0, m: "voxposer_libero_v4_baseline" },
+                { i: 1, p: 0, ax: "", d: 0.0, m: "PlanForge" },
+                { i: 2, p: 1, ax: "", d: -5.0, m: "BDDL-Grounded Few-Shots (surgical)" },
+                { i: 3, p: 2, ax: "", d: -7.5, m: "GraspVocab-LIBERO" },
+                { i: 4, p: 3, ax: "", d: -2.5, m: "ClosedLoopReplan" },
+                { i: 5, p: 4, ax: "", d: 1.0, m: "ModelSwap_gpt4o" },
+                { i: 6, p: 5, ax: "", d: 1.0, m: "PerStepBudget_180s" },
+                { i: 7, p: 6, ax: "", d: 1.0, probe: true, m: "NoPatchProbe" },
+                { i: 8, p: 7, ax: "", d: -9.0, m: "DenseGraspHalo" },
+                { i: 9, p: 8, ax: "", d: -1.5, m: "HaloSweep_radius2" },
+                { i: 10, p: 9, ax: "", d: -2.0, m: "TightenPosTol_radius2" },
+                { i: 11, p: 10, ax: "", d: -2.5, m: "GraspSettleBump" },
+                { i: 12, p: 11, ax: "", d: -0.5, m: "SubtaskSimBudget" },
+                { i: 13, p: 12, ax: "", d: 0.0, m: "SubtaskSimBudget_haloR1" },
+                { i: 14, p: 13, ax: "", d: 3.0, m: "SimBudget800_haloR1" },
+                { i: 15, p: 14, ax: "", d: 1.0, m: "SimBudget1600_haloR1" },
+                { i: 16, p: 15, ax: "", d: 3.0, m: "MaxPlanIter5_onIter14" },
+                { i: 17, p: 16, ax: "", d: 3.0, m: "ControllerHorizon4_onIter14" },
+                { i: 18, p: 17, ax: "", d: 2.5, m: "SimBudget600_haloR1" },
+                { i: 19, p: 18, ax: "", d: 3.5, best: true, m: "Temp0.5_cacheBust" },
+                { i: 20, p: 19, ax: "", d: 2.5, m: "Temp0.8_cacheBust" },
+            ]},
+            "AFlow/VoxPoser": { best: "+3.5", nodes: [
+                { i: 0, p: null, ax: "baseline", d: 0.0, m: "voxposer_libero_v4 baseline" },
+                { i: 1, p: 0, ax: "", d: 0.0, m: "Rewrite LIBERO planner prompt with snake_case _N-suffixed exemplars" },
+                { i: 2, p: 1, ax: "", d: 2.0, m: "composer_model_upgrade_gpt4o" },
+                { i: 3, p: 2, ax: "", d: -5.0, m: "Anchor planner prompt on LIBERO scene-object names" },
+                { i: 4, p: 3, ax: "", d: -5.0, m: "merge-planner-prompt-recover-spatial" },
+                { i: 5, p: 4, ax: "", d: 2.5, m: "compose_iter2_model_lift_onto_iter1_exemplars" },
+                { i: 6, p: 5, ax: "", d: 2.5, m: "env-truth retry loop" },
+                { i: 7, p: 6, ax: "", d: -1.0, m: "osc-tick-cap + suite-budget-bump" },
+                { i: 8, p: 7, ax: "", d: 3.5, best: true, m: "Scene-aware workspace bounds for floor/kitchen_table fixtures" },
+                { i: 9, p: 8, ax: "", d: -1.5, m: "planner_max_plan_iter_3" },
+                { i: 10, p: 9, ax: "", d: 0.0, m: "controller_horizon_2" },
+                { i: 11, p: 10, ax: "", d: -9.0, m: "Cap waypoints-per-execute at 4" },
+                { i: 12, p: 11, ax: "", d: -5.5, m: "Loosen pos_tol_m to 2cm" },
+                { i: 13, p: 12, ax: "", d: 0.0, m: "controller_num_samples=25000" },
+                { i: 14, p: 13, ax: "", d: -2.5, m: "pos_tol_1cm" },
+                { i: 15, p: 14, ax: "", d: -9.0, m: "Composer grasp: open-first + above-then-descend" },
+                { i: 16, p: 15, ax: "", d: 1.0, m: "map_size_150" },
+                { i: 17, p: 16, ax: "", d: 0.0, m: "max_osc_steps_100" },
+                { i: 18, p: 17, ax: "", d: 1.5, m: "max_plan_iter_2_on_gpt4o" },
+                { i: 20, p: 18, ax: "", d: 3.0, m: "compose_iter8_iter5_exemplars" },
+            ]},
+            "KDLoop/VoxPoser": { best: "0.0", nodes: [
+                { i: 0, p: null, ax: "baseline", d: 0.0, best: true, m: "voxposer_libero_v4 frozen baseline." },
+                { i: 4, p: 0, ax: "various", d: 0.0, exit: true, m: "Iters 1–8: probes inconclusive; diagnosed the _self_log silent failure; cell exited under USER_STOP." },
+            ]},
+            "ADAS/ExploreEQA": { best: "+1.0", nodes: [
+                { i: 0, p: null, ax: "baseline", d: 1.0, best: true, m: "ExploreEQA on HM-EQA (baseline)" },
+                { i: 1, p: 0, ax: "", d: -11.0, m: "Deliberative CoT Adjudicator over Top-K Explored Frames" },
+                { i: 2, p: 1, ax: "", d: 0.0, m: "Dummy-Masked Letter Vote with Yes/No Claim-Verification Channel" },
+                { i: 3, p: 2, ax: "", d: 0.0, m: "Question-Target-Anchored Frontier Prompts" },
+                { i: 4, p: 3, ax: "", d: -3.0, m: "Multi-Crop Answer-Image Fusion" },
+                { i: 5, p: 4, ax: "", d: 1.0, m: "Explore-Before-Exploit Frontier Warmup" },
+                { i: 6, p: 5, ax: "", d: -13.0, m: "Pairwise-Tournament Adjudication over Curated Decisive Frames" },
+                { i: 7, p: 6, ax: "", d: -13.0, m: "Confidence-Trajectory-Steered Exploration" },
+                { i: 8, p: 7, ax: "", d: 1.0, m: "Baseline Answer-Path Restoration" },
+                { i: 9, p: 8, ax: "", d: 0.0, probe: true, m: "No-Change Probe — Re-Confirm the 0.44 Baseline Head" },
+                { i: 10, p: 9, ax: "", d: 0.0, probe: true, m: "No-Change Probe — Final Re-Confirmation of the VLM-Bound 0.44 Baseline" },
+                { i: 11, p: 10, ax: "", d: -2.0, m: "Value-Map-Anchored Answering Yaw" },
+                { i: 12, p: 11, ax: "", d: -1.0, m: "Idle-Step Yaw Sweep" },
+                { i: 13, p: 12, ax: "", d: 0.0, probe: true, m: "No-Change Probe — VLM-Bound 0.44 Optimum Confirmed After Independen..." },
+                { i: 14, p: 13, ax: "", d: 0.0, probe: true, m: "No-Change Probe — VLM-Bound 0.44 Optimum Holds After Final Stress-T..." },
+                { i: 15, p: 14, ax: "", d: 1.0, probe: true, m: "Final-Generation No-Change Probe — Editable Surface Source-Verified..." },
+                { i: 16, p: 15, ax: "", d: -1.0, m: "Strict-Frozen-Gated Prior-Debiased Sum Aggregation" },
+                { i: 17, p: 16, ax: "", d: -1.0, probe: true, m: "No-Change Probe (5th consecutive — external-probe CFG vetoed)" },
+                { i: 18, p: 17, ax: "", d: -1.0, m: "Content-String Tokens for Answer Scoring (rejected: Prismatic strin..." },
+                { i: 19, p: 18, ax: "", d: -2.0, probe: true, m: "No-Change Probe — 8th consecutive; Reflexion-1 cross-checked episod..." },
+                { i: 20, p: 19, ax: "", d: 1.0, probe: true, m: "convergence_close_no_change_probe" },
+            ]},
+            "AFlow/ExploreEQA": { best: "+7.0", nodes: [
+                { i: 0, p: null, ax: "baseline", d: -2.0, m: "ExploreEQA on HM-EQA baseline" },
+                { i: 1, p: 0, ax: "", d: 7.0, best: true, m: "Sharpen per-step VLM answer prompt" },
+                { i: 2, p: 1, ax: "", d: 4.0, m: "Revive dead frontier-LSV via image-space fallback" },
+                { i: 3, p: 2, ax: "", d: 5.0, m: "Sharpen prompt_rel to visual-presence" },
+                { i: 4, p: 3, ax: "", d: 5.0, m: "Relevancy-Threshold Aggregation Gate" },
+                { i: 5, p: 4, ax: "", d: 4.0, m: "Low-relevancy rotation-in-place fallback" },
+                { i: 6, p: 5, ax: "", d: 1.0, m: "Rel-weighted sum aggregator" },
+                { i: 7, p: 6, ax: "", d: -20.0, m: "Multi-surface-form pred tokens" },
+                { i: 8, p: 7, ax: "", d: -8.0, m: "True majority-vote aggregator" },
+                { i: 9, p: 8, ax: "", d: 5.0, m: "Rel-gated mean-pool aggregator" },
+                { i: 10, p: 9, ax: "", d: 1.0, m: "Rel-gated mean-pool on iter_3" },
+                { i: 11, p: 10, ax: "", d: 3.0, m: "CoT-scaffolded prompt_pred on iter_3" },
+                { i: 12, p: 11, ax: "", d: -4.0, m: "Negative-cue prompt_pred" },
+                { i: 13, p: 12, ax: "", d: 3.0, m: "Episode-start orbital scan" },
+                { i: 14, p: 13, ax: "", d: -20.0, m: "Conservative 8-token (bare + leading-space)" },
+                { i: 15, p: 14, ax: "", d: -43.0, m: "Center-crop image_pred" },
+                { i: 16, p: 15, ax: "", d: 1.0, m: "prompt_pred question-restate cue" },
+                { i: 17, p: 16, ax: "", d: 6.0, m: "Top-K confident-step sum aggregator" },
+                { i: 18, p: 17, ax: "", d: 7.0, m: "Top-K aggregator on champion" },
+                { i: 19, p: 18, ax: "", d: 6.0, m: "Top-K=4 confident-step sum aggregator" },
+            ]},
+            "KDLoop/ExploreEQA": { best: "+4.0", nodes: [
+                { i: 0, p: null, ax: "baseline", d: 1.0, m: "ExploreEQA on HM-EQA frozen baseline." },
+                { i: 1, p: 0, ax: "control", d: 0.0, m: "Raise step_budget to test the exploration-budget clamp (control-flow, refuted)." },
+                { i: 2, p: 1, ax: "state-memory", d: 2.0, m: "Bayesian prior-calibration over per-step pred_probs to correct a VLM letter-bias." },
+                { i: 3, p: 2, ax: "state-memory", d: 3.0, m: "Sentinel-aware pre-filter: zero out 'do not choose' columns before prior-correction." },
+                { i: 4, p: 3, ax: "state-memory", d: 3.7, m: "Three-pass lock of the sentinel plus prior-correction plus letter-max stack." },
+                { i: 5, p: 4, ax: "prompt", d: 4.0, best: true, m: "Prompt 'only A/B/C/D are valid letters' when the AD-sentinel pattern is detected." },
+                { i: 6, p: 5, ax: "prompt", d: 2.0, m: "Narrow the sentinel prompt to AD-only with cleaner wording (refuted)." },
+                { i: 7, p: 6, ax: "observation+prompt", d: 1.3, m: "Observation-pipeline probe with offline sentinel-signal analysis (mixed)." },
+            ]},
+        };
+
+        // ===================== Tree renderer =====================
+        const SVGNS = "http://www.w3.org/2000/svg";
+        let curExec = "MapGPT", curOpt = "KDLoop";
+
+        // ADAS / AFlow are our ports — mark them wherever rendered dynamically
+        function optMark(name) {
+            return (name === "ADAS" || name === "AFlow")
+                ? name + '<span class="pm" title="Our port — reimplemented as a coding-agent session">↻</span>'
+                : name;
+        }
+
+        function nodeColor(n) {
+            if (n.leak) return { fill: "#ff6a3d33", stroke: "#ff7a7a" };
+            if (n.revert || n.probe || n.noop || n.exit) return { fill: "#0b0f1a", stroke: "#6b7693" };
+            if (n.ax === "baseline") return { fill: "#1a2236", stroke: "#6b7693" };
+            if (n.d >= 6) return { fill: "#ff6a3d", stroke: "#ff8a5c" };
+            if (n.d >= 3) return { fill: "#ff8a5c", stroke: "#ffb094" };
+            if (n.d > 0) return { fill: "#ff6a3d55", stroke: "#ff6a3d88" };
+            if (n.d === 0) return { fill: "#2a3550", stroke: "#566079" };
+            return { fill: "#324063", stroke: "#44537a" };
+        }
+
+        function renderTree() {
+            const cell = CELLS[curOpt + "/" + curExec];
+            const svg = document.getElementById("tree-svg");
+            while (svg.firstChild) svg.removeChild(svg.firstChild);
+            document.getElementById("tree-name").innerHTML = optMark(curOpt) + " × " + curExec;
+            document.getElementById("tree-best").textContent = "best " + (cell.best[0] === "-" || cell.best[0] === "+" || cell.best === "0.0" ? cell.best : "+" + cell.best) + (cell.best === "0.0" ? " pp" : " pp") + (cell.leakcell ? " (leak)" : "");
+
+            const W = 640, H = 340, padL = 46, padR = 22, padT = 26, padB = 34;
+            const nodes = cell.nodes;
+            const iters = nodes.map(n => n.i);
+            const maxI = Math.max(...iters, 1);
+            const ds = nodes.map(n => n.d);
+            let dmin = Math.min(...ds, 0), dmax = Math.max(...ds, 1);
+            const FLOOR = -15; dmin = Math.max(dmin, FLOOR);   // clamp catastrophic regressions so gains stay readable
+            const span = (dmax - dmin) || 1;
+            dmin -= span * 0.10; dmax += span * 0.12;
+            const x = i => padL + (i / maxI) * (W - padL - padR);
+            const y = d => padT + (1 - (Math.max(d, FLOOR) - dmin) / (dmax - dmin)) * (H - padT - padB);
+            const pos = {};
+            nodes.forEach(n => pos[n.i] = { x: x(n.i), y: y(n.d) });
+
+            // baseline (Δ=0) reference line
+            if (dmin < 0 && dmax > 0) {
+                const ln = document.createElementNS(SVGNS, "line");
+                ln.setAttribute("x1", padL - 6); ln.setAttribute("x2", W - padR);
+                ln.setAttribute("y1", y(0)); ln.setAttribute("y2", y(0));
+                ln.setAttribute("stroke", "#2a3550"); ln.setAttribute("stroke-dasharray", "3 4"); ln.setAttribute("stroke-width", "1");
+                svg.appendChild(ln);
+                const t = document.createElementNS(SVGNS, "text");
+                t.setAttribute("x", padL - 9); t.setAttribute("y", y(0) + 3); t.setAttribute("text-anchor", "end");
+                t.setAttribute("fill", "#566079"); t.setAttribute("font-size", "9"); t.setAttribute("font-family", "JetBrains Mono, monospace");
+                t.textContent = "0"; svg.appendChild(t);
+            }
+            // y-axis caption
+            const yl = document.createElementNS(SVGNS, "text");
+            yl.setAttribute("x", 12); yl.setAttribute("y", padT + 4); yl.setAttribute("fill", "#566079");
+            yl.setAttribute("font-size", "9"); yl.setAttribute("font-family", "JetBrains Mono, monospace");
+            yl.textContent = "Δpp"; svg.appendChild(yl);
+
+            // edges
+            nodes.forEach(n => {
+                if (n.p !== null && pos[n.p]) edge(svg, pos[n.p], pos[n.i], false);
+                if (n.port !== undefined && pos[n.port]) edge(svg, pos[n.port], pos[n.i], true);
+            });
+            // nodes
+            nodes.forEach(n => {
+                const c = nodeColor(n);
+                const g = document.createElementNS(SVGNS, "g");
+                g.setAttribute("class", "tnode"); g.setAttribute("tabindex", "0");
+                if (n.best) {
+                    const ring = document.createElementNS(SVGNS, "circle");
+                    ring.setAttribute("cx", pos[n.i].x); ring.setAttribute("cy", pos[n.i].y); ring.setAttribute("r", 11);
+                    ring.setAttribute("fill", "none"); ring.setAttribute("stroke", "#ff6a3d"); ring.setAttribute("stroke-width", "2");
+                    g.appendChild(ring);
+                }
+                const dot = document.createElementNS(SVGNS, "circle");
+                dot.setAttribute("cx", pos[n.i].x); dot.setAttribute("cy", pos[n.i].y);
+                dot.setAttribute("r", n.ax === "baseline" ? 6 : 7);
+                dot.setAttribute("fill", c.fill); dot.setAttribute("stroke", c.stroke); dot.setAttribute("stroke-width", "1.6");
+                if (n.revert || n.probe || n.noop || n.exit) dot.setAttribute("stroke-dasharray", "2.5 2.5");
+                g.appendChild(dot);
+                const lab = document.createElementNS(SVGNS, "text");
+                lab.setAttribute("x", pos[n.i].x); lab.setAttribute("y", pos[n.i].y - 13); lab.setAttribute("text-anchor", "middle");
+                lab.setAttribute("fill", "#8b94ab"); lab.setAttribute("font-size", "8.5"); lab.setAttribute("font-family", "JetBrains Mono, monospace");
+                lab.textContent = n.ax === "baseline" ? "base" : ("i" + n.i);
+                g.appendChild(lab);
+                const act = () => selectNode(n);
+                g.addEventListener("mouseenter", act);
+                g.addEventListener("focus", act);
+                g.addEventListener("click", act);
+                svg.appendChild(g);
+            });
+            // default-select the best node
+            selectNode(nodes.find(n => n.best) || nodes[nodes.length - 1]);
+        }
+
+        function edge(svg, a, b, dashed) {
+            const p = document.createElementNS(SVGNS, "path");
+            const mx = (a.x + b.x) / 2;
+            p.setAttribute("d", `M ${a.x} ${a.y} C ${mx} ${a.y}, ${mx} ${b.y}, ${b.x} ${b.y}`);
+            p.setAttribute("fill", "none");
+            p.setAttribute("stroke", dashed ? "#ff8a5c66" : "#33405f");
+            p.setAttribute("stroke-width", dashed ? "1.4" : "1.6");
+            if (dashed) p.setAttribute("stroke-dasharray", "4 3");
+            svg.appendChild(p);
+        }
+
+        function selectNode(n) {
+            document.getElementById("ti-iter").textContent = n.ax === "baseline" ? "iter_" + n.i + " · baseline" : "iter_" + n.i;
+            const ds = (n.d > 0 ? "+" : "") + n.d.toFixed(1);
+            document.getElementById("ti-delta").textContent = ds;
+            const dl = document.getElementById("ti-delta");
+            dl.style.color = n.d > 0 ? "var(--amber-2)" : (n.d < 0 ? "#7d89a8" : "var(--muted)");
+            document.getElementById("ti-sub").textContent = "pp vs shared baseline" + (n.best ? " · load-bearing best" : "");
+            document.getElementById("ti-mech").textContent = n.m;
+            const f = document.getElementById("ti-flags"); f.innerHTML = "";
+            const chip = (cls, txt) => { const s = document.createElement("span"); s.className = "ti-chip " + cls; s.textContent = txt; f.appendChild(s); };
+            if (n.ax && n.ax !== "baseline" && n.ax !== "various") chip("axis", n.ax);
+            if (n.best) chip("best", "best");
+            if (n.leak) chip("leak", "leak");
+            if (n.revert) chip("warn", "revert");
+            if (n.probe) chip("warn", "probe / not promoted");
+            if (n.noop) chip("warn", "silent no-op");
+            if (n.exit) chip("warn", "substrate exit");
+            if (n.offchain) chip("warn", "off-chain port");
+        }
+
+        // selectors
+        function bindSeg(id, setter) {
+            document.querySelectorAll("#" + id + " button").forEach(b => {
+                b.addEventListener("click", () => {
+                    document.querySelectorAll("#" + id + " button").forEach(x => x.classList.remove("on"));
+                    b.classList.add("on");
+                    setter(b.dataset.v);
+                    renderTree();
+                });
+            });
+        }
+        bindSeg("seg-exec", v => curExec = v);
+        bindSeg("seg-opt", v => curOpt = v);
+        renderTree();
+
+        // ===================== Matrix inspector =====================
+        (function () {
+            const cells = document.querySelectorAll(".cell");
+            const coord = document.getElementById("ro-coord"), delta = document.getElementById("ro-delta"),
+                best = document.getElementById("ro-best"), change = document.getElementById("ro-change"),
+                axes = document.getElementById("ro-axes");
+            function render(cell) {
+                cells.forEach(c => c.classList.remove("sel")); cell.classList.add("sel");
+                coord.innerHTML = cell.dataset.coord.replace(/(ADAS|AFlow)/, '$1<span class="pm" title="our port">↻</span>'); delta.textContent = cell.dataset.delta;
+                best.textContent = cell.dataset.best; change.textContent = cell.dataset.change;
+                axes.innerHTML = "";
+                const ax = cell.dataset.axes;
+                if (ax && ax !== "—") ax.split("|").forEach(a => { const s = document.createElement("span"); s.className = "chip"; s.textContent = a; axes.appendChild(s); });
+                else { const s = document.createElement("span"); s.className = "chip"; s.style.color = "var(--faint)"; s.style.borderColor = "var(--line)"; s.style.background = "transparent"; s.textContent = "none"; axes.appendChild(s); }
+            }
+            cells.forEach(cell => { cell.addEventListener("mouseenter", () => render(cell)); cell.addEventListener("focus", () => render(cell)); cell.addEventListener("click", () => render(cell)); });
+        })();
+
+        // ===================== Scrollspy =====================
+        (function () {
+            const links = document.querySelectorAll(".rail a"), map = {};
+            links.forEach(l => map[l.getAttribute("href").slice(1)] = l);
+            const obs = new IntersectionObserver(entries => {
+                entries.forEach(e => { if (e.isIntersecting) { links.forEach(l => l.classList.remove("active")); if (map[e.target.id]) map[e.target.id].classList.add("active"); } });
+            }, { rootMargin: "-12% 0px -70% 0px", threshold: 0 });
+            document.querySelectorAll("main section").forEach(s => obs.observe(s));
+        })();
+
+        // ===================== Copy citation =====================
+        function copyCite() {
+            const t = document.getElementById("cite-text").innerText;
+            navigator.clipboard.writeText(t).then(() => { const b = document.querySelector(".cite-box .copy"); b.textContent = "copied ✓"; setTimeout(() => b.textContent = "copy", 1800); });
+        }
+    </script>
+  <script src="/_edit/inline-edit.js" defer></script>
+</body>
+
+</html>
