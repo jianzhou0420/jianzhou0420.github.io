@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>The Semantic Poverty of Open X-Embodiment — Jian Zhou</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" type="text/css" href="../../Jian Zhou_files/style.css">
+</head>
+
+<body>
+  <main class="container">
+    <nav class="tabs">
+      <a class="tabs__link" href="../../index.html#home">Home</a>
+      <a class="tabs__link is-active" href="../../index.html#blog">Blog</a>
+    </nav>
+
+    <article class="post-page">
+      <header class="post-page__header">
+        <p class="post-page__date">2026-06-20</p>
+        <h1 class="post-page__title" data-eid="title">The Semantic Poverty of Open X-Embodiment</h1>
+      </header>
+
+      <div class="prose">
+
+        <p data-eid="op-p1">
+          <strong>Language is the thin leg.</strong> A vision-language-action model trains on (vision, language,
+          action) triples. Two of the three are dense: megapixel frames, and continuous control logged at tens of
+          hertz. The third is a single short instruction, held fixed for the whole episode. The largest corpora
+          &mdash; Physical Intelligence&rsquo;s &pi;-series, Google&rsquo;s RT-2 and Gemini Robotics &mdash; are
+          proprietary, so their language cannot be inspected directly; what the papers do report, fixed skill lists
+          and templated commands, points the same way. The one corpus anyone can actually count is the public one.
+        </p>
+        <p data-eid="op-p2">
+          <strong>One sentence, 43% of the data.</strong> Open X-Embodiment is the public pool most foundation VLAs
+          draw from. Its largest sub-dataset, <code>kuka</code>, holds 580,392 demonstrations &mdash; 42.9% of the
+          release&rsquo;s 1.35&nbsp;million &mdash; and every one of them carries the same instruction:
+          &ldquo;pick anything.&rdquo; It is not a lone case: 40 of the 55 sub-datasets have ten or fewer unique
+          instructions, 18 have exactly one, and those 40 together are 55% of all demonstrations; the median
+          sub-dataset has three. The robot data scales; the language attached to it barely moves.
+        </p>
+        <p data-eid="op-p3">
+          <strong>Too short to reason over.</strong> The instructions are tiny as well: a median of 4.4 words per
+          instruction, under six once weighted by how much data each dataset contributes, and two for
+          <code>kuka</code>. At that length there is nothing for the usual generalization tricks to act on &mdash;
+          chain-of-thought, step decomposition, and in-context exemplars each need an instruction with some internal
+          structure, and &ldquo;pick anything&rdquo; has none. What follows counts that language across all 55
+          sub-datasets.
+        </p>
+      </div>
+
+      <div class="prose">
+
+        <h2 style="font-size:clamp(21px,3.4vw,27px);font-weight:700;letter-spacing:-.02em;margin:.2em 0 .6em;border:0;padding:0;" data-eid="s1-h2">1. Counting All 55 Sub-Datasets</h2>
+
+        <p data-eid="s1-p1">
+          <strong>How we counted.</strong> We pulled the natural-language instruction set of all 55 Open X-Embodiment sub-datasets &mdash; including
+          the six that no public mirror carries, taken straight from the original RLDS &mdash; deduplicated each one
+          and counted. <em>Trajectories</em> is the number of recorded demonstrations; <em>unique</em> is how many
+          distinct instructions exist in the whole dataset. The pattern is hard to miss: the largest datasets record
+          tens or hundreds of thousands of demonstrations and teach them with a handful of sentences.
+        </p>
+
+        <figure>
+          <table id="oxe55">
+            <thead>
+              <tr>
+                <th>OXE sub-dataset</th>
+                <th>Trajectories</th>
+                <th>Avg. words</th>
+                <th>Unique instructions</th>
+                <th>Vocabulary</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>kuka</td><td><span class="num">580,392</span></td><td><span class="num">2.0</span></td><td><span class="num">1</span></td><td><span class="num">2</span></td></tr>
+              <tr><td>language_table</td><td><span class="num">442,226</span></td><td><span class="num">9.7</span></td><td><span class="num">127,605</span></td><td><span class="num">927</span></td></tr>
+              <tr><td>fractal20220817_data</td><td><span class="num">87,212</span></td><td><span class="num">6.9</span></td><td><span class="num">598</span></td><td><span class="num">50</span></td></tr>
+              <tr><td>robo_net</td><td><span class="num">82,775</span></td><td><span class="num">7.0</span></td><td><span class="num">1</span></td><td><span class="num">6</span></td></tr>
+              <tr><td>bc_z</td><td><span class="num">39,350</span></td><td><span class="num">5.2</span></td><td><span class="num">104</span></td><td><span class="num">51</span></td></tr>
+              <tr><td>maniskill_dataset</td><td><span class="num">30,213</span></td><td><span class="num">9.8</span></td><td><span class="num">9</span></td><td><span class="num">45</span></td></tr>
+              <tr><td>bridge</td><td><span class="num">25,460</span></td><td><span class="num">10.2</span></td><td><span class="num">19,973</span></td><td><span class="num">2,370</span></td></tr>
+              <tr><td>berkeley_gnm_recon</td><td><span class="num">11,834</span></td><td><span class="num">4.0</span></td><td><span class="num">1</span></td><td><span class="num">4</span></td></tr>
+              <tr><td>stanford_mask_vit</td><td><span class="num">9,109</span></td><td><span class="num">2.0</span></td><td><span class="num">1</span></td><td><span class="num">2</span></td></tr>
+              <tr><td>berkeley_gnm_cory_hall</td><td><span class="num">7,331</span></td><td><span class="num">4.0</span></td><td><span class="num">1</span></td><td><span class="num">4</span></td></tr>
+              <tr><td>furniture_bench_dataset</td><td><span class="num">5,100</span></td><td><span class="num">2.0</span></td><td><span class="num">9</span></td><td><span class="num">12</span></td></tr>
+              <tr><td>cmu_playing_with_food</td><td><span class="num">4,200</span></td><td><span class="num">4.7</span></td><td><span class="num">84</span></td><td><span class="num">31</span></td></tr>
+              <tr><td>taco_play</td><td><span class="num">3,242</span></td><td><span class="num">7.8</span></td><td><span class="num">403</span></td><td><span class="num">74</span></td></tr>
+              <tr><td>stanford_kuka_multimodal_dataset</td><td><span class="num">3,000</span></td><td><span class="num">6.0</span></td><td><span class="num">1</span></td><td><span class="num">5</span></td></tr>
+              <tr><td>berkeley_gnm_sac_son</td><td><span class="num">2,955</span></td><td><span class="num">4.0</span></td><td><span class="num">1</span></td><td><span class="num">4</span></td></tr>
+              <tr><td>stanford_robocook</td><td><span class="num">2,460</span></td><td><span class="num">7.4</span></td><td><span class="num">9</span></td><td><span class="num">21</span></td></tr>
+              <tr><td>roboturk</td><td><span class="num">1,796</span></td><td><span class="num">2.0</span></td><td><span class="num">3</span></td><td><span class="num">6</span></td></tr>
+              <tr><td>utaustin_mutex</td><td><span class="num">1,500</span></td><td><span class="num">46.4</span></td><td><span class="num">50</span></td><td><span class="num">471</span></td></tr>
+              <tr><td>berkeley_cable_routing</td><td><span class="num">1,482</span></td><td><span class="num">2.0</span></td><td><span class="num">1</span></td><td><span class="num">2</span></td></tr>
+              <tr><td>ucsd_pick_and_place_dataset</td><td><span class="num">1,355</span></td><td><span class="num">7.3</span></td><td><span class="num">3</span></td><td><span class="num">12</span></td></tr>
+              <tr><td>jaco_play</td><td><span class="num">976</span></td><td><span class="num">7.2</span></td><td><span class="num">88</span></td><td><span class="num">31</span></td></tr>
+              <tr><td>berkeley_rpt</td><td><span class="num">908</span></td><td><span class="num">3.2</span></td><td><span class="num">4</span></td><td><span class="num">10</span></td></tr>
+              <tr><td>toto</td><td><span class="num">902</span></td><td><span class="num">1.0</span></td><td><span class="num">1</span></td><td><span class="num">1</span></td></tr>
+              <tr><td>berkeley_autolab_ur5</td><td><span class="num">896</span></td><td><span class="num">10.2</span></td><td><span class="num">5</span></td><td><span class="num">29</span></td></tr>
+              <tr><td>usc_cloth_sim</td><td><span class="num">800</span></td><td><span class="num">4.0</span></td><td><span class="num">1</span></td><td><span class="num">4</span></td></tr>
+              <tr><td>iamlab_cmu_pickup_insert</td><td><span class="num">631</span></td><td><span class="num">4.0</span></td><td><span class="num">7</span></td><td><span class="num">12</span></td></tr>
+              <tr><td>cmu_play_fusion</td><td><span class="num">576</span></td><td><span class="num">7.8</span></td><td><span class="num">44</span></td><td><span class="num">34</span></td></tr>
+              <tr><td>stanford_hydra_dataset</td><td><span class="num">570</span></td><td><span class="num">7.7</span></td><td><span class="num">3</span></td><td><span class="num">17</span></td></tr>
+              <tr><td>austin_sirius_dataset</td><td><span class="num">559</span></td><td><span class="num">14.0</span></td><td><span class="num">2</span></td><td><span class="num">16</span></td></tr>
+              <tr><td>berkeley_mvp</td><td><span class="num">480</span></td><td><span class="num">3.2</span></td><td><span class="num">6</span></td><td><span class="num">16</span></td></tr>
+              <tr><td>nyu_door_opening_surprising_effectiveness</td><td><span class="num">435</span></td><td><span class="num">2.0</span></td><td><span class="num">1</span></td><td><span class="num">2</span></td></tr>
+              <tr><td>berkeley_fanuc_manipulation</td><td><span class="num">415</span></td><td><span class="num">8.1</span></td><td><span class="num">32</span></td><td><span class="num">63</span></td></tr>
+              <tr><td>nyu_franka_play_dataset</td><td><span class="num">365</span></td><td><span class="num">4.0</span></td><td><span class="num">1</span></td><td><span class="num">4</span></td></tr>
+              <tr><td>austin_sailor_dataset</td><td><span class="num">240</span></td><td><span class="num">11.8</span></td><td><span class="num">4</span></td><td><span class="num">26</span></td></tr>
+              <tr><td>kaist_nonprehensile</td><td><span class="num">201</span></td><td><span class="num">7.5</span></td><td><span class="num">193</span></td><td><span class="num">115</span></td></tr>
+              <tr><td>cmu_franka_exploration_dataset</td><td><span class="num">199</span></td><td><span class="num">3.0</span></td><td><span class="num">3</span></td><td><span class="num">6</span></td></tr>
+              <tr><td>uiuc_d3field</td><td><span class="num">192</span></td><td>&mdash;</td><td><span class="num">0</span></td><td><span class="num">0</span></td></tr>
+              <tr><td>utokyo_pr2_tabletop_manipulation</td><td><span class="num">192</span></td><td><span class="num">3.0</span></td><td><span class="num">3</span></td><td><span class="num">6</span></td></tr>
+              <tr><td>imperialcollege_sawyer_wrist_cam</td><td><span class="num">170</span></td><td><span class="num">2.7</span></td><td><span class="num">17</span></td><td><span class="num">25</span></td></tr>
+              <tr><td>ucsd_kitchen_dataset</td><td><span class="num">150</span></td><td><span class="num">5.8</span></td><td><span class="num">8</span></td><td><span class="num">23</span></td></tr>
+              <tr><td>cmu_stretch</td><td><span class="num">135</span></td><td><span class="num">4.2</span></td><td><span class="num">5</span></td><td><span class="num">15</span></td></tr>
+              <tr><td>viola</td><td><span class="num">135</span></td><td><span class="num">6.7</span></td><td><span class="num">3</span></td><td><span class="num">15</span></td></tr>
+              <tr><td>columbia_cairlab_pusht_real</td><td><span class="num">122</span></td><td><span class="num">25.0</span></td><td><span class="num">1</span></td><td><span class="num">25</span></td></tr>
+              <tr><td>eth_agent_affordances</td><td><span class="num">118</span></td><td><span class="num">3.0</span></td><td><span class="num">2</span></td><td><span class="num">4</span></td></tr>
+              <tr><td>asu_table_top</td><td><span class="num">110</span></td><td><span class="num">3.3</span></td><td><span class="num">216</span></td><td><span class="num">29</span></td></tr>
+              <tr><td>dlr_sara_grid_clamp</td><td><span class="num">107</span></td><td><span class="num">3.0</span></td><td><span class="num">1</span></td><td><span class="num">3</span></td></tr>
+              <tr><td>dlr_edan_shared_control</td><td><span class="num">104</span></td><td><span class="num">3.4</span></td><td><span class="num">9</span></td><td><span class="num">13</span></td></tr>
+              <tr><td>dlr_sara_pour</td><td><span class="num">100</span></td><td><span class="num">4.0</span></td><td><span class="num">1</span></td><td><span class="num">4</span></td></tr>
+              <tr><td>utokyo_xarm_pick_and_place</td><td><span class="num">92</span></td><td><span class="num">13.0</span></td><td><span class="num">1</span></td><td><span class="num">12</span></td></tr>
+              <tr><td>utokyo_pr2_opening_fridge</td><td><span class="num">64</span></td><td><span class="num">3.0</span></td><td><span class="num">1</span></td><td><span class="num">3</span></td></tr>
+              <tr><td>utokyo_xarm_bimanual</td><td><span class="num">64</span></td><td><span class="num">3.5</span></td><td><span class="num">2</span></td><td><span class="num">5</span></td></tr>
+              <tr><td>austin_buds_dataset</td><td><span class="num">50</span></td><td><span class="num">26.0</span></td><td><span class="num">1</span></td><td><span class="num">16</span></td></tr>
+              <tr><td>tokyo_u_lsmo</td><td><span class="num">50</span></td><td><span class="num">6.5</span></td><td><span class="num">2</span></td><td><span class="num">8</span></td></tr>
+              <tr><td>utokyo_saytap</td><td><span class="num">20</span></td><td><span class="num">4.0</span></td><td><span class="num">20</span></td><td><span class="num">21</span></td></tr>
+              <tr><td>nyu_rot_dataset</td><td><span class="num">14</span></td><td><span class="num">4.6</span></td><td><span class="num">12</span></td><td><span class="num">31</span></td></tr>
+            </tbody>
+          </table>
+          <figcaption data-eid="t1-cap">
+            <strong>Table 1 &mdash; Every instruction in all 55 Open X-Embodiment sub-datasets.</strong>
+            First-party count, sorted by dataset size. <em>Trajectories</em> is the number of recorded episodes,
+            read from each dataset&rsquo;s OXE <code>dataset_info.json</code>; <em>avg. words</em> is the mean length
+            of the distinct instructions; <em>unique instructions</em> and <em>vocabulary</em> are counted from the
+            instruction text we pulled for each dataset (including the six that no public mirror carries, taken
+            straight from the original RLDS). A few datasets store several paraphrases per episode (e.g.
+            <code>asu_table_top</code>), so their distinct-instruction count can run higher than their trajectory
+            count. Browse every instruction in the <a href="#oxe-explorer">instruction sets below</a>.
+          </figcaption>
+        </figure>
+
+        <p data-eid="s1-p2">
+          <strong>Huge data, a handful of sentences.</strong> <code>kuka</code> records 580,392 demonstrations and teaches every one of them with the single sentence
+          &ldquo;pick anything.&rdquo; Among the large datasets, only Language Table and the newer Bridge export pair
+          instruction variety with their episode count; the rest train hundreds of thousands of demonstrations on a
+          handful of sentences. Counting whole demonstrations &mdash; one instruction each &mdash; is the honest
+          measure of how many distinct things the robot was ever asked to do.
+        </p>
+      </div>
+
+      <style>
+        #oxe-explorer{--bg:#fdfdfb;--ink:#1b1d21;--muted:#6b7280;--faint:#9aa1ab;
+          --line:#e6e7e3;--line-soft:#eeefea;--accent:#2f6f5e;--accent-soft:#eef4f1;--code-bg:#f3f4f0;
+          margin:6px 0 42px;color:var(--ink)}
+        #oxe-explorer .ex-h{margin:0 0 8px;font-size:clamp(21px,3.4vw,27px);font-weight:700;letter-spacing:-.02em;border:0;padding:0}
+        #oxe-explorer .ex-lede{margin:0 0 8px;color:var(--muted);font-size:15px;max-width:760px}
+        #oxe-explorer .stat{margin:0;font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--faint)}
+        #oxe-explorer .layout{display:grid;grid-template-columns:330px 1fr;gap:24px;padding:16px 0 0;align-items:start}
+        @media(max-width:820px){#oxe-explorer .layout{grid-template-columns:1fr}}
+        #oxe-explorer .side{position:sticky;top:14px}
+        #oxe-explorer .side__controls{display:flex;gap:8px;margin-bottom:10px}
+        #oxe-explorer .side input,#oxe-explorer .side select{font:inherit;font-size:14px;padding:8px 10px;
+          border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink)}
+        #oxe-explorer .side input{flex:1}
+        #oxe-explorer .dslist{border:1px solid var(--line);border-radius:10px;overflow:hidden;max-height:72vh;overflow-y:auto}
+        #oxe-explorer .dsitem{display:flex;align-items:center;gap:9px;width:100%;text-align:left;border:0;background:none;
+          padding:9px 12px;border-bottom:1px solid var(--line-soft);cursor:pointer;font:inherit}
+        #oxe-explorer .dsitem:last-child{border-bottom:0}
+        #oxe-explorer .dsitem:hover{background:var(--accent-soft)}
+        #oxe-explorer .dsitem.sel{background:var(--accent-soft);box-shadow:inset 3px 0 0 var(--accent)}
+        #oxe-explorer .dsitem .nm{flex:1;font-size:13.5px;font-family:'JetBrains Mono',monospace;color:#2c2f34;
+          white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        #oxe-explorer .dsitem .ct{font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+        #oxe-explorer .dot{width:8px;height:8px;border-radius:50%;flex:none}
+        #oxe-explorer .dot.mirror{background:#2f6f5e}#oxe-explorer .dot.gcs{background:#c08a2d}#oxe-explorer .dot.none{background:#b9bdc4}
+        #oxe-explorer .detail{min-height:280px}
+        #oxe-explorer .empty{color:var(--faint);padding:50px 0;text-align:center}
+        #oxe-explorer .dhead h2{margin:0 0 4px;font-size:20px;font-weight:700;border:0;padding:0}
+        #oxe-explorer .dhead .tfds{font-family:'JetBrains Mono',monospace;font-size:12.5px;color:var(--faint);margin:0 0 14px}
+        #oxe-explorer .src{background:#f6f7f3;border:1px solid var(--line);border-radius:9px;padding:12px 15px;
+          font-size:13px;line-height:1.6;color:#41454b;margin-bottom:16px}
+        #oxe-explorer .src b{color:#2c2f34;font-weight:600}
+        #oxe-explorer .src code{font-family:'JetBrains Mono',monospace;font-size:12px;background:var(--code-bg);
+          padding:.1em .4em;border-radius:4px;border:1px solid #e8e9e4;word-break:break-all}
+        #oxe-explorer .filterbar{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+        #oxe-explorer .filterbar input{flex:1;font:inherit;font-size:14px;padding:9px 11px;border:1px solid var(--line);
+          border-radius:8px;background:#fff}
+        #oxe-explorer .filterbar .shown{font-size:12.5px;color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums}
+        #oxe-explorer ol.instr{margin:0;padding:0 0 0 3.2em;list-style:decimal;border:1px solid var(--line);border-radius:10px;max-height:58vh;overflow-y:auto}
+        #oxe-explorer ol.instr li{padding:6px 12px 6px 4px;border-bottom:1px solid var(--line-soft);font-size:14.5px;color:#26292e}
+        #oxe-explorer ol.instr li::marker{color:var(--faint);font-family:'JetBrains Mono',monospace;font-size:12px}
+        #oxe-explorer ol.instr li:last-child{border-bottom:0}
+        #oxe-explorer .more{padding:11px 12px;color:var(--muted);font-size:13px;background:#fafbf8}
+      </style>
+
+      <section id="oxe-explorer">
+        <h2 class="ex-h" data-eid="s2-h2">2. The Instruction Sets</h2>
+        <p class="ex-lede" data-eid="s2-lede">
+          The natural-language instruction set of every sub-dataset in the Open X-Embodiment &ldquo;55-in-1&rdquo;
+          release, deduplicated, with provenance. Pick a dataset to read exactly what it tells a robot to do.
+        </p>
+        <p class="stat" id="stat">loading&hellip;</p>
+        <div class="layout">
+          <aside class="side">
+            <div class="side__controls">
+              <input id="dsSearch" type="search" placeholder="filter datasets…" autocomplete="off">
+              <select id="dsSort">
+                <option value="count">by count</option>
+                <option value="name">by name</option>
+              </select>
+            </div>
+            <div class="dslist" id="dslist"></div>
+          </aside>
+          <div class="detail" id="detail">
+            <div class="empty">Select a dataset on the left.</div>
+          </div>
+        </div>
+      </section>
+
+      <div class="prose">
+
+        <h2 style="font-size:clamp(21px,3.4vw,27px);font-weight:700;letter-spacing:-.02em;margin:1.9em 0 .6em;border:0;padding:0;" data-eid="s3-h2">3. The Prior Finding (Wanna et al., 2026)</h2>
+
+        <p data-eid="s3-p1">
+          <strong>Not an artifact of our counting.</strong> <a href="#ref-wanna">Wanna et al.</a> measured the same thing on
+          a five-dataset sample and reported it at the frame level: the instruction is stored on every timestep, so
+          RT-1&rsquo;s 3.7M is its roughly 87,000 episodes times the frames in each. That framing is the training
+          view &mdash; a frame is a training sample, so in one epoch the model is shown an instruction 3.7 million
+          times and only 577 of them are different, each sentence repeated on the order of six thousand times. Their
+          headline holds across the robot datasets: fewer than 2% of instructions are unique.
+        </p>
+
+        <figure>
+          <table>
+            <thead>
+              <tr>
+                <th>Dataset</th>
+                <th>Instruction occurrences</th>
+                <th>Unique instructions</th>
+                <th>Vocabulary (unique words)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="group-head"><td colspan="4">Robot / VLA datasets</td></tr>
+              <tr><td>RT-1</td><td><span class="num">3.7M+</span></td><td><span class="num">577</span> <span style="color:var(--muted)">(0.02%)</span></td><td><span class="num">49</span></td></tr>
+              <tr><td>TacoPlay</td><td><span class="num">214K</span></td><td><span class="num">403</span> <span style="color:var(--muted)">(0.2%)</span></td><td><span class="num">74</span></td></tr>
+              <tr><td>BridgeData</td><td><span class="num">864K+</span></td><td><span class="num">11,693</span> <span style="color:var(--muted)">(1.4%)</span></td><td><span class="num">1,189</span></td></tr>
+              <tr><td>LIBERO</td><td><span class="num">6.5K</span></td><td><span class="num">112</span> <span style="color:var(--muted)">(1.72%)</span></td><td><span class="num">79</span></td></tr>
+              <tr><td>Language Table</td><td><span class="num">7.0M+</span></td><td><span class="num">127,370</span> <span style="color:var(--muted)">(1.81%)</span></td><td><span class="num">928</span></td></tr>
+              <tr class="group-head"><td colspan="4">Text &amp; language-rich reference</td></tr>
+              <tr><td>SCOUT</td><td><span class="num">23K+</span></td><td><span class="num">8,795</span> <span style="color:var(--muted)">(39.4%)</span></td><td><span class="num">1,631</span></td></tr>
+              <tr><td>LLaVA-Instruct</td><td><span class="num">366K+</span></td><td><span class="num">261,892</span> <span style="color:var(--muted)">(71.45%)</span></td><td><span class="num">15,477</span></td></tr>
+              <tr><td>ALFRED <span style="color:var(--muted)">(language-rich embodied)</span></td><td><span class="num">162K+</span></td><td><span class="num">126,005</span> <span style="color:var(--muted)">(79.9%)</span></td><td><span class="num">2,627</span></td></tr>
+              <tr><td>OASST2</td><td><span class="num">42K+</span></td><td><span class="num">39,301</span> <span style="color:var(--muted)">(93.33%)</span></td><td><span class="num">35,445</span></td></tr>
+              <tr><td>Alpaca</td><td><span class="num">53K+</span></td><td><span class="num">52,996</span> <span style="color:var(--muted)">(99.81%)</span></td><td><span class="num">18,141</span></td></tr>
+            </tbody>
+          </table>
+          <figcaption data-eid="t2-cap">
+            <strong>Table 2 — Linguistic diversity of instructions.</strong> Reproduced from Table 2 of Wanna et al.
+            (2026) [<a href="#ref-wanna">1</a>], under CC BY 4.0; columns reduced to instruction occurrences, unique
+            (with share), and vocabulary — the original also reports compression ratio, ROUGE-L, BERTScore, embedding
+            intrinsic dimensionality, and tree-kernel similarity. For the robot/VLA datasets an <em>occurrence</em> is
+            the instruction as stored on each frame, so these counts reach the millions; the per-trajectory count is
+            in Table 1.
+          </figcaption>
+        </figure>
+
+        <h2 id="references" style="font-size:17px;">References</h2>
+        <ol class="prose" style="font-size:14px; color:var(--muted); padding-left:1.4em;">
+          <li id="ref-wanna" data-eid="ref-wanna">
+            S. Wanna, A. Luhtaru, J. Salfity, R. Barron, J. Moore, C. Matuszek, M. Pryor.
+            "Limited Linguistic Diversity in Embodied AI Datasets."
+            arXiv:<a href="https://arxiv.org/abs/2601.03136">2601.03136</a>, 2026. Licensed under CC BY 4.0;
+            Table 2 is reproduced here under that license.
+          </li>
+          <li data-eid="ref-oxe">
+            A. Padalkar et al. "Open X-Embodiment: Robotic Learning Datasets and RT-X Models."
+            arXiv:<a href="https://arxiv.org/abs/2310.08864">2310.08864</a>, 2023.
+          </li>
+        </ol>
+        <p>
+          <a href="../../index.html#blog">&larr; Back to blog</a>
+        </p>
+      </div>
+    </article>
+
+    <footer class="footer">&copy; Jian Zhou</footer>
+  </main>
+
+  <style>
+    #oxe55 tbody tr{cursor:pointer}
+    #oxe55 tbody tr.ip-active td{background:#eef4f1}
+    #instr-pop{position:fixed;top:96px;right:18px;width:300px;max-height:72vh;overflow:auto;
+      background:#fff;border:1px solid #e6e7e3;border-radius:10px;box-shadow:0 8px 28px rgba(0,0,0,.13);
+      padding:12px 14px;z-index:60;font-size:13px;line-height:1.5}
+    #instr-pop .ip-h{display:flex;justify-content:space-between;align-items:baseline;gap:8px;
+      border-bottom:1px solid #eee;padding-bottom:6px;margin-bottom:8px}
+    #instr-pop .ip-ds{font-family:'JetBrains Mono',ui-monospace,monospace;font-weight:700;font-size:12.5px;color:#2c2f34}
+    #instr-pop .ip-n{color:#6b7280;font-size:11px;white-space:nowrap}
+    #instr-pop .ip-list{margin:0;padding-left:1.15em}
+    #instr-pop .ip-list li{padding:2px 0;color:#26292e}
+    #instr-pop .ip-empty{color:#9aa1ab}
+    #instr-pop .ip-more{color:#9aa1ab;font-size:11.5px;margin-top:6px}
+    @media(max-width:900px){#instr-pop{display:none!important}}
+  </style>
+  <div id="instr-pop" hidden></div>
+  <script>
+  (function(){
+    var data={"asu_table_top":{"n":216,"items":["put down glass bottle","place down bottle","place down glass bottle","put down green bottle","put down green glass bottle","place down green bottle","place down green glass bottle","put down bottle","pick green bottle","pick up green glass bottle","raise glass bottle","hold bottle","raise green bottle","raise green glass bottle","hold green glass bottle","raise bottle","pick bottle","hold glass bottle","pick green glass bottle","pick up glass bottle","pick up bottle","pick up green bottle","pick glass bottle","hold green bottle","move bread","push bread","move brown object","push brown object","push yellow object","move yellow object"]},"austin_buds_dataset":{"n":1,"items":["Take the lid off the pot, put the pot on the plate, and use the tool to push to pot to the front of the table."]},"austin_sailor_dataset":{"n":4,"items":["Interact with the objects in diverse but meaningful ways.","Place the fish, sausage, and tomato into the frying pan.","Place the bread, butter, and milk from the table onto the serving area.","Place the pan onto the stove and place the fish and sausage into the pan."]},"austin_sirius_dataset":{"n":2,"items":["Insert the blue gear onto the right peg, followed by the red gear","Open the kcup holder, insert the kcup into the holder, and close the kcup holder"]},"bc_z":{"n":104,"items":["place the white sponge in the ceramic bowl","move the arm in a circular motion","place the bottle in the ceramic bowl","drag the ceramic bowl in a circle","place apple in tray","place eraser in metal cup","place sponge in tray","place the eraser on the white sponge","wipe tray with sponge","pick up the ceramic bowl","stack bowls into tray","place the pepper on the white sponge","place banana in red bowl","stack cups into tray","place the ceramic cup in the ceramic bowl","wipe table surface with eraser","place fork in purple bowl","place the pepper in the ceramic bowl","place the white sponge in the ceramic cup","knock the bottle over","place fork in plastic cup","place banana in tray","wipe table surface with brush","place grapes in table surface","push the eraser across the table","place brush in plastic cup","place the eraser in the ceramic cup","place the pepper in the ceramic cup","place the ceramic cup over the eraser","knock the eraser over"]},"berkeley_autolab_ur5":{"n":5,"items":["sweep the green cloth to the left side of the table","put the ranch bottle into the pot","pick up the blue cup and put it into the brown cup. ","take the tiger out of the red bowl and put it in the grey bowl","put the marker into the bowl"]},"berkeley_cable_routing":{"n":1,"items":["route cable"]},"berkeley_fanuc_manipulation":{"n":32,"items":["Press the stapler.","Open the drawer.","Pick up the object under the table and put it on top of the table.","Disassemble the object","Close Water kettle .","Push the cube to the goal location represented using a cross.","Stack cups together.","Pick up the brush and put it on the table.","Pick up the brush and sweep the table.","Close the laptop.","Pick up the object and place it in the box.","Separate the stacked cups..","Pick up the screw driver and place it in the box.","Pick up the object on the table and place it in the cup.","Pick up the banana and place it in the drawer.","Pour the objects in the blue cup to the white cup.","Pick up the level and place it on the cup.","open the box","Close the drawer.","Handover the object on the table to the human.","Pick up the battery and place it in the open drawer.","Pick up the battery.","Pick up the object on the table then put it down.","Disassemble the object.","Pick up the tape and put it in the box.","Pick up the cup and put it on the table.","Pick up the pen and place it in the cup.","Use the stick to swipe the cup.","Pick up the toy duck and put it on the goal location represented using a cross.","Pick up the two cups together then put them down."]},"berkeley_gnm_cory_hall":{"n":1,"items":["Navigate to the goal."]},"berkeley_gnm_recon":{"n":1,"items":["Navigate to the goal."]},"berkeley_gnm_sac_son":{"n":1,"items":["Navigate to the goal."]},"berkeley_mvp":{"n":6,"items":["push wooden cube","pick detergent from the sink","reach red block","pick yellow cube","close fridge door","pick fruit"]},"berkeley_rpt":{"n":4,"items":["stack cube","pick an object from the bin","destack cube","pick yellow cube"]},"bridge":{"n":19973,"items":["put small spoon from basket to tray","put the blue cube on the right side of the table on top of the rectangular block","put the red object into the pot","put the rectangle block on top of the red arch and yellow block","take broccoli out of pan","Picked the piece of chocolate and put it into the drawer","Move the blue fork to the lower right burner","open the drawer","Move the can in the middle bottom of the table","end effector reaching pot or pan","bmbfbbfgjjg","move the silver pot to the lower right burner","sweep into pile","move the pot put on the purple cloth","fold the cloth from bottom left to top right","end effector reaching stuffedrabbit","Put a hollow cylinder through a cylinder","fold from left to the right","put broccoli in pot","take the yellow cube and move in to the left","put a black figure on the top left corner of the cloth","Move the silver container and place it on the blue cloth.","Put the blue fork on top of the napkin","put clothes in laundry machine","move the triangular to right side of the table from the block.","move the silver pan to the burner on the bottom left","put spatula on cutting board","Put the yellow cloth to the left of the pot.","close oven","Place the pot on the blue cloth."]},"cmu_franka_exploration_dataset":{"n":3,"items":["lift the knife","lift the vegetable","open the cabinet"]},"cmu_play_fusion":{"n":44,"items":["pick pot and place in sink","pick yellow bowl and place in dish rack","pick radish and place in red cup","open oven, then pick pineapple and place insid oven","pick yellow cup and place in sink","pick banana and place in blue plate","open oven, then pick steak and place insid oven","pick yellow bowl and place in sink","pick pot and place on wooden hanger","pick knife and place in pink bowl","open pot, then pick bread and place insid pot","open pot, then pick pineapple and place insid pot","pick yellow bowl and place on wooden hanger","pick banana and place in pink bowl","open oven, then pick chicken and place insid oven","pick orange cup and place on wooden hanger","pick knife and place in blue plate","pick yellow cup and place in dish rack","pick carrot and place in blue plate","pick orange cup and place in dish rack","open grill, then pick carrot and place insid grill","open pot, then pick chicken and place insid pot","pick yellow cup and place on wooden hanger","pick radish and place in pink bowl","pick pot and place in dish rack","open grill, then pick pineapple and place insid grill","pick orange cup and place in sink","pick spoon and place in pink bowl","pick radish and place in blue plate","pick knife and place in red cup"]},"cmu_playing_with_food":{"n":84,"items":["Grasp the apple slice.","Grasp the banana slice.","Grasp the bell_pepper slice.","Grasp the boiled_apple slice.","Grasp the boiled_bell_pepper slice.","Grasp the boiled_carrot slice.","Grasp the boiled_celery slice.","Grasp the boiled_jalapeno slice.","Grasp the boiled_pear slice.","Grasp the boiled_potato slice.","Grasp the bread slice.","Grasp the carrot slice.","Grasp the celery slice.","Grasp the cheddar slice.","Grasp the cooked_steak slice.","Grasp the cucumber slice.","Grasp the jalapeno slice.","Grasp the kiwi slice.","Grasp the lemon slice.","Grasp the mozzarella slice.","Grasp the onion slice.","Grasp the orange slice.","Grasp the pear slice.","Grasp the potato slice.","Grasp the raw_steak slice.","Grasp the spam slice.","Grasp the strawberry slice.","Grasp the tomato slice.","Press down on the apple slice.","Press down on the banana slice."]},"cmu_stretch":{"n":5,"items":["lift open green garbage can lid","pull open a dishwasher","lift up a lid from the pot","open drawer","open door"]},"columbia_cairlab_pusht_real":{"n":1,"items":["The task requires pushing a T-shaped block (gray) to a fixed target (green) with a circular end-effector (blue). Both observation and control frequencies are 10Hz."]},"dlr_edan_shared_control":{"n":9,"items":["pick the tennis ball","pick the green apple","pick the mug","pick the glass","pick the pear","pick the yellow ball","pick the orange","pick the red apple","pick the banana"]},"dlr_sara_grid_clamp":{"n":1,"items":["Place grid clamp"]},"dlr_sara_pour":{"n":1,"items":["Pour into the mug"]},"eth_agent_affordances":{"n":2,"items":["close the oven","open the oven"]},"fractal20220817_data":{"n":598,"items":["pick rxbar chocolate from bottom drawer and place on counter","close middle drawer","pick apple from white bowl","move coke can near water bottle","pick brown chip bag from top drawer and place on counter","pick green jalapeno chip bag from bottom drawer and place on counter","pick sponge from top drawer and place on counter","open middle drawer","pick 7up can from bottom shelf of fridge","knock orange can over","pick rxbar chocolate","pick apple","move green rice chip bag near brown chip bag","pick banana from white bowl","pick sponge from middle drawer and place on counter","place coke can into bottom drawer","place water bottle upright","place green jalapeno chip bag into top drawer","open top drawer","pick water bottle","pick blue chip bag from bottom drawer and place on counter","move pepsi can near 7up can","close bottom drawer","place apple into top drawer","move water bottle near rxbar chocolate","move pepsi can near blue plastic bottle","place redbull can into top drawer","pick pepsi can from top drawer and place on counter","place redbull can upright","move green rice chip bag near orange"]},"furniture_bench_dataset":{"n":9,"items":["assemble one_leg","assemble stool","assemble lamp","assemble round_table","assemble cabinet","assemble square_table","assemble drawer","assemble chair","assemble desk"]},"iamlab_cmu_pickup_insert":{"n":7,"items":["Pick up green block.","Pick up pink flower.","Insert greeen block.","Pick up blue block.","Pick up pink block.","Pick up yellow block.","Pick up narrow blue stick."]},"imperialcollege_sawyer_wrist_cam":{"n":17,"items":["insert toast ","open lid ","stack bowls ","insert cap in bottle ","put cup in dishwasher ","pick up apple ","hang cup ","pick up shoe ","open bottle ","pick up kettle ","pick up pan ","grasp can ","put apple in pot ","swipe ","pour in mug ","pick up mug ","pick up bottle "]},"jaco_play":{"n":88,"items":["pick up the butter dairy","place the gray bowl in the dish rack","pick up the square bread","pick up the gray bowl","pick up the orange fruit","pick up the milk dairy","place the gray bowl in the table","place the green cup in the oven","pick up the burger meat","pick up the yellow cup","pick up the black bowl","place the milk dairy in the white plate","pick up the apple fruit","place the long bread in the sink","pick up the long bread","place the burger meat in the oven","place the green cup in the gray plate","place the milk dairy in the table","place the burger meat in the black bowl","place the yellow cup in the dish rack","place the black bowl in the dish rack","place the black bowl in the gray plate","place the apple fruit in the sink","place the yellow cup in the white plate","pick up the steak meat","place the long bread in the gray bowl","place the butter dairy in the gray bowl","pick up the green cup","place the green cup in the dish rack","place the gray bowl in the sink"]},"kaist_nonprehensile":{"n":193,"items":["flip a toy table and push backward","Topple a SPAM can","Pull a cup","Rotate a toy table","push a plastic basket to the left","filp a pen holder in x direction","Drag a ketchup and rotate 90 degrees","Rotate a game controller 180 degrees and push","Push and topple a plastic small mug","Push the object to the front","make holder stand up and move it the left","Drag a thin book","rotate the toppled toy table in z direction","flip toy puppy around y axis and push right","Topple a toy table in y direction","rotate mustard bottle and push right","push a dehumidifier to the left bottom","Make an iced tea box stand up","Push the holder to the right bottom","flip the toy tank around the y axis","make toy tank stand by its back","rotate a plastic box around z axis and push to the left","Topple a coffee dripper","Flip iced tea box 180 deg in y-axis direction then push to the right","Push the table to the left","Drag a mustard sauce bottle","Slide and topple an iced tea box","push wood holder to the left","Lie down a toy dozer to its back","Topple and push an iced tea box to the right top of the table"]},"kuka":{"n":1,"items":["pick anything"]},"language_table":{"n":127605,"items":["push the blue triangle closer to yellow heart","push the blue cube to the center","slide the green star in between the green circle and cube","place your arm to the bottom left of the cube","adjust the heart to the diagonal left of the green circle","move blue triangle towards the top left","push the green star into the blue cube","move the yellow hexagon towards the top left of the board","push the green star towards the left side of the board","push the yellow hexagon to the center","move the green star to the top left","push the green star into the red star","move the yellow heart to the right side of the yellow hexagon","push the blue cube towards the yellow hexagon","move the green circle below the blue triangle","move the blue cube to yellow hexagon","slide the blue triangle closer to the blue cube","place the red star left to the red circle","push the blue cube into the red circle","move the yellow hexagon to the bottom right side of the yellow heart","place your arm to the top right of the red circle","touch the bottom side of the red circle","push the green circle into the blue triangle","move the blue triangle diagonally bottom right of the yellow hexagon","place the yellow heart above the green star","push the red circle towards left","slide the green circle into the red circle","move the green circle towards top center","push the blue cube slightly to the left","push the blue cube and blue triangle a bit down"]},"maniskill_dataset":{"n":9,"items":["Insert a designated object into the corresponding slot on a board.","Insert the peg into the horizontal hole in a box.","Lift up the red cube by 0.2 meters.","Pick up a designated object from a clutter of objects.","Pick up the object and move it to a goal position.","Pick up the red cube and move it to a goal position.","Plug the charger into the wall socket.","Stack the red cube on top of the green cube.","Turn on the faucet by rotating a designated handle."]},"nyu_door_opening_surprising_effectiveness":{"n":1,"items":["open door"]},"nyu_franka_play_dataset":{"n":1,"items":["play with the kitchen"]},"nyu_rot_dataset":{"n":12,"items":["erase the board","hang the hanger on the rod","reach the blue mark on the table","close the door","stack the cups","turn the knob","insert the peg in the cup","press the button","hang the bag on the hook","open the box","pour the almonds into the cup","hang the mug on the hook"]},"robo_net":{"n":1,"items":["Interact with the objects in the bin"]},"roboturk":{"n":3,"items":["object search","layout laundry","create tower"]},"stanford_hydra_dataset":{"n":3,"items":["make a cup of coffee with the keurig machine","palce dishes in the dish rack","make a piece of toast with the oven"]},"stanford_kuka_multimodal_dataset":{"n":1,"items":["insert the peg into the hole"]},"stanford_mask_vit":{"n":1,"items":["push something"]},"stanford_robocook":{"n":9,"items":["pinch the dough with a two-plane symmetric gripper","pinch the dough with a two-rod symmetric gripper","press the dough with a circle press","roll the dough with a large rolling pin","press the dough with a square press","press the dough with a circle punch","press the dough with a square punch","pinch the dough with an asymmetric gripper","roll the dough with a small rolling pin"]},"taco_play":{"n":403,"items":["rotate the yellow block to the left","push right the yellow block","open the drawer","place the pink block on top of the purple block","turn off the blue led light","grasp the drawer handle, then open it","go push the pink block into the drawer","rotate the pink block towards the right","push the green button to turn off the green light","turn off the blue light lamp","turn off the red light lamp","place the yellow object in the drawer","move to the white box and store the purple object","grasp the handle of the drawer and open it","put the yellow block in the drawer","pick up the pink block","turn on the green light lamp","go push the yellow block to the left","move the door all the way to the left and let go","put the yellow object on the table","move the door to the left side","unstack the pink block","go towards the pink block and grasp it","place the pink object on the table","pull the drawer","grasp the pink block","go towards the purple block and pick it up","place the purple block on top of the drawer","pull the handle of the drawer","place the purple block inside the left cabinet"]},"tokyo_u_lsmo":{"n":2,"items":["avoid obstacle and reach the blue pen","avoid obstacle and reach the scissors"]},"toto":{"n":1,"items":["pour"]},"ucsd_kitchen_dataset":{"n":8,"items":["Turn on the faucet","Put the bowl inside the kitchen cabinet","Open the oven door","Place the teapot on the stove","Put the white box into the sink","Open the carbinet door","Put the green box into the sink","Put the canned spam into the sink"]},"ucsd_pick_and_place_dataset":{"n":3,"items":["place the pot in the sink","pick up the red object from the table","pick up the green object from the table"]},"uiuc_d3field":{"n":0,"items":[]},"usc_cloth_sim":{"n":1,"items":["fold cloth along diagonal"]},"utaustin_mutex":{"n":50,"items":["\nKindly spot and seek the red cup placed ahead of you.\nCautiously adjust your gripper towards the red cup, gripping it gently.\nFind the after-storage area of the caddy.\nRelocate the red cup in your grip over the rear portion and softly release it into the compartment.","\nPlease move the gripper into proximity with the fryer handle.\nOnce close enough, gingerly grasp the handle and gently tug the fryer basket open in your direction.","\nCaressingly guide your clamp towards the toast.\nCompassionately possess the toast with your clamp.\nGradually tag the toast up from the worktable.\nComplaisantly, cruise the held-toasty-pillow to your white crockery.\nLast but notably, liberate the toast onto the shiny white tableware.","\nWith care, position your gripper close to the oven tray handle.\nMake sure to grip the handle tightly.\nDelicately and attentively pull the tray out from the oven.","\nGently maneuver your gripper in the book's direction.\nConfidently hold the book by angling your gripper properly.\nRelocate the book to the caddy.\nPinpoint the back pocket of the caddy and set the book down inside it.","\nKindly guide your pinchers towards the book laid out on the table.\nEnsure a firm grip on the book using your pinchers.\nNow, move both the pinchers and the book to the foremost compartment of the rack.\nThen, gently free the book into the leading segment of the rack.","Extend the gripper towards the oven tray handle.\nGrasp the handle and carefully pull the tray out of the oven.\nMove the gripper above the red bowl.\nGrab the red bowl gently.\nLift the bowl and place it onto the oven tray.","\nDiscover the targeted book and set your gripper to the appropriate amplitude.\nSmoothly guide your gripper in the direction of the book and snatch it firmly.\nSearch for the back section of the caddy.\nMove the held book towards the back section and lightly deposit it inside.","\nKindly move the gripper close to the hot dog bowl.\nGrip the bowl lightly with the gripper, taking care not to crush the hot dogs.\nElevate the bowl a little, ensuring it remains flat to stop hot dogs from tumbling.\nTransport the gripper and bowl to the white plate, then lower it down cautiously.\nRelinquish the gripper, letting the bowl rest on the plate.","\nGently grip the air fryer handle with your gripper and kindly pull it open by sliding your gripper away from the base.\nGradually bring your gripper in line with the blue bowl and gently capture it, without tightening your grip too much.\nSecurely place the blue bowl inside the opened air fryer with a steady position.\nLiberate your robot's gripper, and withdraw your gripper from the proximity of the air fryer.","\nObserve the blue drinking vessel close to you.\nPoint your gripping mechanism towards the blue drinking vessel.\nSoftly grip the blue drinking vessel using your gripping mechanism.\nMove your gripping mechanism and the blue drinking vessel above the receptacle.\nLet go of the blue drinking vessel into the receptacle.","\nFind the cornflower hued bowl that lies before your eyes.\nExtend your limb whilst freeing your grasp instrument.\nSteer it towards the box with interest and hold the cup.\nUplift and rotate till the further part of the holder comes in sight.\nDecently toss the cup into caddie's back pocket whilst freeing your hand.","Move your gripper towards the pink mug and hold it gently.\nLift the pink mug from the surface.\nPosition it above the basket, lowering it gently until it is placed inside.\nRelease the grip on the pink mug, completing the task.","\nPlease spot the blue cup positioned before you and pinpoint its location.\nCarefully open your gripper and guide it in the direction of the cup.\nSecure a firm hold on the blue cup using your gripper, ensuring not to crush or let it slip from your grasp.\nWith caution, shift the gripper carrying the cup above the baking sheet.\nTenderly set the cup down on the baking sheet, and unclasp your gripper to release the cup.","\nWith caution, bring your gripper towards the upper drawer's hold.\nGrasp the drawer hold tightly with your gripper tool.\nPull the drawer in your direction to reveal the contents of the top drawer.","\nGently stretch your hand towards the oven tray's handle, obtaining a firm grip, and draw it cautiously out of the oven.\nTransition your grip to the hot dog bowl, gingerly seizing the edge, and elevate it from the surface.\nHover the bowl over the tray, delicately lower it, and temper your grip, establishing the bowl's equilibrium.","\nKindly get your arm to the topmost drawer handle.\nGet a good grip on it, then softly pull to open it.","Move your gripper towards the bottom drawer handle.\nGrasp the handle gently with your gripper.\nApply gentle outward force to slide the bottom drawer open.","Look closely at the bright blue vase near you.\nGently move your arm towards it, carefully releasing your grip to hold the vase delicately.\nLift it slightly and place it securely on a sturdy surface, making sure it is balanced perfectly.\nWithdraw your supporting hand, leaving the vase in its stable position.","\nPlease reach out your grabber to the yellow dish.\nTenderly grip the yellow dish using your grabber.\nSet the yellow dish on the baking sheet.\nPosit your grabber on the rim of the baking sheet carrying the yellow dish.\nMindfully slide the baking sheet with the yellow dish into the oven.\nLet go of your grabber's hold on the baking sheet's edge when it is entirely in the oven.","\nCarefully navigate your gripper to the air fryer's handle.\nConfidently seize the handle using your gripper.\nGradually bring the handle toward yourself to access the air fryer.","\nNotice the yellow vessel located before you.\nBring your fastener close to the yellow vessel and smoothly hold it.\nTransfer the yellow vessel above the white plating and let go of your hold on it, then set the vessel on the plating.","\nPlease focus on the pink mug and carefully direct your gripper towards it.\nGently take hold of the pink mug using your grasping instrument.\nExercise caution as you elevate the pink mug off the tabletop.\nShift the pink mug so it is above the white platter.\nWith precision, slowly place the pink mug onto the white platter.","Kindly move your gripper toward the top drawer's handle.\nWith caution, hold the handle robustly using your gripper and pull open the top drawer.\nLet the handle go.\nRelocate your gripper to the bowl placed in the background.\nGently hold the bowl using your gripper.\nBring the gripper and the bowl to the ajar drawer.\nSoftly release the bowl into it.","\nCarefully direct your gripping tool toward the mac and cheese carton.\nClutch the mac and cheese carton gently but firmly in your gripping tool.\nSlide your gripping tool, with the carton in hand, above the container.\nLoosen your grip, letting the carton of mac and cheese effortlessly fall into the container.","\nPosition your gripper near the tray handle while precisely lining it up.\nFirmly yet gently grip the handle, ensuring a strong hold.\nSlide the tray into the oven in a steady manner until it's entirely inside.\nRelinquish the handle as it sits within the oven and extract your gripper with care.","\nPlease go towards the air fryer and gently seize its handle using your gripper.\nSlowly reveal the interior of the air fryer by pulling the handle outward.\nHead to the bowl filled with hot dogs and firmly but gently grasp it.\nCarefully place it inside the now-open air fryer.","\nPlease shift your gripper toward the book.\nCarefully hold the book with your gripper.\nGently transport the book using your gripper to the caddy's front section.\nSafely let the book go into the caddy's front area.","\nShift your gripper thoughtfully near the cereal snack bar.\nTenderly grip the snack bar with your precision device.\nCarefully hover the precision device above the first drawer installation and invite the snack bar to descend into the first drawer installation.","\nDraw close to the oven tray handle and pull it smoothly until the tray is entirely removed.\nFind the blue cup before you and put it gently onto the wide-open tray."]},"utokyo_pr2_opening_fridge":{"n":1,"items":["opening the fridge"]},"utokyo_pr2_tabletop_manipulation":{"n":3,"items":["picking a bread","picking a grape","folding a cloth"]},"utokyo_saytap":{"n":20,"items":["raise your rear right leg","trot backward slowly","trot forward fast","raise your front left leg","trot in place","bound backward fast","pace in place","bound backward slowly","move backward fast in pacing gait","move backward slowly in pacing gait","trot backward fast","bound forward slowly","stand still","bound forward fast","move forward fast in pacing gait","bound in place","trot forward slowly","raise your rear left leg","raise your front right leg","move forward slowly in pacing gait"]},"utokyo_xarm_bimanual":{"n":2,"items":["Reach a towel.","Unfold a wrinkled towel."]},"utokyo_xarm_pick_and_place":{"n":1,"items":["Pick up a white plate, and then place it on the red plate."]},"viola":{"n":3,"items":["pick up the bowl from the lazy Susan and put bowl on the plate","arrange plate and fork","make coffee"]}};
+    var pop=document.getElementById('instr-pop');
+    var tbl=document.getElementById('oxe55');
+    if(!pop||!tbl) return;
+    function esc(s){return s.replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+    function show(tr){
+      var name=tr.cells[0].textContent.trim();
+      var d=data[name]; if(!d) return;
+      var body=d.items.length
+        ? '<ul class="ip-list">'+d.items.map(function(s){return '<li>'+esc(s)+'</li>';}).join('')+'</ul>'
+        : '<div class="ip-empty">no language instructions</div>';
+      var more=d.n>d.items.length ? '<div class="ip-more">&hellip; '+(d.n-d.items.length)+' more &mdash; see the sets at the top</div>' : '';
+      pop.innerHTML='<div class="ip-h"><span class="ip-ds">'+esc(name)+'</span>'
+        +'<span class="ip-n">'+d.n+(d.n===1?' instruction':' unique')+'</span></div>'+body+more;
+      pop.hidden=false;
+    }
+    var hideT=null;
+    function clearActive(){ tbl.querySelectorAll('tr.ip-active').forEach(function(r){r.classList.remove('ip-active');}); }
+    function hideNow(){ pop.hidden=true; clearActive(); }
+    function scheduleHide(){ clearTimeout(hideT); hideT=setTimeout(hideNow,350); }
+    function cancelHide(){ clearTimeout(hideT); }
+    tbl.querySelectorAll('tbody tr').forEach(function(tr){
+      tr.addEventListener('mouseenter',function(){
+        cancelHide(); clearActive();
+        tr.classList.add('ip-active'); show(tr);
+      });
+    });
+    // keep the panel alive while the cursor travels onto it, so it can be scrolled
+    tbl.addEventListener('mouseleave',scheduleHide);
+    pop.addEventListener('mouseenter',cancelHide);
+    pop.addEventListener('mouseleave',scheduleHide);
+    // drop the panel the instant the table scrolls out of view (reading another section)
+    if('IntersectionObserver' in window){
+      new IntersectionObserver(function(es){
+        es.forEach(function(e){ if(!e.isIntersecting) hideNow(); });
+      },{threshold:0}).observe(tbl);
+    }
+  })();
+  </script>
+  <script>
+    // Open X-Embodiment instruction-set explorer (merged from the former standalone page)
+    const DATA_DIR = 'data/oxe-instructions';
+    const CAP = 500;
+    let manifest = [], currentInstrs = [], detailFilter = '';
+
+    const el = (t, c) => { const e = document.createElement(t); if (c) e.className = c; return e; };
+    const dotClass = t => t === 'lerobot-mirror' ? 'mirror' : (t === 'oxe-rlds-gcs' ? 'gcs' : 'none');
+
+    fetch(DATA_DIR + '/manifest.json').then(r => r.json()).then(m => {
+      manifest = m.datasets;
+      document.getElementById('stat').textContent =
+        m.total_datasets + ' datasets · ' + m.total_unique_instructions.toLocaleString() + ' unique instructions';
+      renderSidebar();
+      const h = decodeURIComponent(location.hash.slice(1));
+      if (h && manifest.some(d => d.dataset === h)) openDataset(h);
+    }).catch(() => {
+      document.getElementById('detail').innerHTML =
+        '<div class="empty">Could not load the data. If viewing locally, serve the folder over HTTP ' +
+        '(e.g. <code>python -m http.server</code>) — browsers block <code>fetch</code> on <code>file://</code>.</div>';
+    });
+
+    function sortedFiltered() {
+      const q = document.getElementById('dsSearch').value.toLowerCase().trim();
+      const mode = document.getElementById('dsSort').value;
+      let list = manifest.filter(d => !q || d.dataset.toLowerCase().includes(q));
+      list = list.slice().sort(mode === 'name'
+        ? (a, b) => a.dataset.localeCompare(b.dataset)
+        : (a, b) => b.num_instructions - a.num_instructions);
+      return list;
+    }
+
+    function renderSidebar() {
+      const box = document.getElementById('dslist');
+      box.innerHTML = '';
+      sortedFiltered().forEach(d => {
+        const b = el('button', 'dsitem');
+        b.dataset.name = d.dataset;
+        const dot = el('span', 'dot ' + dotClass(d.source_type));
+        const nm = el('span', 'nm'); nm.textContent = d.dataset;
+        const ct = el('span', 'ct'); ct.textContent = d.num_instructions.toLocaleString();
+        b.append(dot, nm, ct);
+        b.onclick = () => openDataset(d.dataset);
+        box.appendChild(b);
+      });
+    }
+
+    document.getElementById('dsSearch').addEventListener('input', renderSidebar);
+    document.getElementById('dsSort').addEventListener('change', renderSidebar);
+
+    function openDataset(name) {
+      location.hash = name;
+      document.querySelectorAll('.dsitem').forEach(b => b.classList.toggle('sel', b.dataset.name === name));
+      const d = document.getElementById('detail');
+      d.innerHTML = '<div class="empty">loading ' + name + '…</div>';
+      fetch(DATA_DIR + '/' + name + '/instructions.json').then(r => r.json()).then(data => {
+        currentInstrs = data.instructions || [];
+        detailFilter = '';
+        renderDetail(data);
+      }).catch(() => { d.innerHTML = '<div class="empty">Could not load ' + name + '.</div>'; });
+    }
+
+    function srcHtml(s) {
+      const rows = [];
+      rows.push('<div><b>source</b>: ' + (s.type || '?') + '</div>');
+      if (s.repo) rows.push('<div><b>repo</b>: <a href="' + (s.url || '#') + '">' + s.repo + '</a></div>');
+      if (s.file_url) rows.push('<div><b>file</b>: <code>' + (s.file || s.file_url) + '</code></div>');
+      if (s.gcs_path) rows.push('<div><b>gcs</b>: <code>' + s.gcs_path + '</code></div>');
+      if (s.instruction_field) rows.push('<div><b>field</b>: <code>' + s.instruction_field + '</code></div>');
+      if (s.method) rows.push('<div><b>method</b>: ' + s.method + '</div>');
+      if (s.episodes_scanned != null) rows.push('<div><b>episodes scanned</b>: ' + s.episodes_scanned.toLocaleString() +
+        (s.scan_complete === false ? ' (incomplete)' : '') + '</div>');
+      if (s.retrieved) rows.push('<div><b>retrieved</b>: ' + s.retrieved + '</div>');
+      return rows.join('');
+    }
+
+    function renderDetail(data) {
+      const d = document.getElementById('detail');
+      d.innerHTML = '';
+      const head = el('div', 'dhead');
+      const h = el('h2'); h.textContent = data.dataset;
+      const tf = el('p', 'tfds'); tf.textContent = 'OXE name: ' + (data.oxe_tfds_name || data.dataset) +
+        ' · ' + (data.num_instructions || 0).toLocaleString() + ' unique instructions';
+      head.append(h, tf);
+      const src = el('div', 'src'); src.innerHTML = srcHtml(data.source || {});
+      d.append(head, src);
+
+      if (!currentInstrs.length) {
+        const e = el('div', 'empty');
+        e.textContent = 'No instructions — the language_instruction field is empty in this dataset.';
+        d.appendChild(e);
+        return;
+      }
+      const bar = el('div', 'filterbar');
+      const inp = el('input'); inp.type = 'search'; inp.placeholder = 'filter instructions…'; inp.value = detailFilter;
+      const shown = el('span', 'shown');
+      bar.append(inp, shown);
+      const list = el('ol', 'instr');
+      d.append(bar, list);
+      const draw = () => {
+        const q = detailFilter.toLowerCase();
+        const f = q ? currentInstrs.filter(s => s.toLowerCase().includes(q)) : currentInstrs;
+        list.innerHTML = '';
+        f.slice(0, CAP).forEach(s => { const li = el('li'); li.textContent = s; list.appendChild(li); });
+        if (f.length > CAP) {
+          const m = el('li'); m.className = 'more';
+          m.textContent = 'showing first ' + CAP + ' of ' + f.length.toLocaleString() + ' — narrow with the filter';
+          list.appendChild(m);
+        }
+        shown.textContent = f.length.toLocaleString() + (q ? ' match' + (f.length === 1 ? '' : 'es') : ' total');
+      };
+      inp.addEventListener('input', () => { detailFilter = inp.value; draw(); });
+      draw();
+    }
+  </script>
+  <script src="/_edit/inline-edit.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+{
+  "dataset": "robo_net",
+  "oxe_tfds_name": "robo_net",
+  "source": {
+    "type": "oxe-rlds-gcs",
+    "gcs_path": "gs://gresearch/robotics/robo_net/0.1.0",
+    "instruction_field": "steps/language_instruction",
+    "method": "tfds stream + PartialDecoding(instruction); first step per episode (instruction is episode-constant in OXE); full scan; dedup",
+    "episodes_scanned": 82775,
+    "scan_complete": true,
+    "retrieved": "2026-06-19"
+  },
+  "num_instructions": 1,
+  "instructions": [
+    "Interact with the objects in the bin"
+  ]
+}

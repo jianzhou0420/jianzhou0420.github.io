@@ -1,0 +1,28 @@
+{
+  "dataset": "nyu_rot_dataset",
+  "oxe_tfds_name": "nyu_rot_dataset_converted_externally_to_rlds",
+  "source": {
+    "type": "lerobot-mirror",
+    "repo": "lerobot/nyu_rot_dataset",
+    "file": "meta/tasks.parquet",
+    "file_url": "https://huggingface.co/datasets/lerobot/nyu_rot_dataset/resolve/main/meta/tasks.parquet",
+    "format": "parquet",
+    "method": "curl the HF LeRobot mirror's meta/tasks.parquet (LeRobot v3.0; the task string is the parquet index); collected unique non-empty task strings",
+    "retrieved": "2026-06-19"
+  },
+  "num_instructions": 12,
+  "instructions": [
+    "erase the board",
+    "hang the hanger on the rod",
+    "reach the blue mark on the table",
+    "close the door",
+    "stack the cups",
+    "turn the knob",
+    "insert the peg in the cup",
+    "press the button",
+    "hang the bag on the hook",
+    "open the box",
+    "pour the almonds into the cup",
+    "hang the mug on the hook"
+  ]
+}

@@ -1,0 +1,557 @@
+{
+ "datasets": [
+  {
+   "dataset": "language_table",
+   "oxe_tfds_name": "language_table",
+   "num_instructions": 127605,
+   "source_type": "lerobot-mirror",
+   "source_label": "IPEC-COMMUNITY/language_table_lerobot",
+   "source_url": "https://huggingface.co/datasets/IPEC-COMMUNITY/language_table_lerobot/resolve/main/meta/tasks.jsonl",
+   "trajectories": 442226,
+   "vocab": 927
+  },
+  {
+   "dataset": "bridge",
+   "oxe_tfds_name": "bridge",
+   "num_instructions": 19973,
+   "source_type": "lerobot-mirror",
+   "source_label": "IPEC-COMMUNITY/bridge_orig_lerobot",
+   "source_url": "https://huggingface.co/datasets/IPEC-COMMUNITY/bridge_orig_lerobot/resolve/main/meta/tasks.jsonl",
+   "trajectories": 25460,
+   "vocab": 2370
+  },
+  {
+   "dataset": "fractal20220817_data",
+   "oxe_tfds_name": "fractal20220817_data",
+   "num_instructions": 598,
+   "source_type": "lerobot-mirror",
+   "source_label": "IPEC-COMMUNITY/fractal20220817_data_lerobot",
+   "source_url": "https://huggingface.co/datasets/IPEC-COMMUNITY/fractal20220817_data_lerobot/resolve/main/meta/tasks.jsonl",
+   "trajectories": 87212,
+   "vocab": 50
+  },
+  {
+   "dataset": "taco_play",
+   "oxe_tfds_name": "taco_play",
+   "num_instructions": 403,
+   "source_type": "lerobot-mirror",
+   "source_label": "IPEC-COMMUNITY/taco_play_lerobot",
+   "source_url": "https://huggingface.co/datasets/IPEC-COMMUNITY/taco_play_lerobot/resolve/main/meta/tasks.jsonl",
+   "trajectories": 3242,
+   "vocab": 74
+  },
+  {
+   "dataset": "asu_table_top",
+   "oxe_tfds_name": "asu_table_top_converted_externally_to_rlds",
+   "num_instructions": 216,
+   "source_type": "lerobot-mirror",
+   "source_label": "lerobot/asu_table_top",
+   "source_url": "https://huggingface.co/datasets/lerobot/asu_table_top/resolve/main/meta/tasks.parquet",
+   "trajectories": 110,
+   "vocab": 29
+  },
+  {
+   "dataset": "kaist_nonprehensile",
+   "oxe_tfds_name": "kaist_nonprehensile_converted_externally_to_rlds",
+   "num_instructions": 193,
+   "source_type": "lerobot-mirror",
+   "source_label": "lerobot/kaist_nonprehensile",
+   "source_url": "https://huggingface.co/datasets/lerobot/kaist_nonprehensile/resolve/main/meta/tasks.parquet",
+   "trajectories": 201,
+   "vocab": 115
+  },
+  {
+   "dataset": "bc_z",
+   "oxe_tfds_name": "bc_z",
+   "num_instructions": 104,
+   "source_type": "lerobot-mirror",
+   "source_label": "IPEC-COMMUNITY/bc_z_lerobot",
+   "source_url": "https://huggingface.co/datasets/IPEC-COMMUNITY/bc_z_lerobot/resolve/main/meta/tasks.jsonl",
+   "trajectories": 39350,
+   "vocab": 51
+  },
+  {
+   "dataset": "jaco_play",
+   "oxe_tfds_name": "jaco_play",
+   "num_instructions": 88,
+   "source_type": "lerobot-mirror",
+   "source_label": "IPEC-COMMUNITY/jaco_play_lerobot",
+   "source_url": "https://huggingface.co/datasets/IPEC-COMMUNITY/jaco_play_lerobot/resolve/main/meta/tasks.jsonl",
+   "trajectories": 976,
+   "vocab": 31
+  },
+  {
+   "dataset": "cmu_playing_with_food",
+   "oxe_tfds_name": "cmu_playing_with_food",
+   "num_instructions": 84,
+   "source_type": "oxe-rlds-gcs",
+   "source_label": "gs://gresearch/robotics/cmu_playing_with_food/1.0.0",
+   "source_url": null,
+   "trajectories": 4200,
+   "vocab": 31
+  },
+  {
+   "dataset": "utaustin_mutex",
+   "oxe_tfds_name": "utaustin_mutex",
+   "num_instructions": 50,
+   "source_type": "lerobot-mirror",
+   "source_label": "IPEC-COMMUNITY/utaustin_mutex_lerobot",
+   "source_url": "https://huggingface.co/datasets/IPEC-COMMUNITY/utaustin_mutex_lerobot/resolve/main/meta/tasks.jsonl",
+   "trajectories": 1500,
+   "vocab": 471
+  },
+  {
+   "dataset": "cmu_play_fusion",
+   "oxe_tfds_name": "cmu_play_fusion",
+   "num_instructions": 44,
+   "source_type": "lerobot-mirror",
+   "source_label": "IPEC-COMMUNITY/cmu_play_fusion_lerobot",
+   "source_url": "https://huggingface.co/datasets/IPEC-COMMUNITY/cmu_play_fusion_lerobot/resolve/main/meta/tasks.jsonl",
+   "trajectories": 576,
+   "vocab": 34
+  },
+  {
+   "dataset": "berkeley_fanuc_manipulation",
+   "oxe_tfds_name": "berkeley_fanuc_manipulation",
+   "num_instructions": 32,
+   "source_type": "lerobot-mirror",
+   "source_label": "IPEC-COMMUNITY/berkeley_fanuc_manipulation_lerobot",
+   "source_url": "https://huggingface.co/datasets/IPEC-COMMUNITY/berkeley_fanuc_manipulation_lerobot/resolve/main/meta/tasks.jsonl",
+   "trajectories": 415,
+   "vocab": 63
+  },
+  {
+   "dataset": "utokyo_saytap",
+   "oxe_tfds_name": "utokyo_saytap_converted_externally_to_rlds",
+   "num_instructions": 20,
+   "source_type": "lerobot-mirror",
+   "source_label": "lerobot/utokyo_saytap",
+   "source_url": "https://huggingface.co/datasets/lerobot/utokyo_saytap/resolve/main/meta/tasks.parquet",
+   "trajectories": 20,
+   "vocab": 21
+  },
+  {
+   "dataset": "imperialcollege_sawyer_wrist_cam",
+   "oxe_tfds_name": "imperialcollege_sawyer_wrist_cam",
+   "num_instructions": 17,
+   "source_type": "lerobot-mirror",
+   "source_label": "lerobot/imperialcollege_sawyer_wrist_cam",
+   "source_url": "https://huggingface.co/datasets/lerobot/imperialcollege_sawyer_wrist_cam/resolve/main/meta/tasks.parquet",
+   "trajectories": 170,
+   "vocab": 25
+  },
+  {
+   "dataset": "nyu_rot_dataset",
+   "oxe_tfds_name": "nyu_rot_dataset_converted_externally_to_rlds",
+   "num_instructions": 12,
+   "source_type": "lerobot-mirror",
+   "source_label": "lerobot/nyu_rot_dataset",
+   "source_url": "https://huggingface.co/datasets/lerobot/nyu_rot_dataset/resolve/main/meta/tasks.parquet",
+   "trajectories": 14,
+   "vocab": 31
+  },
+  {
+   "dataset": "dlr_edan_shared_control",
+   "oxe_tfds_name": "dlr_edan_shared_control_converted_externally_to_rlds",
+   "num_instructions": 9,
+   "source_type": "lerobot-mirror",
+   "source_label": "IPEC-COMMUNITY/dlr_edan_shared_control_lerobot",
+   "source_url": "https://huggingface.co/datasets/IPEC-COMMUNITY/dlr_edan_shared_control_lerobot/resolve/main/meta/tasks.jsonl",
+   "trajectories": 104,
+   "vocab": 13
+  },
+  {
+   "dataset": "furniture_bench_dataset",
+   "oxe_tfds_name": "furniture_bench_dataset_converted_externally_to_rlds",
+   "num_instructions": 9,
+   "source_type": "lerobot-mirror",
+   "source_label": "IPEC-COMMUNITY/furniture_bench_dataset_lerobot",
+   "source_url": "https://huggingface.co/datasets/IPEC-COMMUNITY/furniture_bench_dataset_lerobot/resolve/main/meta/tasks.jsonl",
+   "trajectories": 5100,
+   "vocab": 12
+  },
+  {
+   "dataset": "maniskill_dataset",
+   "oxe_tfds_name": "maniskill_dataset_converted_externally_to_rlds",
+   "num_instructions": 9,
+   "source_type": "oxe-rlds-gcs",
+   "source_label": "gs://gresearch/robotics/maniskill_dataset_converted_externally_to_rlds/0.1.0",
+   "source_url": null,
+   "trajectories": 30213,
+   "vocab": 45
+  },
+  {
+   "dataset": "stanford_robocook",
+   "oxe_tfds_name": "stanford_robocook_converted_externally_to_rlds",
+   "num_instructions": 9,
+   "source_type": "lerobot-mirror",
+   "source_label": "lerobot/stanford_robocook",
+   "source_url": "https://huggingface.co/datasets/lerobot/stanford_robocook/resolve/main/meta/tasks.parquet",
+   "trajectories": 2460,
+   "vocab": 21
+  },
+  {
+   "dataset": "ucsd_kitchen_dataset",
+   "oxe_tfds_name": "ucsd_kitchen_dataset_converted_externally_to_rlds",
+   "num_instructions": 8,
+   "source_type": "lerobot-mirror",
+   "source_label": "IPEC-COMMUNITY/ucsd_kitchen_dataset_lerobot",
+   "source_url": "https://huggingface.co/datasets/IPEC-COMMUNITY/ucsd_kitchen_dataset_lerobot/resolve/main/meta/tasks.parquet",
+   "trajectories": 150,
+   "vocab": 23
+  },
+  {
+   "dataset": "iamlab_cmu_pickup_insert",
+   "oxe_tfds_name": "iamlab_cmu_pickup_insert_converted_externally_to_rlds",
+   "num_instructions": 7,
+   "source_type": "lerobot-mirror",
+   "source_label": "IPEC-COMMUNITY/iamlab_cmu_pickup_insert_lerobot",
+   "source_url": "https://huggingface.co/datasets/IPEC-COMMUNITY/iamlab_cmu_pickup_insert_lerobot/resolve/main/meta/tasks.jsonl",
+   "trajectories": 631,
+   "vocab": 12
+  },
+  {
+   "dataset": "berkeley_mvp",
+   "oxe_tfds_name": "berkeley_mvp_converted_externally_to_rlds",
+   "num_instructions": 6,
+   "source_type": "lerobot-mirror",
+   "source_label": "IPEC-COMMUNITY/berkeley_mvp_lerobot",
+   "source_url": "https://huggingface.co/datasets/IPEC-COMMUNITY/berkeley_mvp_lerobot/resolve/main/meta/tasks.jsonl",
+   "trajectories": 480,
+   "vocab": 16
+  },
+  {
+   "dataset": "berkeley_autolab_ur5",
+   "oxe_tfds_name": "berkeley_autolab_ur5",
+   "num_instructions": 5,
+   "source_type": "lerobot-mirror",
+   "source_label": "IPEC-COMMUNITY/berkeley_autolab_ur5_lerobot",
+   "source_url": "https://huggingface.co/datasets/IPEC-COMMUNITY/berkeley_autolab_ur5_lerobot/resolve/main/meta/tasks.jsonl",
+   "trajectories": 896,
+   "vocab": 29
+  },
+  {
+   "dataset": "cmu_stretch",
+   "oxe_tfds_name": "cmu_stretch",
+   "num_instructions": 5,
+   "source_type": "lerobot-mirror",
+   "source_label": "IPEC-COMMUNITY/cmu_stretch_lerobot",
+   "source_url": "https://huggingface.co/datasets/IPEC-COMMUNITY/cmu_stretch_lerobot/resolve/main/meta/tasks.jsonl",
+   "trajectories": 135,
+   "vocab": 15
+  },
+  {
+   "dataset": "austin_sailor_dataset",
+   "oxe_tfds_name": "austin_sailor_dataset_converted_externally_to_rlds",
+   "num_instructions": 4,
+   "source_type": "lerobot-mirror",
+   "source_label": "IPEC-COMMUNITY/austin_sailor_dataset_lerobot",
+   "source_url": "https://huggingface.co/datasets/IPEC-COMMUNITY/austin_sailor_dataset_lerobot/resolve/main/meta/tasks.jsonl",
+   "trajectories": 240,
+   "vocab": 26
+  },
+  {
+   "dataset": "berkeley_rpt",
+   "oxe_tfds_name": "berkeley_rpt_converted_externally_to_rlds",
+   "num_instructions": 4,
+   "source_type": "lerobot-mirror",
+   "source_label": "IPEC-COMMUNITY/berkeley_rpt_lerobot",
+   "source_url": "https://huggingface.co/datasets/IPEC-COMMUNITY/berkeley_rpt_lerobot/resolve/main/meta/tasks.jsonl",
+   "trajectories": 908,
+   "vocab": 10
+  },
+  {
+   "dataset": "cmu_franka_exploration_dataset",
+   "oxe_tfds_name": "cmu_franka_exploration_dataset_converted_externally_to_rlds",
+   "num_instructions": 3,
+   "source_type": "lerobot-mirror",
+   "source_label": "lerobot/cmu_franka_exploration_dataset",
+   "source_url": "https://huggingface.co/datasets/lerobot/cmu_franka_exploration_dataset/resolve/main/meta/tasks.parquet",
+   "trajectories": 199,
+   "vocab": 6
+  },
+  {
+   "dataset": "roboturk",
+   "oxe_tfds_name": "roboturk",
+   "num_instructions": 3,
+   "source_type": "lerobot-mirror",
+   "source_label": "IPEC-COMMUNITY/roboturk_lerobot",
+   "source_url": "https://huggingface.co/datasets/IPEC-COMMUNITY/roboturk_lerobot/resolve/main/meta/tasks.jsonl",
+   "trajectories": 1796,
+   "vocab": 6
+  },
+  {
+   "dataset": "stanford_hydra_dataset",
+   "oxe_tfds_name": "stanford_hydra_dataset_converted_externally_to_rlds",
+   "num_instructions": 3,
+   "source_type": "lerobot-mirror",
+   "source_label": "IPEC-COMMUNITY/stanford_hydra_dataset_lerobot",
+   "source_url": "https://huggingface.co/datasets/IPEC-COMMUNITY/stanford_hydra_dataset_lerobot/resolve/main/meta/tasks.jsonl",
+   "trajectories": 570,
+   "vocab": 17
+  },
+  {
+   "dataset": "ucsd_pick_and_place_dataset",
+   "oxe_tfds_name": "ucsd_pick_and_place_dataset_converted_externally_to_rlds",
+   "num_instructions": 3,
+   "source_type": "lerobot-mirror",
+   "source_label": "lerobot/ucsd_pick_and_place_dataset",
+   "source_url": "https://huggingface.co/datasets/lerobot/ucsd_pick_and_place_dataset/resolve/main/meta/tasks.parquet",
+   "trajectories": 1355,
+   "vocab": 12
+  },
+  {
+   "dataset": "utokyo_pr2_tabletop_manipulation",
+   "oxe_tfds_name": "utokyo_pr2_tabletop_manipulation_converted_externally_to_rlds",
+   "num_instructions": 3,
+   "source_type": "lerobot-mirror",
+   "source_label": "lerobot/utokyo_pr2_tabletop_manipulation",
+   "source_url": "https://huggingface.co/datasets/lerobot/utokyo_pr2_tabletop_manipulation/resolve/main/meta/tasks.parquet",
+   "trajectories": 192,
+   "vocab": 6
+  },
+  {
+   "dataset": "viola",
+   "oxe_tfds_name": "viola",
+   "num_instructions": 3,
+   "source_type": "lerobot-mirror",
+   "source_label": "IPEC-COMMUNITY/viola_lerobot",
+   "source_url": "https://huggingface.co/datasets/IPEC-COMMUNITY/viola_lerobot/resolve/main/meta/tasks.jsonl",
+   "trajectories": 135,
+   "vocab": 15
+  },
+  {
+   "dataset": "austin_sirius_dataset",
+   "oxe_tfds_name": "austin_sirius_dataset_converted_externally_to_rlds",
+   "num_instructions": 2,
+   "source_type": "lerobot-mirror",
+   "source_label": "IPEC-COMMUNITY/austin_sirius_dataset_lerobot",
+   "source_url": "https://huggingface.co/datasets/IPEC-COMMUNITY/austin_sirius_dataset_lerobot/resolve/main/meta/tasks.jsonl",
+   "trajectories": 559,
+   "vocab": 16
+  },
+  {
+   "dataset": "eth_agent_affordances",
+   "oxe_tfds_name": "eth_agent_affordances",
+   "num_instructions": 2,
+   "source_type": "oxe-rlds-gcs",
+   "source_label": "gs://gresearch/robotics/eth_agent_affordances/0.1.0",
+   "source_url": null,
+   "trajectories": 118,
+   "vocab": 4
+  },
+  {
+   "dataset": "tokyo_u_lsmo",
+   "oxe_tfds_name": "tokyo_u_lsmo_converted_externally_to_rlds",
+   "num_instructions": 2,
+   "source_type": "lerobot-mirror",
+   "source_label": "lerobot/tokyo_u_lsmo",
+   "source_url": "https://huggingface.co/datasets/lerobot/tokyo_u_lsmo/resolve/main/meta/tasks.parquet",
+   "trajectories": 50,
+   "vocab": 8
+  },
+  {
+   "dataset": "utokyo_xarm_bimanual",
+   "oxe_tfds_name": "utokyo_xarm_bimanual_converted_externally_to_rlds",
+   "num_instructions": 2,
+   "source_type": "lerobot-mirror",
+   "source_label": "lerobot/utokyo_xarm_bimanual",
+   "source_url": "https://huggingface.co/datasets/lerobot/utokyo_xarm_bimanual/resolve/main/meta/tasks.parquet",
+   "trajectories": 64,
+   "vocab": 5
+  },
+  {
+   "dataset": "austin_buds_dataset",
+   "oxe_tfds_name": "austin_buds_dataset_converted_externally_to_rlds",
+   "num_instructions": 1,
+   "source_type": "lerobot-mirror",
+   "source_label": "IPEC-COMMUNITY/austin_buds_dataset_lerobot",
+   "source_url": "https://huggingface.co/datasets/IPEC-COMMUNITY/austin_buds_dataset_lerobot/resolve/main/meta/tasks.jsonl",
+   "trajectories": 50,
+   "vocab": 16
+  },
+  {
+   "dataset": "berkeley_cable_routing",
+   "oxe_tfds_name": "berkeley_cable_routing",
+   "num_instructions": 1,
+   "source_type": "lerobot-mirror",
+   "source_label": "IPEC-COMMUNITY/berkeley_cable_routing_lerobot",
+   "source_url": "https://huggingface.co/datasets/IPEC-COMMUNITY/berkeley_cable_routing_lerobot/resolve/main/meta/tasks.jsonl",
+   "trajectories": 1482,
+   "vocab": 2
+  },
+  {
+   "dataset": "berkeley_gnm_cory_hall",
+   "oxe_tfds_name": "berkeley_gnm_cory_hall",
+   "num_instructions": 1,
+   "source_type": "lerobot-mirror",
+   "source_label": "lerobot/berkeley_gnm_cory_hall",
+   "source_url": "https://huggingface.co/datasets/lerobot/berkeley_gnm_cory_hall/resolve/main/meta/tasks.parquet",
+   "trajectories": 7331,
+   "vocab": 4
+  },
+  {
+   "dataset": "berkeley_gnm_recon",
+   "oxe_tfds_name": "berkeley_gnm_recon",
+   "num_instructions": 1,
+   "source_type": "lerobot-mirror",
+   "source_label": "lerobot/berkeley_gnm_recon",
+   "source_url": "https://huggingface.co/datasets/lerobot/berkeley_gnm_recon/resolve/main/meta/tasks.parquet",
+   "trajectories": 11834,
+   "vocab": 4
+  },
+  {
+   "dataset": "berkeley_gnm_sac_son",
+   "oxe_tfds_name": "berkeley_gnm_sac_son",
+   "num_instructions": 1,
+   "source_type": "lerobot-mirror",
+   "source_label": "lerobot/berkeley_gnm_sac_son",
+   "source_url": "https://huggingface.co/datasets/lerobot/berkeley_gnm_sac_son/resolve/main/meta/tasks.parquet",
+   "trajectories": 2955,
+   "vocab": 4
+  },
+  {
+   "dataset": "columbia_cairlab_pusht_real",
+   "oxe_tfds_name": "columbia_cairlab_pusht_real",
+   "num_instructions": 1,
+   "source_type": "lerobot-mirror",
+   "source_label": "lerobot/columbia_cairlab_pusht_real",
+   "source_url": "https://huggingface.co/datasets/lerobot/columbia_cairlab_pusht_real/resolve/main/meta/tasks.parquet",
+   "trajectories": 122,
+   "vocab": 25
+  },
+  {
+   "dataset": "dlr_sara_grid_clamp",
+   "oxe_tfds_name": "dlr_sara_grid_clamp_converted_externally_to_rlds",
+   "num_instructions": 1,
+   "source_type": "lerobot-mirror",
+   "source_label": "lerobot/dlr_sara_grid_clamp",
+   "source_url": "https://huggingface.co/datasets/lerobot/dlr_sara_grid_clamp/resolve/main/meta/tasks.parquet",
+   "trajectories": 107,
+   "vocab": 3
+  },
+  {
+   "dataset": "dlr_sara_pour",
+   "oxe_tfds_name": "dlr_sara_pour_converted_externally_to_rlds",
+   "num_instructions": 1,
+   "source_type": "lerobot-mirror",
+   "source_label": "lerobot/dlr_sara_pour",
+   "source_url": "https://huggingface.co/datasets/lerobot/dlr_sara_pour/resolve/main/meta/tasks.parquet",
+   "trajectories": 100,
+   "vocab": 4
+  },
+  {
+   "dataset": "kuka",
+   "oxe_tfds_name": "kuka",
+   "num_instructions": 1,
+   "source_type": "lerobot-mirror",
+   "source_label": "IPEC-COMMUNITY/kuka_lerobot",
+   "source_url": "https://huggingface.co/datasets/IPEC-COMMUNITY/kuka_lerobot/resolve/main/meta/tasks.jsonl",
+   "trajectories": 580392,
+   "vocab": 2
+  },
+  {
+   "dataset": "nyu_door_opening_surprising_effectiveness",
+   "oxe_tfds_name": "nyu_door_opening_surprising_effectiveness",
+   "num_instructions": 1,
+   "source_type": "lerobot-mirror",
+   "source_label": "IPEC-COMMUNITY/nyu_door_opening_surprising_effectiveness_lerobot",
+   "source_url": "https://huggingface.co/datasets/IPEC-COMMUNITY/nyu_door_opening_surprising_effectiveness_lerobot/resolve/main/meta/tasks.jsonl",
+   "trajectories": 435,
+   "vocab": 2
+  },
+  {
+   "dataset": "nyu_franka_play_dataset",
+   "oxe_tfds_name": "nyu_franka_play_dataset_converted_externally_to_rlds",
+   "num_instructions": 1,
+   "source_type": "lerobot-mirror",
+   "source_label": "IPEC-COMMUNITY/nyu_franka_play_dataset_lerobot",
+   "source_url": "https://huggingface.co/datasets/IPEC-COMMUNITY/nyu_franka_play_dataset_lerobot/resolve/main/meta/tasks.jsonl",
+   "trajectories": 365,
+   "vocab": 4
+  },
+  {
+   "dataset": "robo_net",
+   "oxe_tfds_name": "robo_net",
+   "num_instructions": 1,
+   "source_type": "oxe-rlds-gcs",
+   "source_label": "gs://gresearch/robotics/robo_net/0.1.0",
+   "source_url": null,
+   "trajectories": 82775,
+   "vocab": 6
+  },
+  {
+   "dataset": "stanford_kuka_multimodal_dataset",
+   "oxe_tfds_name": "stanford_kuka_multimodal_dataset_converted_externally_to_rlds",
+   "num_instructions": 1,
+   "source_type": "lerobot-mirror",
+   "source_label": "lerobot/stanford_kuka_multimodal_dataset",
+   "source_url": "https://huggingface.co/datasets/lerobot/stanford_kuka_multimodal_dataset/resolve/main/meta/tasks.parquet",
+   "trajectories": 3000,
+   "vocab": 5
+  },
+  {
+   "dataset": "stanford_mask_vit",
+   "oxe_tfds_name": "stanford_mask_vit_converted_externally_to_rlds",
+   "num_instructions": 1,
+   "source_type": "oxe-rlds-gcs",
+   "source_label": "gs://gresearch/robotics/stanford_mask_vit_converted_externally_to_rlds/0.1.0",
+   "source_url": null,
+   "trajectories": 9109,
+   "vocab": 2
+  },
+  {
+   "dataset": "toto",
+   "oxe_tfds_name": "toto",
+   "num_instructions": 1,
+   "source_type": "lerobot-mirror",
+   "source_label": "IPEC-COMMUNITY/toto_lerobot",
+   "source_url": "https://huggingface.co/datasets/IPEC-COMMUNITY/toto_lerobot/resolve/main/meta/tasks.jsonl",
+   "trajectories": 902,
+   "vocab": 1
+  },
+  {
+   "dataset": "usc_cloth_sim",
+   "oxe_tfds_name": "usc_cloth_sim_converted_externally_to_rlds",
+   "num_instructions": 1,
+   "source_type": "lerobot-mirror",
+   "source_label": "lerobot/usc_cloth_sim",
+   "source_url": "https://huggingface.co/datasets/lerobot/usc_cloth_sim/resolve/main/meta/tasks.parquet",
+   "trajectories": 800,
+   "vocab": 4
+  },
+  {
+   "dataset": "utokyo_pr2_opening_fridge",
+   "oxe_tfds_name": "utokyo_pr2_opening_fridge_converted_externally_to_rlds",
+   "num_instructions": 1,
+   "source_type": "lerobot-mirror",
+   "source_label": "lerobot/utokyo_pr2_opening_fridge",
+   "source_url": "https://huggingface.co/datasets/lerobot/utokyo_pr2_opening_fridge/resolve/main/meta/tasks.parquet",
+   "trajectories": 64,
+   "vocab": 3
+  },
+  {
+   "dataset": "utokyo_xarm_pick_and_place",
+   "oxe_tfds_name": "utokyo_xarm_pick_and_place_converted_externally_to_rlds",
+   "num_instructions": 1,
+   "source_type": "lerobot-mirror",
+   "source_label": "lerobot/utokyo_xarm_pick_and_place",
+   "source_url": "https://huggingface.co/datasets/lerobot/utokyo_xarm_pick_and_place/resolve/main/meta/tasks.parquet",
+   "trajectories": 92,
+   "vocab": 12
+  },
+  {
+   "dataset": "uiuc_d3field",
+   "oxe_tfds_name": "uiuc_d3field",
+   "num_instructions": 0,
+   "source_type": "oxe-rlds-gcs",
+   "source_label": "gs://gresearch/robotics/uiuc_d3field/0.1.0",
+   "source_url": null,
+   "trajectories": 192,
+   "vocab": 0
+  }
+ ],
+ "total_datasets": 55,
+ "total_unique_instructions": 149558,
+ "total_trajectories": 1354134
+}

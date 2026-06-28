@@ -1,0 +1,33 @@
+{
+  "dataset": "imperialcollege_sawyer_wrist_cam",
+  "oxe_tfds_name": "imperialcollege_sawyer_wrist_cam",
+  "source": {
+    "type": "lerobot-mirror",
+    "repo": "lerobot/imperialcollege_sawyer_wrist_cam",
+    "file": "meta/tasks.parquet",
+    "file_url": "https://huggingface.co/datasets/lerobot/imperialcollege_sawyer_wrist_cam/resolve/main/meta/tasks.parquet",
+    "format": "parquet",
+    "method": "curl the HF LeRobot mirror's meta/tasks.parquet (LeRobot v3.0; the task string is the parquet index); collected unique non-empty task strings",
+    "retrieved": "2026-06-19"
+  },
+  "num_instructions": 17,
+  "instructions": [
+    "insert toast ",
+    "open lid ",
+    "stack bowls ",
+    "insert cap in bottle ",
+    "put cup in dishwasher ",
+    "pick up apple ",
+    "hang cup ",
+    "pick up shoe ",
+    "open bottle ",
+    "pick up kettle ",
+    "pick up pan ",
+    "grasp can ",
+    "put apple in pot ",
+    "swipe ",
+    "pour in mug ",
+    "pick up mug ",
+    "pick up bottle "
+  ]
+}

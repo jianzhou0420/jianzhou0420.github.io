@@ -1,0 +1,18 @@
+{
+  "dataset": "austin_sirius_dataset",
+  "oxe_tfds_name": "austin_sirius_dataset_converted_externally_to_rlds",
+  "source": {
+    "type": "lerobot-mirror",
+    "repo": "IPEC-COMMUNITY/austin_sirius_dataset_lerobot",
+    "file": "meta/tasks.jsonl",
+    "file_url": "https://huggingface.co/datasets/IPEC-COMMUNITY/austin_sirius_dataset_lerobot/resolve/main/meta/tasks.jsonl",
+    "format": "jsonl",
+    "method": "curl the HF LeRobot mirror's meta/tasks.jsonl (one JSON obj per line, {task_index, task}); collected unique non-empty 'task' values",
+    "retrieved": "2026-06-19"
+  },
+  "num_instructions": 2,
+  "instructions": [
+    "Insert the blue gear onto the right peg, followed by the red gear",
+    "Open the kcup holder, insert the kcup into the holder, and close the kcup holder"
+  ]
+}

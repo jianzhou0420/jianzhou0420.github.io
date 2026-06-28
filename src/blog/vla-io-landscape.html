@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+  <meta charset="UTF-8">
+  <title>VLA 模型大全表：I/O + 训练数据全景 — Jian Zhou</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+  <style>
+    :root{
+      --bg:#fdfdfb;--ink:#1b1d21;--muted:#6b7280;--faint:#9aa1ab;
+      --line:#e6e7e3;--line-soft:#eeefea;--accent:#2f6f5e;--accent-soft:#eef4f1;
+      --code-bg:#f3f4f0;--ok:#2e7d32;--no:#b06a00;
+    }
+    *{box-sizing:border-box}
+    html{-webkit-text-size-adjust:100%}
+    body{margin:0;background:var(--bg);color:var(--ink);
+      font-family:'Inter',system-ui,-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",Roboto,sans-serif;
+      font-size:17px;line-height:1.72;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+    .container{max-width:960px;margin:0 auto;padding:0 26px}
+
+    .tabs{display:flex;gap:26px;padding:30px 0 0;font-size:14px}
+    .tabs__link{color:var(--muted);text-decoration:none;letter-spacing:.01em;
+      padding-bottom:3px;border-bottom:1.5px solid transparent;transition:color .15s}
+    .tabs__link:hover{color:var(--ink)}
+    .tabs__link.is-active{color:var(--ink);border-bottom-color:var(--accent)}
+
+    .post-page__header{padding:54px 0 8px}
+    .post-page__date{margin:0 0 14px;font-family:'JetBrains Mono',monospace;font-size:13px;
+      letter-spacing:.06em;color:var(--faint)}
+    .post-page__title{margin:0;font-size:clamp(26px,4.2vw,37px);font-weight:700;
+      letter-spacing:-.018em;line-height:1.2}
+
+    .prose{padding:14px 0 8px}
+    .prose p{margin:0 0 1.35em}
+    .prose strong{font-weight:600;color:#15171a}
+    .prose em{font-style:italic;color:#33363b}
+    .prose a{color:var(--accent);text-decoration:none;border-bottom:1px solid #cfe0d9}
+    .prose a:hover{border-bottom-color:var(--accent)}
+
+    .prose ul,.prose ol{margin:0 0 1.4em;padding-left:1.5em}
+    .prose li{margin:0 0 .6em;line-height:1.66}
+    .prose ul ul,.prose ol ul{margin:.55em 0 .2em}
+    .prose li::marker{color:var(--faint)}
+
+    .lede{font-size:18.5px;line-height:1.62;color:#34383d;margin:6px 0 0}
+    .lede em{color:#1d2b26;font-style:normal;font-weight:600}
+
+    .note{margin:1.4em 0 0;padding:14px 18px;background:#f6f7f3;border:1px solid var(--line);
+      border-radius:8px;font-size:14px;line-height:1.62;color:var(--muted)}
+    .note p{margin:0 0 .5em}
+    .note p:last-child{margin:0}
+    .note strong{color:#3a3d42;font-weight:600}
+
+    .callout{margin:1.8em 0 2.2em;padding:20px 24px;background:var(--accent-soft);
+      border-left:3px solid var(--accent);border-radius:0 8px 8px 0}
+    .callout__label{font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:.16em;
+      text-transform:uppercase;color:var(--accent);font-weight:600;margin:0 0 .7em}
+    .callout ul{margin:0;padding-left:1.25em}
+    .callout li{font-size:15.5px;line-height:1.62;color:#2c3a35;margin:0 0 .7em}
+    .callout li:last-child{margin-bottom:0}
+    .callout strong{color:#1d2b26}
+
+    .prose h2{font-size:clamp(20px,2.8vw,25px);font-weight:700;letter-spacing:-.012em;line-height:1.25;
+      margin:1.6em 0 .2em;padding-top:1.5em;border-top:1px solid var(--line)}
+    .prose h3{font-size:18px;font-weight:600;letter-spacing:-.005em;line-height:1.4;margin:2em 0 .5em;color:#23262b}
+
+    code{font-family:'JetBrains Mono',monospace;font-size:.84em;background:var(--code-bg);
+      border-radius:4px;padding:.1em .4em;color:#2c2f34;border:1px solid #e8e9e4}
+
+    /* wide reference tables: scroll on small screens, break out wider on large screens */
+    .table-wrap{overflow-x:auto;margin:1.3em 0 1em;-webkit-overflow-scrolling:touch;
+      border:1px solid var(--line);border-radius:8px}
+    @media (min-width:1080px){
+      .table-wrap{position:relative;left:50%;transform:translateX(-50%);width:94vw;max-width:1440px}
+    }
+    table{width:100%;min-width:1080px;border-collapse:collapse;font-size:12.5px;line-height:1.5;background:#fff}
+    thead th{text-align:left;font-weight:600;font-size:11.5px;letter-spacing:.01em;color:var(--muted);
+      background:#fafaf7;padding:10px 11px;border-bottom:1px solid var(--line);vertical-align:bottom;white-space:nowrap}
+    tbody td{padding:10px 11px;border-bottom:1px solid var(--line-soft);vertical-align:top}
+    tbody tr:last-child td{border-bottom:none}
+    tbody tr:hover{background:#fafaf8}
+    td:first-child{font-weight:500;color:#202327;white-space:nowrap}
+    td+td{border-left:1px solid var(--line-soft);color:#41454b}
+    table strong{font-weight:600;color:#1d2b26}
+    table em{font-style:italic;color:#5c6066}
+
+    .footer{margin-top:48px;padding:26px 0 60px;border-top:1px solid var(--line);
+      font-size:13px;color:var(--faint);font-family:'JetBrains Mono',monospace;letter-spacing:.04em}
+
+    @media(max-width:600px){
+      body{font-size:16px}
+      table{font-size:12px}
+      thead th,tbody td{padding:8px 9px}
+      .prose h3{font-size:17px}
+      .callout{padding:16px 18px}
+    }
+  </style>
+</head>
+
+<body>
+  <main class="container">
+    <nav class="tabs">
+      <a class="tabs__link" href="../../index.html#home">Home</a>
+      <a class="tabs__link is-active" href="../../index.html#blog">Blog</a>
+    </nav>
+
+    <article class="post-page">
+      <header class="post-page__header">
+        <p data-eid="p-1" class="post-page__date">2026-06-18</p>
+        <h1 data-eid="h1-1" class="post-page__title">Vision-Language-Action (VLA) 模型大全表：I/O + 训练数据全景（尽量穷尽版）</h1>
+      </header>
+
+      <div class="prose">
+        <p data-eid="p-2" class="lede">
+          在上一版 I/O 对照的基础上尽量穷尽地收录 VLA 模型，并为每个模型补上了 <em>训练数据</em> 这一列——数据集构成
+          + 规模。补齐之后，几条关于数据来源与血统分野的规律一下子清晰起来。
+        </p>
+
+        <div class="note">
+          <p data-eid="p-3"><strong>收录标准：</strong>有 arXiv 论文 / 技术报告 / 官方发布、且信息可核实的模型。细节未公开的字段标注"未公开"。</p>
+          <p data-eid="p-4"><strong>维度：</strong>输入模态 | 本体状态? | 语言含推理? | 动作表示 | 分块? | backbone | <strong>训练数据</strong> | 动作空间。</p>
+          <p data-eid="p-5"><strong>本版相对上一版的新增：</strong>为每个模型补充了训练数据总结（数据集构成 + 规模）。</p>
+        </div>
+
+        <div class="callout">
+          <p data-eid="p-6" class="callout__label">TL;DR</p>
+          <ul>
+            <li data-eid="li-1">
+              <strong>训练数据这一列补齐后，几条规律一目了然</strong>：(1) 奠基模型几乎全靠
+              <strong>Open X-Embodiment (OXE)</strong> 这口"公共井"——RT-1-X、Octo、OpenVLA、RDT、SpatialVLA 都从中
+              取数（约 100 万条轨迹 / 22 个本体）；(2) <strong>π 系列、Helix、GR-3、GO-1 等领先模型转向自采的专有
+              大规模数据</strong>（π0 约 1 万小时、Helix 约 500 小时、AgiBot World 约 100 万条轨迹），数据成了护城河；
+              (3) <strong>新一代普遍用"数据金字塔"</strong>——网络视频/图文 + 仿真/合成 + 真实机器人遥操作三层混合
+              （GR00T、GR-3、π0.5、π0.7）。
+            </li>
+            <li data-eid="li-2">
+              <strong>数据规模与"是否输入本体状态"再次印证血统分野</strong>：OXE 系（离散 token、主打泛化）规模大
+              但本体单一、多不输入状态；自采系（流匹配、工业部署）输入状态且强调多本体真实数据。
+            </li>
+            <li data-eid="li-3">
+              <strong>量级参考</strong>：RT-1 约 13 万条；OXE 约 100 万条/22 本体；π0 约 1 万小时/7+ 本体；
+              GR00T N1 约 8,376 小时（数据金字塔）；AgiBot World 约 100 万条/217 任务/100 台机器人；
+              Helix 约 500 小时；CoVLA（自动驾驶）约 80 小时/1 万段视频。
+            </li>
+          </ul>
+        </div>
+
+        <h2 data-eid="h2-1">A. 经典/奠基 VLA（及前身、同源对照）</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>模型 (机构, 年份)</th><th>输入模态</th><th>本体状态?</th><th>语言含推理?</th><th>动作表示</th>
+                <th>分块?</th><th>backbone</th><th>训练数据（数据集 + 规模）</th><th>动作空间</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td><strong>RT-1</strong> (Google, 2022)</td><td>指令 + 6 帧 RGB</td><td>否</td><td>否</td><td>离散 token（256 bin）</td><td>单步</td><td>EfficientNet-B3 + Transformer</td><td>谷歌自采 <strong>~13 万条</strong>演示，跨 13 台机器人、700+ 任务（未公开发布）</td><td>末端位姿+底盘</td></tr>
+              <tr><td><strong>RT-2</strong> (Google DeepMind, 2023)</td><td>指令 + 单路 RGB</td><td>否</td><td>否（默认）</td><td>离散 token（动作即文本）</td><td>单步</td><td>PaLI-X / PaLM-E（≤55B）</td><td><strong>RT-1 的 13 万条机器人数据 + 数十亿网络图文</strong>（VLM 共训）</td><td>末端位姿增量</td></tr>
+              <tr><td><strong>RT-X / Open X-Embodiment</strong> (2023)</td><td>指令 + RGB</td><td>部分</td><td>否</td><td>同 RT-1/RT-2</td><td>单步</td><td>RT-1-X / RT-2-X</td><td><strong>OXE：约 100 万条轨迹、22 个本体、21 机构、527 种技能</strong></td><td>末端位姿</td></tr>
+              <tr><td><strong>PaLM-E</strong> (Google, 2023) — <em>前身</em></td><td>文本+图像+状态（交错）</td><td>是</td><td><strong>是（高层规划）</strong></td><td>文本计划（外接低层）</td><td>N/A</td><td>PaLM-540B + ViT-22B</td><td>网络图文 + 机器人规划数据（多任务多本体混合）</td><td>不直接输出动作</td></tr>
+              <tr><td><strong>RoboFlamingo</strong> (字节/THU, 2024)</td><td>指令 + 6–12 帧 RGB</td><td>否</td><td>否</td><td>连续（独立动作头，~10M）</td><td>多步</td><td>冻结 Flamingo（CLIP ViT-L + LLM）</td><td><strong>CALVIN</strong> 基准数据（冻结 VLM，仅训小动作头）</td><td>末端位姿</td></tr>
+              <tr><td><strong>Octo</strong> (UC Berkeley, 2024)</td><td>指令<strong>或目标图像</strong> + RGB</td><td>否</td><td>否</td><td>连续 via 扩散</td><td>是</td><td>从头训练 Transformer（~93M）</td><td><strong>OXE 子集：约 80 万条 episode、25 个数据集</strong></td><td>可配置</td></tr>
+              <tr><td><strong>OpenVLA</strong> (Stanford, 2024)</td><td>指令 + 单路 RGB</td><td>否</td><td>否</td><td>离散 token（256 bin）</td><td>单步</td><td>Prismatic-7B（SigLIP+DINOv2+Llama2）</td><td><strong>OXE-Magic-Soup：约 97 万条 episode</strong>（64×A100 训 15 天）</td><td>末端位姿增量</td></tr>
+              <tr><td><strong>Diffusion Policy (DROID)</strong> (2024) — <em>同源对照</em></td><td>语言（DistilBERT）+ 双 RGB + 状态</td><td>是</td><td>否</td><td>连续 via 扩散（U-Net）</td><td>是</td><td>ResNet-50 + DistilBERT + U-Net</td><td><strong>DROID：约 7.6 万条演示、564 场景、86 任务、13 机构</strong>（+ 50/50 混域内数据）</td><td>末端/关节轨迹</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2 data-eid="h2-2">B. Physical Intelligence π 系列（完整谱系）</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>模型 (年份)</th><th>输入模态</th><th>本体状态?</th><th>语言含推理?</th><th>动作表示</th>
+                <th>分块?</th><th>backbone</th><th>训练数据（数据集 + 规模）</th><th>动作空间</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td><strong>π0</strong> (2024)</td><td>指令 + 多 RGB（base+双腕） + 状态</td><td>是</td><td>否</td><td>连续 via <strong>流匹配</strong></td><td>是（H=50）</td><td>PaliGemma-3B + 300M action expert</td><td><strong>专有约 1 万小时 / 7+ 本体 / 68 任务 + OXE</strong>（网络图文 VLM 预训练打底）</td><td>多 embodiment</td></tr>
+              <tr><td><strong>π0-FAST</strong> (2025)</td><td>同 π0</td><td>是</td><td>否</td><td>离散 token（<strong>FAST</strong>）</td><td>是</td><td>PaliGemma-3B</td><td>同 π0 数据；首次高效用上 <strong>DROID</strong> 全集</td><td>多 embodiment</td></tr>
+              <tr><td><strong>π0.5</strong> (2025)</td><td>指令 + 多 RGB + 状态</td><td>是</td><td><strong>部分（层级子任务）</strong></td><td>FAST 离散→流匹配</td><td>是</td><td>PaliGemma + action expert</td><td><strong>比 OXE 大若干数量级</strong>（≥1 万小时，含遥操作+自采；+ 网络图文）官方未给精确值</td><td>移动操作</td></tr>
+              <tr><td><strong>π*0.6 (RECAP)</strong> (2025.11)</td><td>同 π0.5</td><td>是</td><td>部分（+主动求助）</td><td>流匹配 + <strong>优势条件 RL</strong></td><td>是</td><td>π0.6 架构</td><td>π0.6 数据 + <strong>机器人自主经验数据 + 专家纠正</strong>（离线RL→演示→在线RL 三阶段）</td><td>多 embodiment</td></tr>
+              <tr><td><strong>π0.7</strong> (2026.4)</td><td>指令 + 多 RGB + <strong>subgoal 图</strong> + 元数据</td><td>是</td><td>部分（高层语义策略驱动）</td><td>连续 via <strong>流匹配</strong></td><td>是</td><td>5B：Gemma3-4B + MEM 视频历史 + 860M action expert</td><td><strong>多源混合</strong>：多本体演示 + 自主 rollout + 人类干预 + 开源机器人数据 + 第一视角人类视频 + 网络 VQA；<strong>刻意纳入低质量/失败数据</strong></td><td>多 embodiment（含 UR5e）</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2 data-eid="h2-3">C. 工业 / 人形机器人基础模型</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>模型 (机构, 年份)</th><th>输入模态</th><th>本体状态?</th><th>语言含推理?</th><th>动作表示</th>
+                <th>分块?</th><th>backbone</th><th>训练数据（数据集 + 规模）</th><th>动作空间</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td><strong>GR00T N1 / N1.5</strong> (NVIDIA, 2025)</td><td>指令 + 多视角 RGB + 状态</td><td>是</td><td>否</td><td>连续 via 流匹配（DiT）</td><td>是</td><td>Eagle-2 VLM + DiT</td><td><strong>数据金字塔</strong>：网络视频/人类视频（底）+ 仿真/神经生成合成数据（中）+ 真实遥操作（顶）；约 <strong>8,376 小时</strong>等效</td><td>多 embodiment</td></tr>
+              <tr><td><strong>GR00T N1.6</strong> (NVIDIA, 2025.12)</td><td>指令 + 多视角 RGB + 状态</td><td>是</td><td>否</td><td>连续 via 流匹配（2× 大 DiT）</td><td>是</td><td>内部 Cosmos-2B VLM + DiT</td><td>同 N1.5 金字塔 + 改进数据增强/共训；真机 YAM / Genie-1 / Unitree G1 数据</td><td>多 embodiment</td></tr>
+              <tr><td><strong>Gemini Robotics</strong> (DeepMind, 2025)</td><td>指令 + RGB</td><td>未明示</td><td>否</td><td>物理动作（直接控制）</td><td>是</td><td>Gemini 2.0</td><td><strong>网络多模态 + 机器人数据</strong>（海量专有，主用 ALOHA 2 数据，扩展到 Apollo 等）</td><td>末端/双臂</td></tr>
+              <tr><td><strong>Gemini Robotics 1.5 / ER 1.5</strong> (2025)</td><td>指令 + RGB</td><td>未明示</td><td><strong>是（动作+多层推理交织）</strong></td><td>直接控制 + 推理交织</td><td>是</td><td>Gemini 系 + Motion Transfer</td><td>多本体机器人数据 + 网络多模态（跨本体 Motion Transfer 复用数据）</td><td>多 embodiment</td></tr>
+              <tr><td><strong>Helix</strong> (Figure AI, 2025)</td><td>指令 + 全 6 路 RGB</td><td>是（全身）</td><td>否</td><td>连续（S1, 200Hz）</td><td>是</td><td>S2：内部 7B VLM + S1：80M Transformer</td><td><strong>约 500 小时</strong>机器人遥操作 + 自动生成文本描述配对</td><td>上半身 35 DoF</td></tr>
+              <tr><td><strong>GR-2</strong> (ByteDance, 2024)</td><td>指令 + RGB（+状态）</td><td>是</td><td>否</td><td>视频生成 + 动作头</td><td>是</td><td>GPT 式生成 Transformer</td><td><strong>约 3,800 万条互联网视频片段（&gt;500 亿 token）</strong>预训练 + 机器人演示</td><td>末端/关节</td></tr>
+              <tr><td><strong>GR-3</strong> (ByteDance, 2025)</td><td>指令 + 多视角 RGB + 状态</td><td>是</td><td>否</td><td>连续 via 流匹配（DiT）</td><td>是</td><td>Qwen2.5-VL-3B + DiT（4B）</td><td><strong>三源共训</strong>：网络图文（VQA）+ 真实机器人遥操作轨迹 + 人类（VR）轨迹数据</td><td>双臂移动，全身控制</td></tr>
+              <tr><td><strong>GO-1 (AgiBot World)</strong> (智元, 2025)</td><td>指令 + 多视角 RGB + 状态</td><td>是</td><td>部分（latent planner）</td><td>VLM + 扩散（latent 规划）</td><td>是</td><td>InternVL 系 + 扩散专家</td><td><strong>AgiBot World：约 100 万条轨迹、217 任务、100 台真机、4000㎡ 五大场景</strong></td><td>双臂 dexterous</td></tr>
+              <tr><td><strong>WALL-OSS</strong> (自变量, 2025)</td><td>指令 + RGB + 状态</td><td>是</td><td><strong>是（多模态+CoT 共训）</strong></td><td>连续（动作专家）</td><td>是</td><td>VLM + action expert</td><td>多模态网络数据 + 机器人数据共训（含 CoT 推理信号）</td><td>多 embodiment</td></tr>
+              <tr><td><strong>LingBot-VLA / VA</strong> (蚂蚁, 2026.1)</td><td>指令 + RGB + 状态</td><td>是</td><td>否</td><td>连续</td><td>是</td><td>开源 VLA</td><td><strong>约 2 万小时真实双臂机器人数据、9 种配置</strong>（全开源）</td><td>双臂</td></tr>
+              <tr><td><strong>WholeBodyVLA</strong> (OpenDriveLab, ICLR 2026)</td><td>指令 + RGB（+可选状态）</td><td>可选</td><td>否</td><td>连续（从无动作视频学潜动作）</td><td>是</td><td>统一潜 VLA</td><td><strong>无动作第一视角视频 + AgiBot X2 全身数据</strong>（学潜动作）</td><td>全身 loco-manipulation</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2 data-eid="h2-4">D. 开源 / 学术 VLA（操作为主）</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>模型 (机构, 年份)</th><th>输入模态</th><th>本体状态?</th><th>语言含推理?</th><th>动作表示</th>
+                <th>分块?</th><th>backbone</th><th>训练数据（数据集 + 规模）</th><th>动作空间</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td><strong>OpenVLA-OFT</strong> (Stanford, 2025)</td><td>指令 + RGB（+可选状态/夹爪图）</td><td>可选</td><td>否</td><td>连续 via L1 回归（并行解码）</td><td>是</td><td>OpenVLA（Prismatic-7B）</td><td>继承 OpenVLA（OXE 约 97 万）+ 下游微调（LIBERO / ALOHA）</td><td>末端/双臂</td></tr>
+              <tr><td><strong>CogACT</strong> (Microsoft 等, 2024)</td><td>指令 + RGB</td><td>否</td><td>否</td><td>连续 via 扩散（DiT，≤300M）</td><td>是</td><td>Prismatic-7B + DiT</td><td><strong>OXE 约 40 万条轨迹</strong>预训练（+ 少量下游微调）</td><td>多 embodiment</td></tr>
+              <tr><td><strong>TinyVLA</strong> (2024)</td><td>指令 + RGB</td><td>否</td><td>否</td><td>连续 via 扩散解码头</td><td>是</td><td>&lt;1B 骨干 + diffusion decoder</td><td>多模态预训练 + 机器人数据（强调数据高效，少量演示即可）</td><td>末端位姿</td></tr>
+              <tr><td><strong>RDT-1B</strong> (清华, 2024)</td><td>指令 + ≤3 RGB + 状态</td><td>是</td><td>否</td><td>连续 via 扩散（DiT，1.2B）</td><td>是（64步）</td><td>改进 DiT（SigLIP + T5-XXL）</td><td><strong>46 个数据集、&gt;100 万条轨迹</strong>预训练 + <strong>6k 条双臂</strong>微调</td><td>物理可解释统一空间</td></tr>
+              <tr><td><strong>SmolVLA</strong> (Hugging Face, 2025)</td><td>指令 + 多 RGB + 状态</td><td>是</td><td>否</td><td>连续 via 流匹配</td><td>是</td><td>SmolVLM-2 + 100M action expert</td><td><strong>LeRobot 社区数据集</strong>（开源众包，非专有大数据）</td><td>SO-100/101</td></tr>
+              <tr><td><strong>CLIP-RT / +</strong> (2024/2025)</td><td>指令 + RGB</td><td>否</td><td>否</td><td>语言化运动基元</td><td>+版是</td><td>改造 CLIP（1–1.3B）</td><td><strong>OXE</strong> 预训练 + 自采（自然语言监督采集）域内数据</td><td>末端运动基元</td></tr>
+              <tr><td><strong>SpatialVLA</strong> (上海AILab 等, 2025)</td><td>指令 + 多 RGB（+Ego3D 编码）</td><td>否</td><td>否</td><td>离散空间动作 token</td><td>是</td><td>VLM + Ego3D 编码</td><td><strong>约 110 万条真实机器人 episode</strong>预训练（跨多机器人环境）</td><td>末端，3D 感知</td></tr>
+              <tr><td><strong>TraceVLA</strong> (微软/UMD, 2025)</td><td>指令 + RGB（叠加轨迹）</td><td>是</td><td>否（视觉轨迹提示）</td><td>离散（基于 OpenVLA）</td><td>单/多步</td><td>OpenVLA</td><td>继承 OpenVLA（OXE）+ 轨迹叠加增强数据</td><td>末端位姿</td></tr>
+              <tr><td><strong>HybridVLA</strong> (北大 等, 2025)</td><td>指令 + RGB + 状态</td><td>是</td><td>否</td><td><strong>混合：离散自回归 + 扩散连续</strong></td><td>是</td><td>统一 7B 框架</td><td>OXE + 下游机器人数据（协同集成训练）</td><td>末端/双臂</td></tr>
+              <tr><td><strong>UniVLA</strong> (清华/上海AILab, 2025)</td><td>指令 + RGB（从无动作视频学潜动作）</td><td>取决实现</td><td>否</td><td>潜动作→离散解码</td><td>是</td><td>8.5B 自回归（VQ 图像 + FAST 动作 token）</td><td>网络视频（学潜动作）+ CALVIN/LIBERO/Bridge</td><td>跨 embodiment</td></tr>
+              <tr><td><strong>X-VLA</strong> (2025.10)</td><td>指令 + 多 RGB + 状态</td><td>是</td><td>否</td><td>连续（soft-prompt Transformer）</td><td>是</td><td>可扩展跨本体 Transformer</td><td>多本体混合数据（soft-prompt 区分本体）</td><td>跨 embodiment</td></tr>
+              <tr><td><strong>VLA-Adapter</strong> (2025)</td><td>第三视角图 + 夹爪图 + 指令 + ActionQuery</td><td>是（OFT 模式）</td><td>否</td><td>连续（轻量 Policy 桥接）</td><td>是（8维）</td><td>Prismatic（Qwen2.5-0.5B）微型</td><td>LIBERO / CALVIN（主打微型骨干 + 少预训练）</td><td>末端/关节</td></tr>
+              <tr><td><strong>GraspVLA</strong> (银河通用, CoRL 2025)</td><td>指令 + RGB</td><td>否</td><td>否</td><td>动作</td><td>是</td><td>VLA 抓取基础模型</td><td><strong>十亿级合成抓取动作数据</strong>预训练</td><td>抓取</td></tr>
+              <tr><td><strong>Magma</strong> (Microsoft, CVPR 2025)</td><td>指令 + RGB（UI/机器人通用）</td><td>否</td><td>部分（SoM/ToM 标记）</td><td>动作（数字+物理统一）</td><td>是</td><td>多模态基础模型</td><td>UI 截图 + 网络视频 + 机器人数据（Set/Trace-of-Mark 标注）</td><td>UI + 机器人</td></tr>
+              <tr><td><strong>NORA</strong> (2025)</td><td>指令 + RGB</td><td>否</td><td>否</td><td>离散 token</td><td>是</td><td>Qwen2-VL 系小模型</td><td>OXE 等开源机器人数据</td><td>末端</td></tr>
+              <tr><td><strong>NORA-1.5</strong> (2025.11)</td><td>指令 + RGB</td><td>否</td><td>否</td><td>流匹配 + 世界模型/偏好奖励</td><td>是</td><td>NORA + 世界模型</td><td>NORA 数据 + 世界模型生成 + 动作偏好奖励数据</td><td>末端</td></tr>
+              <tr><td><strong>3D-VLA</strong> (UMass, 2024)</td><td>指令 + RGB-D / 点云</td><td>是</td><td><strong>是（生成式世界模型）</strong></td><td>扩散（场景生成+动作）</td><td>是</td><td>3D 大语言模型</td><td>自建 <strong>3D 具身指令数据集</strong>（含 3D 场景、目标生成标注）</td><td>3D 操作</td></tr>
+              <tr><td><strong>EO-1 (EmbodiedOneVision)</strong> (2025.8)</td><td>指令 + RGB（视觉-文本-动作交错）</td><td>是</td><td><strong>是（交错预训练）</strong></td><td>交错预训练</td><td>是</td><td>交错 VLA 预训练</td><td><strong>交错的视觉-文本-动作</strong>大规模语料（L1-like 知识共训）</td><td>多 embodiment</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2 data-eid="h2-5">E. 显式推理增强 VLA（少数派，但在增多）</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>模型 (机构, 年份)</th><th>推理形式</th><th>动作表示</th><th>backbone</th>
+                <th>训练数据（数据集 + 规模）</th><th>备注</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td><strong>ECoT</strong> (Berkeley, CoRL 2024)</td><td>动作前输出"计划→子任务→运动→可见特征"</td><td>离散（OpenVLA）</td><td>OpenVLA</td><td><strong>Bridge 数据 + 自动生成的具身推理链标注</strong>（无需额外机器人数据）</td><td>成功率 +28%</td></tr>
+              <tr><td><strong>CoT-VLA</strong> (NVIDIA/Stanford, 2025)</td><td>视觉链式思维（预测子目标图像）</td><td>离散</td><td>VILA-U 系</td><td>机器人数据 + 子目标图像作为视觉 CoT 监督</td><td>LIBERO 强</td></tr>
+              <tr><td><strong>ThinkAct</strong> (NVIDIA, NeurIPS 2025)</td><td>强化视觉潜规划</td><td>连续</td><td>VLA + 强化潜规划</td><td>机器人数据 + 强化学习潜规划信号</td><td>推理与动作解耦</td></tr>
+              <tr><td><strong>RoboBrain / 2.0</strong> (BAAI, CVPR 2025)</td><td>长链 CoT（输出结构化计划/坐标）</td><td>不直接输出低层动作</td><td>Qwen2.5-VL</td><td>多视角图像 + 视频 + 场景图 + 具身推理数据（VQA + 规划）</td><td>具身推理大脑</td></tr>
+              <tr><td><strong>Gemini Robotics-ER / 1.5 / 1.6</strong> (DeepMind, 2025)</td><td>具身推理（空间/时间、指点、3D）</td><td>不直接输出低层动作</td><td>Gemini 2.0</td><td>网络多模态 + 具身推理标注（空间/3D/指点）</td><td>独立推理 VLM</td></tr>
+              <tr><td><strong>VLA-Reasoner</strong> (2025)</td><td>测试时 MCTS 前瞻</td><td>插件式（套现成 VLA）</td><td>任意 VLA</td><td>无需重训（test-time + 世界模型 rollout）</td><td>插件式推理</td></tr>
+              <tr><td><strong>AutoVLA</strong> (UCLA, 2025)</td><td>自适应"think vs act" + GRPO</td><td>自回归轨迹</td><td>单一自回归 VLM</td><td>nuScenes 等驾驶数据 + 强化微调</td><td>自动驾驶推理</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2 data-eid="h2-6">F. 世界模型 / 视频生成路线（技术路径不同）</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>模型 (机构, 年份)</th><th>输入</th><th>输出/动作来源</th><th>训练数据（数据集 + 规模）</th><th>备注</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td><strong>Cosmos Policy / WAM</strong> (NVIDIA, 2025/2026)</td><td>RGB 视频帧（动作=latent 帧）</td><td>扩散</td><td><strong>Cosmos 世界基础模型</strong>（海量互联网视频预训练）+ 机器人演示后训练</td><td>复用视频物理先验</td></tr>
+              <tr><td><strong>WorldVLA</strong> (阿里达摩, 2025.6)</td><td>指令 + RGB</td><td>自回归统一动作+世界模型</td><td>机器人数据（动作模型 + 世界模型联合 token 化训练）</td><td>互相增强</td></tr>
+              <tr><td><strong>RynnVLA-002</strong> (阿里, 2025.11)</td><td>指令 + 历史图像 + 状态</td><td>统一 VLA + 世界模型（下一帧+动作）</td><td>机器人轨迹（VLA）+ 图像帧预测（世界模型）联合</td><td>离散+连续动作</td></tr>
+              <tr><td><strong>GR-2</strong> (ByteDance)</td><td>指令 + RGB</td><td>视频生成 + 动作头</td><td><strong>3,800 万视频片段（&gt;500 亿 token）+ 机器人演示</strong></td><td>见 C 类</td></tr>
+              <tr><td><strong>Genie Envisioner</strong> (智元, 2025)</td><td>指令 + RGB</td><td>世界基础平台（生成+规划）</td><td>AgiBot World 系数据（世界模型平台）</td><td>统一操作平台</td></tr>
+              <tr><td><strong>UniPi / UVA</strong> (2023/2025)</td><td>指令 + 图像</td><td>视频生成→逆动力学提取动作</td><td>机器人 + 网络视频（视频即策略）</td><td>视频即策略</td></tr>
+              <tr><td><strong>V-JEPA 2 / 2-AC</strong> (Meta, 2025)</td><td>视频（潜空间预测）</td><td>规划模式（MPC，非直接策略）</td><td><strong>超 100 万小时互联网视频</strong>自监督预训练 + 少量机器人交互（训 AC 预测器）</td><td>前瞻规划</td></tr>
+              <tr><td><strong>FLOWER</strong> (2025)</td><td>指令 + RGB</td><td>流匹配动作生成</td><td>CALVIN 基准数据</td><td>CALVIN SOTA</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2 data-eid="h2-7">G. 导航 / 移动操作 / 自动驾驶 VLA</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>模型 (机构, 年份)</th><th>输入模态</th><th>本体/自车状态?</th><th>语言含推理?</th>
+                <th>动作表示</th><th>backbone</th><th>训练数据（数据集 + 规模）</th><th>动作空间</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td><strong>MoManipVLA</strong> (CVPR 2025)</td><td>指令 + RGB</td><td>是</td><td>否</td><td>迁移 VLA 到移动操作</td><td>现成 VLA</td><td>现成 VLA 权重 + 移动操作微调数据</td><td>移动底盘+臂</td></tr>
+              <tr><td><strong>EchoVLA</strong> (2025.10)</td><td>指令 + RGB + 状态</td><td>是</td><td>部分（声明式记忆）</td><td>连续</td><td>VLA + 记忆</td><td>移动操作机器人数据（+声明式记忆）</td><td>移动操作</td></tr>
+              <tr><td><strong>OpenDriveVLA</strong> (TUM, 2025)</td><td>2D+3D 视觉 token + 自车状态 + 驾驶指令</td><td>是（自车）</td><td>部分（agent-env-ego 建模）</td><td>自回归轨迹 waypoint</td><td>开源 LLM + 3D 感知</td><td>nuScenes（约 1000 场景，3D 感知 + 驾驶指令 + 轨迹标注）</td><td>轨迹规划（开环）</td></tr>
+              <tr><td><strong>AutoVLA</strong> (UCLA, 2025)</td><td>视觉 + 语言 + 驾驶场景</td><td>是</td><td><strong>是（think vs act + GRPO）</strong></td><td>自回归动作</td><td>单一自回归 VLM</td><td>nuScenes 等驾驶基准 + 强化微调</td><td>轨迹</td></tr>
+              <tr><td><strong>EMMA</strong> (Waymo, 2025)</td><td>多相机 + 文本</td><td>是</td><td>部分</td><td>联合检测+规划（文本化轨迹）</td><td>Gemini 系</td><td>Waymo 内部大规模驾驶数据</td><td>轨迹规划</td></tr>
+              <tr><td><strong>CoVLA</strong> (Turing, WACV 2025)</td><td>驾驶视频 + 语言 + 动作</td><td>是</td><td>部分（视觉空间推理）</td><td>开环控制</td><td>Llama-2 + CLIP ViT-L</td><td><strong>CoVLA 数据集：约 80 小时、1 万段 30 秒视频</strong>（东京路采，CAN 数据生成轨迹+语言标注）</td><td>开环控制</td></tr>
+              <tr><td><strong>Alpamayo-R1 (AR1)</strong> (NVIDIA, 2025.11)</td><td>多模态驾驶</td><td>是</td><td><strong>是（因果链推理）</strong></td><td>轨迹规划</td><td>VLA + 因果链推理</td><td>大规模驾驶数据 + 因果链（Chain of Causation）标注</td><td>轨迹（面向 L4）</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2 data-eid="h2-8">核心结论（训练数据视角）</h2>
+        <p data-eid="p-7">
+          <strong>1. 数据来源的"两个时代"。</strong> 早期奠基模型几乎都吃 <strong>Open X-Embodiment</strong> 这口公共井：
+          RT-1-X、Octo（约 80 万 episode）、OpenVLA（约 97 万 episode）、CogACT（约 40 万）、RDT（&gt;100 万）、
+          SpatialVLA（约 110 万）、CLIP-RT 都从中取数。但 OXE 高度不均衡——超 85% 真实轨迹来自
+          Franka/xArm/Kuka/Google Robot 四种机器人，且以短程抓放为主。于是领先玩家转向<strong>自采的专有大规模数据</strong>：
+          π0（约 1 万小时）、Helix（约 500 小时）、AgiBot World/GO-1（约 100 万条/100 台真机）、LingBot（约 2 万小时）。
+          <strong>数据从"共享资源"变成了"护城河"。</strong>
+        </p>
+        <p data-eid="p-8">
+          <strong>2. "数据金字塔"成为新一代标配。</strong> GR00T、GR-3、π0.5、π0.7 等都不再只用真实机器人数据，而是三层
+          混合：<strong>网络视频/图文（底，量大、泛化）+ 仿真/合成/神经生成（中）+ 真实遥操作（顶，量少、本体专属）</strong>。
+          GR-3 明确三源共训（网络 VQA + 机器人遥操作 + 人类 VR 轨迹）；π0.7 甚至<strong>刻意纳入低质量和失败数据</strong>；
+          π*0.6 进一步加入<strong>机器人自主经验 + 专家纠正</strong>（RL）。这是为绕开"机器人没有互联网级数据"这一根本瓶颈。
+        </p>
+        <p data-eid="p-9">
+          <strong>3. 数据规模与"是否输入本体状态"再次沿血统分野。</strong> OXE 系（离散 token、主打跨任务泛化）虽规模大
+          但本体单一，且多不输入 proprioception（OpenVLA、CogACT、TinyVLA、SpatialVLA）；自采系（流匹配、面向
+          多本体/高频/工业部署）输入本体状态、强调真实多本体数据（π 全系、GR00T、RDT、Helix、GO-1）。这与前面 I/O
+          表得出的分野完全一致。
+        </p>
+        <p data-eid="p-10">
+          <strong>4. 动作表示与数据形态相关。</strong> 离散 token 系常配 OXE 这类异构汇聚数据（动作离散化便于统一不同
+          本体）；流匹配/扩散系常配自采的高频连续轨迹（50Hz 多视角 + 本体状态）。世界模型系（Cosmos、GR-2、
+          V-JEPA 2、UniPi）则反过来主吃<strong>互联网视频</strong>（V-JEPA 2 超 100 万小时视频），靠视频学物理先验，
+          再用少量机器人数据接出动作。
+        </p>
+
+        <h2 data-eid="h2-9">Caveats</h2>
+        <ul>
+          <li data-eid="li-4">
+            <strong>规模数字口径不一</strong>：有的按"小时"、有的按"条轨迹/episode"、有的按"视频片段/token"，难以直接
+            横比；不同综述对同一模型的数字偶有出入（如 Octo 约 80 万 episode vs 另说约 25 个数据集/65k 演示子集），
+            本表取较主流口径并标注。
+          </li>
+          <li data-eid="li-5">
+            <strong>专有数据多未公开精确值</strong>：π0.5/π0.7、Gemini Robotics、Helix 等的确切规模官方未完全披露，
+            本表用"约/≥/数量级"等措辞，精确值以官方报告为准。
+          </li>
+          <li data-eid="li-6">
+            <strong>数据 ≠ 仅机器人数据</strong>：几乎所有 VLM-based VLA 都先在<strong>数十亿网络图文</strong>上预训练
+            （VLM 骨干），本表"训练数据"列主要记机器人/动作侧数据，VLM 预训练语料只在关键处提及。
+          </li>
+          <li data-eid="li-7">
+            <strong>同上一版的 I/O 字段</strong>：本体状态、推理、动作表示等判断仍是概念级简化，连续谱上的中间态
+            （如 π0.5 层级子任务）已在备注说明。
+          </li>
+          <li data-eid="li-8">
+            <strong>arXiv 编号/引用数</strong>：如需精确编号与引用请查 arXiv/Google Scholar；本表聚焦数据与 I/O，
+            未逐一附编号（上一版表格含部分编号）。
+          </li>
+        </ul>
+
+        <p data-eid="p-11" style="margin-top:2em">
+          <a href="../../index.html#blog">&larr; Back to blog</a>
+        </p>
+      </div>
+    </article>
+
+    <footer class="footer">&copy; Jian Zhou</footer>
+  </main>
+  <script src="/_edit/inline-edit.js" defer></script>
+</body>
+</html>

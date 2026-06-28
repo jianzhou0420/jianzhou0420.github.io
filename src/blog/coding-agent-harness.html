@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Inside the Coding-Agent Harness — Jian Zhou</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+  <style>
+    :root{
+      --bg:#fdfdfb;--ink:#1b1d21;--muted:#6b7280;--faint:#9aa1ab;
+      --line:#e6e7e3;--line-soft:#eeefea;--accent:#2f6f5e;--accent-soft:#eef4f1;
+      --code-bg:#f3f4f0;
+    }
+    *{box-sizing:border-box}
+    html{-webkit-text-size-adjust:100%}
+    body{margin:0;background:var(--bg);color:var(--ink);
+      font-family:'Inter',system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+      font-size:17px;line-height:1.72;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+    .container{max-width:960px;margin:0 auto;padding:0 26px}
+
+    .tabs{display:flex;gap:26px;padding:30px 0 0;font-size:14px}
+    .tabs__link{color:var(--muted);text-decoration:none;letter-spacing:.01em;
+      padding-bottom:3px;border-bottom:1.5px solid transparent;transition:color .15s}
+    .tabs__link:hover{color:var(--ink)}
+    .tabs__link.is-active{color:var(--ink);border-bottom-color:var(--accent)}
+
+    .post-page__header{padding:54px 0 8px}
+    .post-page__date{margin:0 0 14px;font-family:'JetBrains Mono',monospace;font-size:13px;
+      letter-spacing:.06em;color:var(--faint)}
+    .post-page__title{margin:0;font-size:clamp(28px,4.6vw,40px);font-weight:700;
+      letter-spacing:-.022em;line-height:1.16}
+
+    .prose{padding:14px 0 8px}
+    .prose p{margin:0 0 1.35em}
+    .prose strong{font-weight:600;color:#15171a}
+    .prose em{font-style:italic;color:#33363b}
+    .prose a{color:var(--accent);text-decoration:none;border-bottom:1px solid #cfe0d9}
+    .prose a:hover{border-bottom-color:var(--accent)}
+
+    .prose ul{margin:0 0 1.4em;padding-left:1.4em}
+    .prose li{margin:0 0 .6em;line-height:1.66}
+    .prose li::marker{color:var(--faint)}
+
+    .lede{font-size:18.5px;line-height:1.6;color:#34383d;margin:6px 0 0;padding-bottom:6px}
+    .lede em{color:#1d2b26;font-style:normal;font-weight:600}
+
+    .note{margin:1.4em 0 .4em;padding:14px 18px;background:#f6f7f3;border:1px solid var(--line);
+      border-radius:8px;font-size:14px;line-height:1.62;color:var(--muted)}
+
+    .prose h2{font-size:clamp(21px,3vw,26px);font-weight:700;letter-spacing:-.012em;line-height:1.25;
+      margin:1.5em 0 .35em;padding-top:1.4em;border-top:1px solid var(--line)}
+    .prose h2 .sn{color:var(--accent);font-weight:700;margin-right:.55em}
+
+    code{font-family:'JetBrains Mono',monospace;font-size:.86em;background:var(--code-bg);
+      border-radius:4px;padding:.1em .4em;color:#2c2f34;border:1px solid #e8e9e4}
+
+    blockquote{margin:2.2em 0;padding:18px 22px;background:var(--accent-soft);border-left:3px solid var(--accent);
+      border-radius:0 6px 6px 0;font-size:16.5px;line-height:1.66;color:#2c3a35}
+    blockquote strong{color:#1d2b26}
+
+    .refs{margin-top:10px}
+    .refs__item{position:relative;padding-left:2.9em;margin:0 0 .7em;font-size:14px;line-height:1.62;color:#41454b}
+    .refs__n{position:absolute;left:0;top:0;font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--faint)}
+    .refs__item em{font-style:italic;color:#5c6066}
+    .refs a{color:var(--accent);border-bottom:1px solid #cfe0d9}
+
+    .footer{margin-top:48px;padding:26px 0 60px;border-top:1px solid var(--line);
+      font-size:13px;color:var(--faint);font-family:'JetBrains Mono',monospace;letter-spacing:.04em}
+
+    @media(max-width:600px){
+      body{font-size:16px}
+      .prose h2{font-size:20px}
+    }
+  </style>
+</head>
+
+<body>
+  <main class="container">
+    <nav class="tabs">
+      <a class="tabs__link" href="../../index.html#home">Home</a>
+      <a class="tabs__link is-active" href="../../index.html#blog">Blog</a>
+    </nav>
+
+    <article class="post-page">
+      <header class="post-page__header">
+        <p data-eid="p-1" class="post-page__date">2026-06-19</p>
+        <h1 data-eid="h1-1" class="post-page__title">Inside the Coding-Agent Harness</h1>
+      </header>
+
+      <div class="prose">
+        <p data-eid="p-2" class="lede">
+          The coding agent is the one agent that clearly crossed into autonomous, long-horizon ReAct — and the reason is
+          not the model alone. It is <em>Base Model × Harness.</em> This piece dissects the harness half: what today's
+          coding agents actually provide around the model. It is the control case for the companion piece on embodied
+          agents — almost every item below is <em>free</em> in code and has to be rebuilt from scratch in the physical world.
+        </p>
+
+        <div class="note">
+          Mostly system-agnostic anatomy; each section names one or two real systems as illustration.
+        </div>
+
+        <h2 data-eid="h2-1"><span class="sn">0</span>The loop</h2>
+        <ul>
+          <li data-eid="li-1">ReAct: <strong>think → act → observe</strong>, repeated until done; the model owns the control flow.</li>
+          <li data-eid="li-2">Autonomy = Base Model × Harness; neither half works alone.</li>
+          <li data-eid="li-3"><em>e.g.</em> SWE-agent calls this the <strong>Agent-Computer Interface (ACI)</strong> — it argues interface design moves benchmark scores as much as the model. [1]</li>
+        </ul>
+
+        <h2 data-eid="h2-2"><span class="sn">1</span>Tools</h2>
+        <ul>
+          <li data-eid="li-4">Core set: read / edit / write files, code search (<code>grep</code>/<code>glob</code>), shell (<code>bash</code>), run tests; lately web + MCP.</li>
+          <li data-eid="li-5">Uniform contract: <strong>text in, text out</strong>; synchronous; cheap; reversible; local.</li>
+          <li data-eid="li-6"><em>e.g.</em> Claude Code [2] exposes Read/Edit/Write/Grep/Glob/Bash. Aider [3] edits via <strong>search/replace blocks</strong> so changes apply precisely.</li>
+        </ul>
+
+        <h2 data-eid="h2-3"><span class="sn">2</span>State / workspace</h2>
+        <ul>
+          <li data-eid="li-7">The <strong>filesystem + git repo <em>is</em> the state</strong> — persistent, symbolic, fully inspectable.</li>
+          <li data-eid="li-8">No separate "state" primitive: state lives behind file tools (<code>read_file</code>, <code>grep</code>); plus memory files (<code>CLAUDE.md</code> / <code>AGENTS.md</code> / <code>.cursorrules</code>).</li>
+          <li data-eid="li-9"><em>e.g.</em> Aider's <strong>repo map</strong> (tree-sitter); Cursor's <strong>codebase index</strong> (embeddings) to fetch relevant files cheaply. [4]</li>
+        </ul>
+
+        <h2 data-eid="h2-4"><span class="sn">3</span>Verification</h2>
+        <ul>
+          <li data-eid="li-10">compiler · type-checker · linter · unit/integration tests · CI → <strong>clear pass/fail</strong>, explicit error text the model can read.</li>
+          <li data-eid="li-11"><em>e.g.</em> <strong>SWE-bench</strong>: a fix counts only if the repo's own tests flip the right way — FAIL_TO_PASS go red→green, PASS_TO_PASS stay green. [5]</li>
+        </ul>
+
+        <h2 data-eid="h2-5"><span class="sn">4</span>Recovery &amp; credit assignment</h2>
+        <ul>
+          <li data-eid="li-12">Failures arrive as <strong>stack traces / compiler errors / failed assertions</strong> → localize to <code>file:line</code>.</li>
+          <li data-eid="li-13">Rollback is near-free: git diff / revert, checkpoints, re-run.</li>
+          <li data-eid="li-14"><em>e.g.</em> Cline [6] auto-checkpoints after every tool call (shadow git, with file/task restore modes); git diff/revert as undo; Claude Code works on a branch and shows diffs.</li>
+        </ul>
+
+        <h2 data-eid="h2-6"><span class="sn">5</span>Safety &amp; authority</h2>
+        <ul>
+          <li data-eid="li-15">Sandboxing (file / network / command scope), <strong>permission prompts + allowlists</strong>, approval gates for risky ops, git as the net.</li>
+          <li data-eid="li-16"><em>e.g.</em> OpenAI Codex CLI [7] approval modes (suggest / auto-edit / full-auto) + sandbox (workspace-write … danger-full-access); OpenHands [8] runs each session in an isolated Docker sandbox.</li>
+        </ul>
+
+        <h2 data-eid="h2-7"><span class="sn">6</span>Context / memory</h2>
+        <ul>
+          <li data-eid="li-17">Context window is finite → <strong>summarization / compaction</strong>, sub-agents, memory files, retrieval (RAG / index), MCP [9] for external tools.</li>
+          <li data-eid="li-18"><em>e.g.</em> Claude Code sub-agents + <code>CLAUDE.md</code>; Aider's repo map keeps the working context small.</li>
+        </ul>
+
+        <h2 data-eid="h2-8">Why this is the control case</h2>
+        <p data-eid="p-3">
+          Every row above is something a coding agent gets <em>for free</em> from a 50-year-old, standardized, text-based
+          workspace. The companion piece — <a href="react-embodiment-architecture-brief.html">What It Takes to Build a
+          ReAct-Style Embodied Agent</a> — walks the same rows and asks what it takes to rebuild each one in a world that
+          has none of them.
+        </p>
+
+        <h2 data-eid="h2-9">References</h2>
+        <div class="refs">
+          <p data-eid="p-4" class="refs__item"><span class="refs__n">[1]</span> J. Yang et al., "SWE-agent: Agent-computer interfaces enable automated software engineering," in <em>Proc. NeurIPS</em>, 2024. arXiv:<a href="https://arxiv.org/abs/2405.15793">2405.15793</a>.</p>
+          <p data-eid="p-5" class="refs__item"><span class="refs__n">[2]</span> Anthropic, "Claude Code." [Online]. Available: <a href="https://code.claude.com/docs">https://code.claude.com/docs</a></p>
+          <p data-eid="p-6" class="refs__item"><span class="refs__n">[3]</span> "Aider — AI pair programming in your terminal." [Online]. Available: <a href="https://aider.chat">https://aider.chat</a></p>
+          <p data-eid="p-7" class="refs__item"><span class="refs__n">[4]</span> "Cursor — Codebase indexing." [Online]. Available: <a href="https://cursor.com/docs/context/codebase-indexing">https://cursor.com/docs/context/codebase-indexing</a></p>
+          <p data-eid="p-8" class="refs__item"><span class="refs__n">[5]</span> C. E. Jimenez et al., "SWE-bench: Can language models resolve real-world GitHub issues?," in <em>Proc. ICLR</em>, 2024. arXiv:<a href="https://arxiv.org/abs/2310.06770">2310.06770</a>.</p>
+          <p data-eid="p-9" class="refs__item"><span class="refs__n">[6]</span> "Cline — Checkpoints." [Online]. Available: <a href="https://docs.cline.bot/features/checkpoints">https://docs.cline.bot/features/checkpoints</a></p>
+          <p data-eid="p-10" class="refs__item"><span class="refs__n">[7]</span> OpenAI, "Codex CLI — agent approvals &amp; sandboxing." [Online]. Available: <a href="https://developers.openai.com/codex">https://developers.openai.com/codex</a></p>
+          <p data-eid="p-11" class="refs__item"><span class="refs__n">[8]</span> X. Wang et al., "OpenHands: An open platform for AI software developers as generalist agents," in <em>Proc. ICLR</em>, 2025. arXiv:<a href="https://arxiv.org/abs/2407.16741">2407.16741</a>.</p>
+          <p data-eid="p-12" class="refs__item"><span class="refs__n">[9]</span> Anthropic, "Model Context Protocol." [Online]. Available: <a href="https://modelcontextprotocol.io">https://modelcontextprotocol.io</a></p>
+        </div>
+
+        <p data-eid="p-13" style="margin-top:2em">
+          <a href="../../index.html#blog">&larr; Back to blog</a>
+        </p>
+      </div>
+    </article>
+
+    <footer class="footer">&copy; Jian Zhou</footer>
+  </main>
+  <script src="/_edit/inline-edit.js" defer></script>
+</body>
+</html>

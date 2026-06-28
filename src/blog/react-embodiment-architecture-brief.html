@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>What It Takes to Build a ReAct-Style Embodied Agent — Jian Zhou</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+  <style>
+    :root{
+      --bg:#fdfdfb;--ink:#1b1d21;--muted:#6b7280;--faint:#9aa1ab;
+      --line:#e6e7e3;--line-soft:#eeefea;--accent:#2f6f5e;--accent-soft:#eef4f1;
+      --code-bg:#f3f4f0;
+    }
+    *{box-sizing:border-box}
+    html{-webkit-text-size-adjust:100%}
+    body{margin:0;background:var(--bg);color:var(--ink);
+      font-family:'Inter',system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+      font-size:17px;line-height:1.72;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+    .container{max-width:960px;margin:0 auto;padding:0 26px}
+
+    .tabs{display:flex;gap:26px;padding:30px 0 0;font-size:14px}
+    .tabs__link{color:var(--muted);text-decoration:none;letter-spacing:.01em;
+      padding-bottom:3px;border-bottom:1.5px solid transparent;transition:color .15s}
+    .tabs__link:hover{color:var(--ink)}
+    .tabs__link.is-active{color:var(--ink);border-bottom-color:var(--accent)}
+
+    .post-page__header{padding:54px 0 8px}
+    .post-page__date{margin:0 0 14px;font-family:'JetBrains Mono',monospace;font-size:13px;
+      letter-spacing:.06em;color:var(--faint)}
+    .post-page__title{margin:0;font-size:clamp(28px,4.6vw,40px);font-weight:700;
+      letter-spacing:-.022em;line-height:1.16}
+
+    .prose{padding:14px 0 8px}
+    .prose p{margin:0 0 1.35em}
+    .prose strong{font-weight:600;color:#15171a}
+    .prose em{font-style:italic;color:#33363b}
+    .prose a{color:var(--accent);text-decoration:none;border-bottom:1px solid #cfe0d9}
+    .prose a:hover{border-bottom-color:var(--accent)}
+
+    .lede{font-size:18.5px;line-height:1.6;color:#34383d;margin:6px 0 0;padding-bottom:6px}
+    .lede em{color:#1d2b26;font-style:normal;font-weight:600}
+
+    .prose h2{font-size:clamp(21px,3vw,26px);font-weight:700;letter-spacing:-.012em;line-height:1.25;
+      margin:1.5em 0 .15em;padding-top:1.4em;border-top:1px solid var(--line)}
+    .prose h2 .sn{color:var(--accent);font-weight:700;margin-right:.55em}
+
+    code{font-family:'JetBrains Mono',monospace;font-size:.86em;background:var(--code-bg);
+      border-radius:4px;padding:.1em .4em;color:#2c2f34;border:1px solid #e8e9e4}
+
+    .diagram{font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.5;white-space:pre;
+      background:#f7f8f4;border:1px solid var(--line);border-radius:8px;padding:20px 22px;margin:1.7em 0;
+      overflow-x:auto;color:#2c3a35;-webkit-overflow-scrolling:touch}
+
+    /* comparison tables: scroll on small screens, break out wider on large screens */
+    .table-wrap{overflow-x:auto;margin:1.6em 0;-webkit-overflow-scrolling:touch;
+      border:1px solid var(--line);border-radius:8px}
+    @media (min-width:1080px){
+      .table-wrap{position:relative;left:50%;transform:translateX(-50%);width:92vw;max-width:1200px}
+    }
+    table{width:100%;min-width:720px;border-collapse:collapse;font-size:13.5px;line-height:1.55;background:#fff}
+    thead th{text-align:left;font-weight:600;font-size:12px;letter-spacing:.02em;color:var(--muted);
+      background:#fafaf7;padding:11px 14px;border-bottom:1px solid var(--line);vertical-align:bottom}
+    tbody td{padding:12px 14px;border-bottom:1px solid var(--line-soft);vertical-align:top}
+    tbody tr:last-child td{border-bottom:none}
+    tbody tr:hover{background:#fafaf8}
+    td:first-child{font-weight:600;color:#202327;min-width:135px}
+    td+td{border-left:1px solid var(--line-soft);color:#41454b}
+    table strong{font-weight:600;color:#1d2b26}
+
+    blockquote{margin:2.2em 0;padding:18px 22px;background:var(--accent-soft);border-left:3px solid var(--accent);
+      border-radius:0 6px 6px 0;font-size:16.5px;line-height:1.66;color:#2c3a35}
+    blockquote strong{color:#1d2b26}
+
+    .refs{margin-top:10px}
+    .refs__item{position:relative;padding-left:2.9em;margin:0 0 .7em;font-size:14px;line-height:1.62;color:#41454b}
+    .refs__n{position:absolute;left:0;top:0;font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--faint)}
+    .refs__item em{font-style:italic;color:#5c6066}
+    .refs a{color:var(--accent);border-bottom:1px solid #cfe0d9}
+
+    .footer{margin-top:48px;padding:26px 0 60px;border-top:1px solid var(--line);
+      font-size:13px;color:var(--faint);font-family:'JetBrains Mono',monospace;letter-spacing:.04em}
+
+    @media(max-width:600px){
+      body{font-size:16px}
+      table{font-size:13px}
+      thead th,tbody td{padding:10px 11px}
+      .diagram{font-size:11.5px;padding:16px}
+    }
+  </style>
+</head>
+
+<body>
+  <main class="container">
+    <nav class="tabs">
+      <a class="tabs__link" href="../../index.html#home">Home</a>
+      <a class="tabs__link is-active" href="../../index.html#blog">Blog</a>
+    </nav>
+
+    <article class="post-page">
+      <header class="post-page__header">
+        <p data-eid="p-1" class="post-page__date">2026-06-18</p>
+        <h1 data-eid="h1-1" class="post-page__title">What It Takes to Build a ReAct-Style Embodied Agent</h1>
+      </header>
+
+      <div class="prose">
+        <p data-eid="p-2" class="lede">
+          Current VLA and WAM research mostly improves the embodied base models, but deployable embodied agents require
+          a harness analogous to modern coding agents. Such a harness must maintain executable state, expose robot and
+          simulator tools, enforce action contracts and safety boundaries, collect episode-level feedback, and route
+          control among VLA policies, world-action predictors, planners, and low-level controllers. In this view, VLA
+          and WAM are not complete agents: they are <em>model components inside an embodied execution substrate.</em>
+        </p>
+
+        <h2 data-eid="h2-1"><span class="sn">1</span>Current Embodied Agentic Systems Are Still Workflows</h2>
+
+        <p data-eid="p-3">
+          The current embodied AI landscape already contains many systems that look agentic, but most of them are still
+          better understood as task-specific LLM/VLM workflows rather than general ReAct-style embodied harnesses. In
+          vision-language navigation, systems such as NavGPT [1], MapGPT [2], and SmartWay [3] wrap language models with textual,
+          topological, or metric scene representations so that navigation becomes reasoning over maps, landmarks,
+          candidate viewpoints, and history. In manipulation and VLA-adjacent systems, SayCan [4], Code-as-Policies [5],
+          VoxPoser [6], and ReKep [7] compose foundation models with affordance scoring, code generation, keypoints,
+          constraints, value maps, motion planners, and low-level controllers; the model usually produces an
+          intermediate structure rather than directly owning the whole execution loop. This line should also be
+          distinguished from embodied foundation models and end-to-end VLA policies such as RT-1 [8], RT-2 [9], OpenVLA [10], and π0 [11],
+          which are trained or adapted on robot-action data and are closer to embodied base models than explicit agent
+          workflows. In embodied question answering, systems such as Explore-EQA [12], GraphEQA [13], and ToolEQA [14] combine frozen
+          VLMs with exploration policies, semantic maps, visual memory, scene graphs, confidence calibration, and
+          specialized tools so that the agent can gather enough evidence before answering. Across these domains, the
+          pattern is consistent: external state, tools, planners, and controllers are hand-wired around foundation
+          models to make them useful in interactive environments. These systems are important because they show what
+          embodied agents need — maps, memory, geometry, tool use, verification, and feedback — but they do not yet
+          provide the embodied equivalent of a Codex-style harness. <strong>A workflow uses a model inside a
+          pre-designed system; a harness would let the model operate a system.</strong>
+        </p>
+
+        <h2 data-eid="h2-2"><span class="sn">2</span>What a ReAct-Style (Coding-Agent-Like) Embodied Agent Looks Like</h2>
+
+        <pre class="diagram">                  User Goal
+                      ↓
+          Embodied Reasoner / Task Planner
+                      ↓
+        ┌──────────────────────────────┐
+        │       Embodied Harness        │
+        │                              │
+        │  State Manager                │
+        │  Tool Router                  │
+        │  Memory / Episode Logs        │
+        │  Safety / Approval Layer      │
+        │  Verifier / Recovery Manager  │
+        └──────────────────────────────┘
+          ↓          ↓          ↓
+       Tools        Models     Controllers
+       ↓            ↓          ↓
+  SAM / 3D /     VLA / WAM /   MPC / PID /
+  pose / SLAM    VLM / LLM     motion planner
+       ↓            ↓          ↓
+              Robot + World</pre>
+
+        <p data-eid="p-4">
+          The central challenge is to construct an embodied harness that exposes perception, geometry, memory,
+          simulation, and control tools as typed, executable interfaces. In such a harness, segmentation models, 3D
+          reconstruction modules, pose estimators, motion planners, and world-action predictors become callable tools
+          whose outputs are logged, checked, and composed into action. This shifts embodied agents from monolithic
+          vision-to-action policies toward tool-augmented execution systems.
+        </p>
+
+        <h2 data-eid="h2-3"><span class="sn">3</span>Obstacles</h2>
+
+        <p data-eid="p-5">
+          The difficult part is not adding more tools to the robot stack. The difficult part is turning those tools into
+          a harness: a typed, stateful, inspectable, and safe execution substrate that an agent can actually operate.
+          Coding agents have a relatively clean workspace — files, commands, diffs, tests, logs. Embodied agents have a
+          much harder workspace: the physical world.
+        </p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Obstacle</th>
+                <th>Why it is easy in coding agents</th>
+                <th>Why it is hard in embodied agents</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Tool interfaces</strong></td>
+                <td>Standardized I/O — files, commands, text, diffs, test outputs.</td>
+                <td>Heterogeneous outputs — masks, 3D points, 6D poses, scene graphs, grasps, trajectories, forces, predicted futures; must be typed &amp; composable.</td>
+              </tr>
+              <tr>
+                <td><strong>State management</strong></td>
+                <td>Persistent, symbolic, inspectable repo; re-read, diff, rerun at will.</td>
+                <td>Partial, noisy, dynamic physical state; must track geometry, semantics, robot state, uncertainty, memory, progress.</td>
+              </tr>
+              <tr>
+                <td><strong>Tool routing</strong></td>
+                <td>Next tool obvious; calls cheap &amp; reversible.</td>
+                <td>Many candidate tools; some calls are physical — slow, world-changing, risky.</td>
+              </tr>
+              <tr>
+                <td><strong>Verification</strong></td>
+                <td>Clear pass/fail tests; explicit errors.</td>
+                <td>Latent, delayed, uncertain success; needs progress monitors, geometric checks, WAM rollouts, sim, or human feedback.</td>
+              </tr>
+              <tr>
+                <td><strong>Recovery and credit assignment</strong></td>
+                <td>Failures localized by stack traces, compiler errors, test logs.</td>
+                <td>Failure could be anywhere — perception, pose, depth, planner, controller, skill choice; needs logged intermediate evidence.</td>
+              </tr>
+              <tr>
+                <td><strong>Safety and authority</strong></td>
+                <td>Sandbox file/network/command access; approve risky ops.</td>
+                <td>Physical safety — force/speed limits, collision &amp; proximity rules, workspace bounds, approval gates; part of execution semantics.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p data-eid="p-6">
+          These obstacles explain why current embodied systems remain mostly workflows. It is much easier to hand-design
+          one loop for VLN, another for manipulation, and another for EQA than to build a general embodied harness. But
+          the direction is clear: a ReAct-style embodied agent needs the equivalent of a coding-agent runtime for the
+          physical world — a substrate where tools, models, controllers, state, logs, verification, and recovery are
+          exposed in a form that an agent can operate.
+        </p>
+
+        <h2 data-eid="h2-4"><span class="sn">4</span>Adjacent Attempts</h2>
+
+        <p data-eid="p-7">
+          The closest attempts do not come from one unified line of work. They approach the embodied-harness problem
+          from different sides: robot middleware, robot learning lifecycle, domain-specific agentic execution,
+          self-improving robot policies, and editable agent substrates.
+        </p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Direction</th>
+                <th>Examples</th>
+                <th>What they make concrete</th>
+                <th>Why this is still not the full harness</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Robot stack as an agent interface</strong></td>
+                <td>ROSA [15], ROSClaw [16]</td>
+                <td>ROS topics, services, actions, parameters, logs, capabilities, validation, and safety checks can be exposed to an LLM-facing interface. This turns the robot middleware into something an agent can inspect and operate.</td>
+                <td>The focus is still the robot stack interface or executive layer. It does not by itself define a general loop for open-ended task execution, dynamic perception-tool routing, VLA/WAM arbitration, recovery, and long-horizon world-state management.</td>
+              </tr>
+              <tr>
+                <td><strong>Robot lifecycle as an agentic loop</strong></td>
+                <td>RoboClaw [17]</td>
+                <td>Data collection, policy learning, and task execution can be placed under one controller. Self-resetting action pairs make recovery and autonomous data collection part of the system rather than an external human operation.</td>
+                <td>This is closer to a lifecycle assistant for long-horizon manipulation than a general ReAct-style embodied harness. It makes learning and deployment more agentic, but within a specific manipulation framework.</td>
+              </tr>
+              <tr>
+                <td><strong>Domain-specific agentic execution</strong></td>
+                <td>AgentVLN [18]</td>
+                <td>Navigation agents can use skill libraries, active exploration, self-correction, and explicit mechanisms for seeking missing geometric information. This makes the execution loop less static than earlier VLN workflows.</td>
+                <td>The abstraction is still navigation-specific. It improves one domain workflow rather than exposing a general embodied workspace shared by navigation, manipulation, EQA, and household tasks.</td>
+              </tr>
+              <tr>
+                <td><strong>Coding-agent-driven robot improvement</strong></td>
+                <td>ENPIRE [19]</td>
+                <td>Coding agents can modify robot policies, rewards, environments, training recipes, or policy repositories using rollout feedback, logs, verification, and iterative evaluation. This brings the Codex-style edit–run–observe loop into robotics.</td>
+                <td>The agent is usually improving robot systems rather than acting as the deployed embodied agent. The robot is part of the evaluation loop, not yet the workspace of a general task-solving agent.</td>
+              </tr>
+              <tr>
+                <td><strong>Editable embodied agent substrate</strong></td>
+                <td><a href="../works/AgentCanvas/index.html">AgentCanvas</a> [20]</td>
+                <td>Embodied agents can be represented as typed, executable graphs: perception nodes, memory nodes, planners, tool-use nodes, controllers, and verifiers can be edited, run, logged, and compared. The architecture itself becomes the workspace.</td>
+                <td>This points most directly toward an embodied harness, but it is still a research substrate rather than a widely adopted runtime for deployed physical agents.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p data-eid="p-8">
+          These systems are important precisely because they do not solve the whole problem. Each one exposes a missing
+          layer. ROSA and ROSClaw expose the robot stack. RoboClaw exposes the data–learning–execution lifecycle.
+          AgentVLN exposes agentic decisions inside navigation. ENPIRE exposes
+          robot improvement as an edit–execute–evaluate loop. AgentCanvas exposes the embodied agent architecture as an
+          editable object.
+        </p>
+
+        <blockquote data-eid="blockquote-1">
+          The gap is the unified runtime: a general embodied harness where <strong>tools, models, controllers, world
+          state, safety checks, execution logs, verification, and recovery</strong> are all exposed as typed interfaces
+          that an agent can operate during task execution.
+        </blockquote>
+
+        <h2 data-eid="h2-5">References</h2>
+        <div class="refs">
+          <p data-eid="p-9" class="refs__item"><span class="refs__n">[1]</span> G. Zhou, Y. Hong, and Q. Wu, "NavGPT: Explicit reasoning in vision-and-language navigation with large language models," in <em>Proc. AAAI Conf. Artif. Intell. (AAAI)</em>, 2024. arXiv:<a href="https://arxiv.org/abs/2305.16986">2305.16986</a>.</p>
+          <p data-eid="p-10" class="refs__item"><span class="refs__n">[2]</span> J. Chen et al., "MapGPT: Map-guided prompting with adaptive path planning for vision-and-language navigation," in <em>Proc. Annu. Meeting Assoc. Comput. Linguistics (ACL)</em>, 2024. arXiv:<a href="https://arxiv.org/abs/2401.07314">2401.07314</a>.</p>
+          <p data-eid="p-11" class="refs__item"><span class="refs__n">[3]</span> X. Shi et al., "SmartWay: Enhanced waypoint prediction and backtracking for zero-shot vision-and-language navigation," arXiv:<a href="https://arxiv.org/abs/2503.10069">2503.10069</a>, 2025.</p>
+          <p data-eid="p-12" class="refs__item"><span class="refs__n">[4]</span> M. Ahn et al., "Do as I can, not as I say: Grounding language in robotic affordances," in <em>Proc. Conf. Robot Learn. (CoRL)</em>, 2022. arXiv:<a href="https://arxiv.org/abs/2204.01691">2204.01691</a>.</p>
+          <p data-eid="p-13" class="refs__item"><span class="refs__n">[5]</span> J. Liang et al., "Code as policies: Language model programs for embodied control," in <em>Proc. IEEE Int. Conf. Robot. Autom. (ICRA)</em>, 2023. arXiv:<a href="https://arxiv.org/abs/2209.07753">2209.07753</a>.</p>
+          <p data-eid="p-14" class="refs__item"><span class="refs__n">[6]</span> W. Huang et al., "VoxPoser: Composable 3D value maps for robotic manipulation with language models," in <em>Proc. Conf. Robot Learn. (CoRL)</em>, 2023. arXiv:<a href="https://arxiv.org/abs/2307.05973">2307.05973</a>.</p>
+          <p data-eid="p-15" class="refs__item"><span class="refs__n">[7]</span> W. Huang et al., "ReKep: Spatio-temporal reasoning of relational keypoint constraints for robotic manipulation," in <em>Proc. Conf. Robot Learn. (CoRL)</em>, 2024. arXiv:<a href="https://arxiv.org/abs/2409.01652">2409.01652</a>.</p>
+          <p data-eid="p-16" class="refs__item"><span class="refs__n">[8]</span> A. Brohan et al., "RT-1: Robotics transformer for real-world control at scale," in <em>Proc. Robot.: Sci. Syst. (RSS)</em>, 2023. arXiv:<a href="https://arxiv.org/abs/2212.06817">2212.06817</a>.</p>
+          <p data-eid="p-17" class="refs__item"><span class="refs__n">[9]</span> A. Brohan et al., "RT-2: Vision-language-action models transfer web knowledge to robotic control," in <em>Proc. Conf. Robot Learn. (CoRL)</em>, 2023. arXiv:<a href="https://arxiv.org/abs/2307.15818">2307.15818</a>.</p>
+          <p data-eid="p-18" class="refs__item"><span class="refs__n">[10]</span> M. J. Kim et al., "OpenVLA: An open-source vision-language-action model," in <em>Proc. Conf. Robot Learn. (CoRL)</em>, 2024. arXiv:<a href="https://arxiv.org/abs/2406.09246">2406.09246</a>.</p>
+          <p data-eid="p-19" class="refs__item"><span class="refs__n">[11]</span> K. Black et al., "π0: A vision-language-action flow model for general robot control," Physical Intelligence, 2024. arXiv:<a href="https://arxiv.org/abs/2410.24164">2410.24164</a>.</p>
+          <p data-eid="p-20" class="refs__item"><span class="refs__n">[12]</span> A. Z. Ren et al., "Explore until confident: Efficient exploration for embodied question answering," arXiv:<a href="https://arxiv.org/abs/2403.15941">2403.15941</a>, 2024.</p>
+          <p data-eid="p-21" class="refs__item"><span class="refs__n">[13]</span> S. Saxena et al., "GraphEQA: Using 3D semantic scene graphs for real-time embodied question answering," arXiv:<a href="https://arxiv.org/abs/2412.14480">2412.14480</a>, 2024.</p>
+          <p data-eid="p-22" class="refs__item"><span class="refs__n">[14]</span> M. Zhai et al., "Multi-step reasoning for embodied question answering via tool augmentation (ToolEQA)," arXiv:<a href="https://arxiv.org/abs/2510.20310">2510.20310</a>, 2025.</p>
+          <p data-eid="p-23" class="refs__item"><span class="refs__n">[15]</span> R. Royce et al., "Enabling novel mission operations and interactions with ROSA: The robot operating system agent," in <em>Proc. IEEE Aerosp. Conf.</em>, 2025. arXiv:<a href="https://arxiv.org/abs/2410.06472">2410.06472</a>.</p>
+          <p data-eid="p-24" class="refs__item"><span class="refs__n">[16]</span> I. S. Cardenas et al., "ROSClaw: An OpenClaw ROS 2 framework for agentic robot control and interaction," arXiv:<a href="https://arxiv.org/abs/2603.26997">2603.26997</a>, 2026.</p>
+          <p data-eid="p-25" class="refs__item"><span class="refs__n">[17]</span> R. Li et al., "RoboClaw: An agentic framework for scalable long-horizon robotic tasks," arXiv:<a href="https://arxiv.org/abs/2603.11558">2603.11558</a>, 2026.</p>
+          <p data-eid="p-26" class="refs__item"><span class="refs__n">[18]</span> Z. Xin et al., "AgentVLN: Towards agentic vision-and-language navigation," arXiv:<a href="https://arxiv.org/abs/2603.17670">2603.17670</a>, 2026.</p>
+          <p data-eid="p-27" class="refs__item"><span class="refs__n">[19]</span> W. Xiao et al., "ENPIRE: Agentic robot policy self-improvement in the real world," NVIDIA GEAR, 2026. [Online]. Available: <a href="https://research.nvidia.com/labs/gear/enpire/">https://research.nvidia.com/labs/gear/enpire/</a></p>
+          <p data-eid="p-28" class="refs__item"><span class="refs__n">[20]</span> J. Zhou, "AgentCanvas: A typed-graph runtime for embodied agents," 2026. [Online]. Available: <a href="../works/AgentCanvas/index.html">project page</a>.</p>
+        </div>
+
+        <p data-eid="p-29" style="margin-top:2em">
+          <a href="../../index.html#blog">&larr; Back to blog</a>
+        </p>
+      </div>
+    </article>
+
+    <footer class="footer">&copy; Jian Zhou</footer>
+  </main>
+  <script src="/_edit/inline-edit.js" defer></script>
+</body>
+</html>

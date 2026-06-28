@@ -1,0 +1,19 @@
+{
+  "dataset": "utokyo_pr2_tabletop_manipulation",
+  "oxe_tfds_name": "utokyo_pr2_tabletop_manipulation_converted_externally_to_rlds",
+  "source": {
+    "type": "lerobot-mirror",
+    "repo": "lerobot/utokyo_pr2_tabletop_manipulation",
+    "file": "meta/tasks.parquet",
+    "file_url": "https://huggingface.co/datasets/lerobot/utokyo_pr2_tabletop_manipulation/resolve/main/meta/tasks.parquet",
+    "format": "parquet",
+    "method": "curl the HF LeRobot mirror's meta/tasks.parquet (LeRobot v3.0; the task string is the parquet index); collected unique non-empty task strings",
+    "retrieved": "2026-06-19"
+  },
+  "num_instructions": 3,
+  "instructions": [
+    "picking a bread",
+    "picking a grape",
+    "folding a cloth"
+  ]
+}

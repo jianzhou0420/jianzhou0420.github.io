@@ -1,0 +1,18 @@
+{
+  "dataset": "eth_agent_affordances",
+  "oxe_tfds_name": "eth_agent_affordances",
+  "source": {
+    "type": "oxe-rlds-gcs",
+    "gcs_path": "gs://gresearch/robotics/eth_agent_affordances/0.1.0",
+    "instruction_field": "steps/language_instruction",
+    "method": "tfds stream + PartialDecoding(instruction); first step per episode (instruction is episode-constant in OXE); full scan; dedup",
+    "episodes_scanned": 118,
+    "scan_complete": true,
+    "retrieved": "2026-06-19"
+  },
+  "num_instructions": 2,
+  "instructions": [
+    "close the oven",
+    "open the oven"
+  ]
+}

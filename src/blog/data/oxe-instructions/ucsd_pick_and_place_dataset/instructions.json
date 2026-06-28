@@ -1,0 +1,19 @@
+{
+  "dataset": "ucsd_pick_and_place_dataset",
+  "oxe_tfds_name": "ucsd_pick_and_place_dataset_converted_externally_to_rlds",
+  "source": {
+    "type": "lerobot-mirror",
+    "repo": "lerobot/ucsd_pick_and_place_dataset",
+    "file": "meta/tasks.parquet",
+    "file_url": "https://huggingface.co/datasets/lerobot/ucsd_pick_and_place_dataset/resolve/main/meta/tasks.parquet",
+    "format": "parquet",
+    "method": "curl the HF LeRobot mirror's meta/tasks.parquet (LeRobot v3.0; the task string is the parquet index); collected unique non-empty task strings",
+    "retrieved": "2026-06-19"
+  },
+  "num_instructions": 3,
+  "instructions": [
+    "place the pot in the sink",
+    "pick up the red object from the table",
+    "pick up the green object from the table"
+  ]
+}

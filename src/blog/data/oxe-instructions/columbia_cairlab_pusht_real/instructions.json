@@ -1,0 +1,17 @@
+{
+  "dataset": "columbia_cairlab_pusht_real",
+  "oxe_tfds_name": "columbia_cairlab_pusht_real",
+  "source": {
+    "type": "lerobot-mirror",
+    "repo": "lerobot/columbia_cairlab_pusht_real",
+    "file": "meta/tasks.parquet",
+    "file_url": "https://huggingface.co/datasets/lerobot/columbia_cairlab_pusht_real/resolve/main/meta/tasks.parquet",
+    "format": "parquet",
+    "method": "curl the HF LeRobot mirror's meta/tasks.parquet (LeRobot v3.0; the task string is the parquet index); collected unique non-empty task strings",
+    "retrieved": "2026-06-19"
+  },
+  "num_instructions": 1,
+  "instructions": [
+    "The task requires pushing a T-shaped block (gray) to a fixed target (green) with a circular end-effector (blue). Both observation and control frequencies are 10Hz."
+  ]
+}

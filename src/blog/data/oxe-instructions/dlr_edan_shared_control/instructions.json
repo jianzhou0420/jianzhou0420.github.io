@@ -1,0 +1,25 @@
+{
+  "dataset": "dlr_edan_shared_control",
+  "oxe_tfds_name": "dlr_edan_shared_control_converted_externally_to_rlds",
+  "source": {
+    "type": "lerobot-mirror",
+    "repo": "IPEC-COMMUNITY/dlr_edan_shared_control_lerobot",
+    "file": "meta/tasks.jsonl",
+    "file_url": "https://huggingface.co/datasets/IPEC-COMMUNITY/dlr_edan_shared_control_lerobot/resolve/main/meta/tasks.jsonl",
+    "format": "jsonl",
+    "method": "curl the HF LeRobot mirror's meta/tasks.jsonl (one JSON obj per line, {task_index, task}); collected unique non-empty 'task' values",
+    "retrieved": "2026-06-19"
+  },
+  "num_instructions": 9,
+  "instructions": [
+    "pick the tennis ball",
+    "pick the green apple",
+    "pick the mug",
+    "pick the glass",
+    "pick the pear",
+    "pick the yellow ball",
+    "pick the orange",
+    "pick the red apple",
+    "pick the banana"
+  ]
+}

@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Why Embodied AI Will Converge on Agentic Systems — Jian Zhou</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" type="text/css" href="../../Jian Zhou_files/style.css">
+</head>
+
+<body>
+  <main class="container">
+    <nav class="tabs">
+      <a class="tabs__link" href="../../index.html#home">Home</a>
+      <a class="tabs__link is-active" href="../../index.html#blog">Blog</a>
+    </nav>
+
+    <article class="post-page">
+      <header class="post-page__header">
+        <p data-eid="p-1" class="post-page__date">2026-06-09</p>
+        <h1 data-eid="h1-1" class="post-page__title">Why Embodied AI Will Converge on Agentic Systems</h1>
+      </header>
+
+      <div class="prose">
+        <p data-eid="p-2">
+          <strong>TL;DR.</strong> Whether you bet on atomic skills or on end-to-end VLA/WAM, embodied AI will enter
+          the household as an agentic system.
+        </p>
+
+        <p data-eid="p-3">
+          The evolution of LLM agents suggests a pattern: once a foundation model becomes strong enough, its
+          deployed form converges on the agentic paradigm — model + tools + an orchestration loop. We can expect
+          household embodied robots to walk the same path once embodied foundation models mature. And compared to
+          coding agents like Claude Code or Codex, embodied tasks will only depend <em>more</em> on the agentic
+          system and its harness, not less. The reason starts with the combinatorial explosion of the task space.
+        </p>
+        <p data-eid="p-4">
+          A home is an open-world, long-horizon setting, and its complexity comes from two orthogonal dimensions:
+          the composition <em>across</em> tasks, and the variation in detail <em>within</em> a single task. The
+          first looks like "do the laundry, then clear the table, then open the packages" — the types and ordering
+          of subtasks can be concatenated arbitrarily. The second shows up even if you look at "doing the laundry"
+          alone: one household is meticulous — coats and underwear separated, hand-wash plus machine-wash; another
+          household keeps it simple — three people's clothes tossed in together, trusting in "the power of
+          chemistry." Multiply the permutations across tasks by the preferences within each task and the space is
+          effectively infinite — you cannot train a separate end-to-end policy for every combination.
+        </p>
+        <p data-eid="p-5">
+          Step back, then, and suppose we don't chase "one policy per combination" but instead hope a single
+          end-to-end foundation model will learn the shared structure on its own from massive data — absorbing the
+          composition across tasks, the details within them, and the manipulation of all the objects each subtask
+          touches. But measured against the data scales of language, multimodal, and video models, fitting embodied
+          tasks by sheer data is likely to demand several more orders of magnitude — and across modalities far
+          beyond text and image: proprioception, force/torque, depth, touch, and more. Collecting or simulating
+          data at that scale, along with the compute, storage, and inference latency that follow, is extraordinarily
+          hard. A telling sign: even in the LLM domain, where data is far more abundant than in embodied settings,
+          the field did not end up purely end-to-end — it converged on agentic.
+        </p>
+
+        <figure>
+          <table>
+            <thead>
+              <tr>
+                <th>Source</th>
+                <th>Scale (≈ input steps)</th>
+                <th>Independent instructions</th>
+                <th>Disclosure</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="group-head"><td colspan="4">Language models — text tokens</td></tr>
+              <tr>
+                <td>DeepSeek-V4-Pro <span style="color:var(--muted)">(1.6T params, 49B active)</span></td>
+                <td><span class="num">3.3 × 10<sup>13</sup></span> tokens <span style="color:var(--muted)">(33T)</span></td>
+                <td style="color:var(--muted)">— <span style="font-size:12px">(not instruction-indexed)</span></td>
+                <td><span class="badge badge--official">official</span></td>
+              </tr>
+              <tr>
+                <td>Claude Opus 4.8</td>
+                <td>not disclosed <span style="color:var(--muted)">(Claude 3 est. ~40T)</span></td>
+                <td style="color:var(--muted)">—</td>
+                <td><span class="badge badge--none">undisclosed</span></td>
+              </tr>
+              <tr>
+                <td>GPT-5.5</td>
+                <td>not disclosed <span style="color:var(--muted)">(GPT-4 leak ~13T)</span></td>
+                <td style="color:var(--muted)">—</td>
+                <td><span class="badge badge--none">undisclosed</span></td>
+              </tr>
+              <tr class="group-head"><td colspan="4">Embodied data — camera frames</td></tr>
+              <tr>
+                <td>π0 <span style="color:var(--muted)">(Physical Intelligence — 10,000 h @ 50 Hz)</span></td>
+                <td><span class="num">~1.8 × 10<sup>9</sup></span> frames</td>
+                <td><span class="num">~68</span> tasks</td>
+                <td><span class="badge badge--official">official</span></td>
+              </tr>
+              <tr>
+                <td>Ego4D <span style="color:var(--muted)">(egocentric video — perception only, no actions; 3,670 h @ 30 fps)</span></td>
+                <td><span class="num">~4 × 10<sup>8</sup></span> frames</td>
+                <td style="color:var(--muted)">n/a <span style="font-size:12px">(passive video, narrations not instructions)</span></td>
+                <td><span class="badge badge--official">official</span></td>
+              </tr>
+              <tr>
+                <td>Open X-Embodiment <span style="color:var(--muted)">(~1M traj × ~200 steps; 22 embodiments)</span></td>
+                <td><span class="num">~2 × 10<sup>8</sup></span> frames</td>
+                <td><span class="num">~530</span> skills <span style="color:var(--muted)">(160k task instances)</span></td>
+                <td><span class="badge badge--official">official</span></td>
+              </tr>
+              <tr>
+                <td>DROID <span style="color:var(--muted)">(350 h @ 15 Hz)</span></td>
+                <td><span class="num">~1.9 × 10<sup>7</sup></span> frames</td>
+                <td><span class="num">~86</span> tasks <span style="color:var(--muted)">(≤3 annotations/episode)</span></td>
+                <td><span class="badge badge--official">official</span></td>
+              </tr>
+            </tbody>
+          </table>
+          <figcaption data-eid="figcaption-1">
+            <strong>Training data: language vs. embodied.</strong> To compare across the unit mismatch, both sides
+            are reduced to their nearest common currency — <em>one discrete input step the model ingests</em>: a
+            text token for an LLM, a camera frame for an embodied model. (Frames are converted from the reported
+            hours or trajectories using the control/video rate noted in each row; a frame is counted as one unit,
+            even though a VLA actually expands it into hundreds of vision tokens — we count the scarce, task-grounding
+            <em>step</em>, not the pixels.) Even on this generous footing the largest embodied corpus (π0,
+            ~1.8 × 10<sup>9</sup>) sits roughly <strong>four orders of magnitude</strong> below a single LLM
+            pre-training run (3.3 × 10<sup>13</sup>), and Open X-Embodiment ~five — and that is before accounting
+            for the extra modalities embodied models need (proprioception, force/torque, depth, touch) or the fact
+            that robot data accrues in real time rather than being scraped. The
+            <strong>independent-instructions</strong> column makes the combinatorial point directly: the largest
+            embodied corpora span only dozens to a few hundred distinct instructions (π0 ~68, DROID ~86, OXE ~530
+            skills), whereas a household's instruction space — tasks composed in any order, each bent to a
+            household's preferences — is effectively unbounded. So embodied data is short not just on raw volume but
+            on the very <em>diversity</em> a generalist would have to cover. Note too that the frontier has grown
+            <em>more</em> opaque, not less: among the latest models only DeepSeek still publishes a token count
+            (33T for V4-Pro, April 2026) while OpenAI and Anthropic disclose none, and on the embodied side
+            Physical Intelligence quantified π0 (~10,000 h) but gives no totals for π0.5–π0.7 — the parenthetical
+            LLM figures are the last-known leak (GPT-4) and estimate (Claude 3), shown only for scale. Sources:
+            DeepSeek-V4 (<a href="https://puiching-memory.github.io/TAAC_2026/papers/deepseek-v4/">tech report</a>;
+            V3 baseline <a href="https://arxiv.org/abs/2412.19437">arXiv:2412.19437</a>),
+            GPT-4 leak (<a href="https://the-decoder.com/gpt-4-architecture-datasets-costs-and-more-leaked/">SemiAnalysis via The Decoder</a>),
+            Claude 3 estimate (<a href="https://lifearchitect.ai/gpt-4/">lifearchitect.ai</a>),
+            π0 (<a href="https://www.pi.website/download/pi0.pdf">pi.website/pi0.pdf</a>),
+            Ego4D (<a href="https://arxiv.org/abs/2110.07058">arXiv:2110.07058</a>),
+            Open X-Embodiment (<a href="https://arxiv.org/abs/2310.08864">arXiv:2310.08864</a>),
+            DROID (<a href="https://arxiv.org/abs/2403.12945">arXiv:2403.12945</a>).
+          </figcaption>
+        </figure>
+        <p data-eid="p-6">
+          Step back once more, and suppose data is not the obstacle either: we genuinely obtain an embodied
+          foundation model — a base model in the mold of GPT, Claude, or DeepSeek. It still has to be driven by
+          human language: told what to do, whose preferences to honor, and to what standard. And reliably turning a
+          natural-language instruction into a correctly completed task requires a harness layer to receive intent,
+          orchestrate execution, and verify the result — exactly what Claude Code is to a coding model. The model is
+          only the base; what turns it into a system that reliably gets the job done is the orchestration wrapped
+          around it.
+        </p>
+        <p data-eid="p-7">
+          So we don't even need to invoke the stronger premise that "embodied tasks can be decomposed into atomic
+          operations." Even standing entirely on the end-to-end position and retreating step by step — granting that
+          a unified model is possible, granting that the data can be solved — we still arrive at the same place: for
+          an embodied foundation model to actually land as a usable system, it must be wrapped in a layer of
+          language-driven orchestration and verification, a harness. In other words, an agentic embodied system is
+          not one route among several; it is the form the end-to-end ideal necessarily converges to once it meets
+          the constraints of reality.
+        </p>
+
+        <p data-eid="p-8">
+          <a href="../../index.html#blog">&larr; Back to blog</a>
+        </p>
+      </div>
+    </article>
+
+    <footer class="footer">&copy; Jian Zhou</footer>
+  </main>
+  <script src="/_edit/inline-edit.js" defer></script>
+</body>
+</html>

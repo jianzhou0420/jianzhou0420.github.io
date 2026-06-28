@@ -1,0 +1,22 @@
+{
+  "dataset": "berkeley_mvp",
+  "oxe_tfds_name": "berkeley_mvp_converted_externally_to_rlds",
+  "source": {
+    "type": "lerobot-mirror",
+    "repo": "IPEC-COMMUNITY/berkeley_mvp_lerobot",
+    "file": "meta/tasks.jsonl",
+    "file_url": "https://huggingface.co/datasets/IPEC-COMMUNITY/berkeley_mvp_lerobot/resolve/main/meta/tasks.jsonl",
+    "format": "jsonl",
+    "method": "curl the HF LeRobot mirror's meta/tasks.jsonl (one JSON obj per line, {task_index, task}); collected unique non-empty 'task' values",
+    "retrieved": "2026-06-19"
+  },
+  "num_instructions": 6,
+  "instructions": [
+    "push wooden cube",
+    "pick detergent from the sink",
+    "reach red block",
+    "pick yellow cube",
+    "close fridge door",
+    "pick fruit"
+  ]
+}

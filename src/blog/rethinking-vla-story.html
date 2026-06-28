@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Rethinking the VLA Story — Jian Zhou</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" type="text/css" href="../../Jian Zhou_files/style.css">
+</head>
+
+<body>
+  <main class="container">
+    <nav class="tabs">
+      <a class="tabs__link" href="../../index.html#home">Home</a>
+      <a class="tabs__link is-active" href="../../index.html#blog">Blog</a>
+    </nav>
+
+    <article class="post-page">
+      <header class="post-page__header">
+        <p data-eid="p-1" class="post-page__date">2026-06-09</p>
+        <h1 data-eid="h1-1" class="post-page__title">Rethinking the VLA Story</h1>
+      </header>
+
+      <div class="prose">
+        <p data-eid="p-2">
+          The standard VLA story goes: collect enough robot demonstrations, scale the model, and a generalist
+          household policy falls out — the way it did for language. This series re-examines that story, one
+          assumption at a time. It starts where the story itself starts: the data.
+        </p>
+
+        <h2 data-eid="h2-1">Part 1 — Data</h2>
+
+        <p data-eid="p-3">
+          Two questions decide whether "just scale the data" is even on the table: <em>how much</em> data is there,
+          and <em>how diverse</em> is it? Both answers are sobering. The first table puts language and embodied
+          data on a common footing; the second zooms into the one axis the first can only estimate — instruction
+          diversity — using a community audit that actually counted.
+        </p>
+
+        <figure>
+          <table>
+            <thead>
+              <tr>
+                <th>Source</th>
+                <th>Scale (≈ input steps)</th>
+                <th>Independent instructions</th>
+                <th>Disclosure</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="group-head"><td colspan="4">Language models — text tokens</td></tr>
+              <tr>
+                <td>DeepSeek-V4-Pro <span style="color:var(--muted)">(1.6T params, 49B active)</span></td>
+                <td><span class="num">3.3 × 10<sup>13</sup></span> tokens <span style="color:var(--muted)">(33T)</span></td>
+                <td style="color:var(--muted)">— <span style="font-size:12px">(not instruction-indexed)</span></td>
+                <td><span class="badge badge--official">official</span></td>
+              </tr>
+              <tr>
+                <td>Claude Opus 4.8</td>
+                <td>not disclosed <span style="color:var(--muted)">(Claude 3 est. ~40T)</span></td>
+                <td style="color:var(--muted)">—</td>
+                <td><span class="badge badge--none">undisclosed</span></td>
+              </tr>
+              <tr>
+                <td>GPT-5.5</td>
+                <td>not disclosed <span style="color:var(--muted)">(GPT-4 leak ~13T)</span></td>
+                <td style="color:var(--muted)">—</td>
+                <td><span class="badge badge--none">undisclosed</span></td>
+              </tr>
+              <tr class="group-head"><td colspan="4">Embodied data — camera frames</td></tr>
+              <tr>
+                <td>π0 <span style="color:var(--muted)">(Physical Intelligence — 10,000 h @ 50 Hz)</span></td>
+                <td><span class="num">~1.8 × 10<sup>9</sup></span> frames</td>
+                <td><span class="num">~68</span> tasks</td>
+                <td><span class="badge badge--official">official</span></td>
+              </tr>
+              <tr>
+                <td>Ego4D <span style="color:var(--muted)">(egocentric video — perception only, no actions; 3,670 h @ 30 fps)</span></td>
+                <td><span class="num">~4 × 10<sup>8</sup></span> frames</td>
+                <td style="color:var(--muted)">n/a <span style="font-size:12px">(passive video, narrations not instructions)</span></td>
+                <td><span class="badge badge--official">official</span></td>
+              </tr>
+              <tr>
+                <td>Open X-Embodiment <span style="color:var(--muted)">(~1M traj × ~200 steps; 22 embodiments)</span></td>
+                <td><span class="num">~2 × 10<sup>8</sup></span> frames</td>
+                <td><span class="num">~530</span> skills <span style="color:var(--muted)">(160k task instances)</span></td>
+                <td><span class="badge badge--official">official</span></td>
+              </tr>
+              <tr>
+                <td>DROID <span style="color:var(--muted)">(350 h @ 15 Hz)</span></td>
+                <td><span class="num">~1.9 × 10<sup>7</sup></span> frames</td>
+                <td><span class="num">~86</span> tasks <span style="color:var(--muted)">(≤3 annotations/episode)</span></td>
+                <td><span class="badge badge--official">official</span></td>
+              </tr>
+            </tbody>
+          </table>
+          <figcaption data-eid="figcaption-1">
+            <strong>Table 1 — Training data: language vs. embodied.</strong> To compare across the unit mismatch,
+            both sides are reduced to their nearest common currency — <em>one discrete input step the model
+            ingests</em>: a text token for an LLM, a camera frame for an embodied model. (Frames are converted from
+            the reported hours or trajectories using the control/video rate noted in each row; a frame is counted as
+            one unit, even though a VLA actually expands it into hundreds of vision tokens — we count the scarce,
+            task-grounding <em>step</em>, not the pixels.) Even on this generous footing the largest embodied corpus
+            (π0, ~1.8 × 10<sup>9</sup>) sits roughly <strong>four orders of magnitude</strong> below a single LLM
+            pre-training run (3.3 × 10<sup>13</sup>), and Open X-Embodiment ~five — before accounting for the extra
+            modalities embodied models need (proprioception, force/torque, depth, touch) or the fact that robot data
+            accrues in real time rather than being scraped. The <strong>independent-instructions</strong> column is a
+            first cut at diversity, but it flatters the embodied side: those counts are de-duplicated task/skill
+            <em>categories</em>, not distinct instruction strings — Table 2 shows what the strings actually look
+            like. Note too that the frontier has grown <em>more</em> opaque, not less: among the latest models only
+            DeepSeek still publishes a token count (33T for V4-Pro, April 2026) while OpenAI and Anthropic disclose
+            none, and on the embodied side Physical Intelligence quantified π0 (~10,000 h) but gives no totals for
+            π0.5–π0.7 — the parenthetical LLM figures are the last-known leak (GPT-4) and estimate (Claude 3), shown
+            only for scale. Sources:
+            DeepSeek-V4 (<a href="https://puiching-memory.github.io/TAAC_2026/papers/deepseek-v4/">tech report</a>;
+            V3 baseline <a href="https://arxiv.org/abs/2412.19437">arXiv:2412.19437</a>),
+            GPT-4 leak (<a href="https://the-decoder.com/gpt-4-architecture-datasets-costs-and-more-leaked/">SemiAnalysis via The Decoder</a>),
+            Claude 3 estimate (<a href="https://lifearchitect.ai/gpt-4/">lifearchitect.ai</a>),
+            π0 (<a href="https://www.pi.website/download/pi0.pdf">pi.website/pi0.pdf</a>),
+            Ego4D (<a href="https://arxiv.org/abs/2110.07058">arXiv:2110.07058</a>),
+            Open X-Embodiment (<a href="https://arxiv.org/abs/2310.08864">arXiv:2310.08864</a>),
+            DROID (<a href="https://arxiv.org/abs/2403.12945">arXiv:2403.12945</a>).
+          </figcaption>
+        </figure>
+
+        <p data-eid="p-4">
+          "~530 skills" or "~86 tasks" still overstates how varied the language actually is, because those numbers
+          de-duplicate to verbs and skill clusters. The right question is: across the millions of recorded
+          instructions, how many are <em>unique strings</em>? Wanna et al. measured exactly this across widely-used
+          VLA datasets, and the answer is stark — <strong>fewer than 2% of instructions are unique</strong>; the
+          rest are templated repetitions over a tiny vocabulary.
+        </p>
+
+        <figure>
+          <table>
+            <thead>
+              <tr>
+                <th>Dataset</th>
+                <th>Total instructions</th>
+                <th>Unique instructions</th>
+                <th>Vocabulary (unique words)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="group-head"><td colspan="4">Robot / VLA datasets</td></tr>
+              <tr>
+                <td>RT-1</td>
+                <td><span class="num">3.7M+</span></td>
+                <td><span class="num">577</span> <span style="color:var(--muted)">(0.02%)</span></td>
+                <td><span class="num">49</span></td>
+              </tr>
+              <tr>
+                <td>TacoPlay</td>
+                <td><span class="num">214K</span></td>
+                <td><span class="num">403</span> <span style="color:var(--muted)">(0.2%)</span></td>
+                <td><span class="num">74</span></td>
+              </tr>
+              <tr>
+                <td>BridgeData</td>
+                <td><span class="num">864K+</span></td>
+                <td><span class="num">11,693</span> <span style="color:var(--muted)">(1.4%)</span></td>
+                <td><span class="num">1,189</span></td>
+              </tr>
+              <tr>
+                <td>LIBERO</td>
+                <td><span class="num">6.5K</span></td>
+                <td><span class="num">112</span> <span style="color:var(--muted)">(1.72%)</span></td>
+                <td><span class="num">79</span></td>
+              </tr>
+              <tr>
+                <td>Language Table</td>
+                <td><span class="num">7.0M+</span></td>
+                <td><span class="num">127,370</span> <span style="color:var(--muted)">(1.81%)</span></td>
+                <td><span class="num">928</span></td>
+              </tr>
+              <tr class="group-head"><td colspan="4">Reference — text &amp; language-rich datasets</td></tr>
+              <tr>
+                <td>SCOUT</td>
+                <td><span class="num">23K+</span></td>
+                <td><span class="num">8,795</span> <span style="color:var(--muted)">(39.4%)</span></td>
+                <td><span class="num">1,631</span></td>
+              </tr>
+              <tr>
+                <td>LLaVA-Instruct</td>
+                <td><span class="num">366K+</span></td>
+                <td><span class="num">261,892</span> <span style="color:var(--muted)">(71.45%)</span></td>
+                <td><span class="num">15,477</span></td>
+              </tr>
+              <tr>
+                <td>ALFRED <span style="color:var(--muted)">(language-rich embodied)</span></td>
+                <td><span class="num">162K+</span></td>
+                <td><span class="num">126,005</span> <span style="color:var(--muted)">(79.9%)</span></td>
+                <td><span class="num">2,627</span></td>
+              </tr>
+              <tr>
+                <td>OASST2</td>
+                <td><span class="num">42K+</span></td>
+                <td><span class="num">39,301</span> <span style="color:var(--muted)">(93.33%)</span></td>
+                <td><span class="num">35,445</span></td>
+              </tr>
+              <tr>
+                <td>Alpaca</td>
+                <td><span class="num">53K+</span></td>
+                <td><span class="num">52,996</span> <span style="color:var(--muted)">(99.81%)</span></td>
+                <td><span class="num">18,141</span></td>
+              </tr>
+            </tbody>
+          </table>
+          <figcaption data-eid="figcaption-2">
+            <strong>Table 2 — Linguistic diversity of instructions.</strong> Selected rows from Table 2 of
+            Wanna et al. (2026) [<a href="#ref-wanna">1</a>]. The <em>unique-instructions</em> column is the count of
+            distinct instruction strings out of the total. Robot/VLA datasets are overwhelmingly templated: RT-1
+            holds 3.7M instructions that collapse to just <strong>577 unique strings (0.02%) built from 49 words</strong>;
+            no VLA dataset exceeds ~1.8% unique. Text and language-rich datasets sit at 39–99% unique over far larger
+            vocabularies. This is the diversity ceiling Table 1's category counts could only hint at: embodied data is
+            scarce not only in volume but in <em>linguistic</em> coverage — exactly the dimension a generalist asked
+            to follow open-ended household instructions would most need. (Scope: the audit covers RT-1, BridgeData,
+            TacoPlay, Language Table, and LIBERO — RT-1/Bridge/Language Table are major Open X-Embodiment components;
+            it does not directly measure DROID or π0.)
+          </figcaption>
+        </figure>
+
+        <p data-eid="p-5">
+          So the data case for "just scale it" is weak on both axes at once. Volume is four to five orders of
+          magnitude below a single LLM run, and what little there is repeats a few hundred templated commands. The
+          next part turns from data to what people hope will rescue it — a single end-to-end model that learns the
+          shared structure anyway.
+        </p>
+
+        <h2 data-eid="h2-2" id="references" style="font-size:17px;">References</h2>
+        <ol class="prose" style="font-size:14px; color:var(--muted); padding-left:1.4em;">
+          <li data-eid="li-1" id="ref-wanna">
+            S. Wanna, A. Luhtaru, J. Salfity, R. Barron, J. Moore, C. Matuszek, M. Pryor.
+            "Limited Linguistic Diversity in Embodied AI Datasets."
+            arXiv:<a href="https://arxiv.org/abs/2601.03136">2601.03136</a>, 2026.
+          </li>
+        </ol>
+        <p data-eid="p-6" style="font-size:13px; color:var(--muted);">
+          Data-scale sources for Table 1 are linked inline in its caption.
+        </p>
+
+        <p data-eid="p-7">
+          <a href="../../index.html#blog">&larr; Back to blog</a>
+        </p>
+      </div>
+    </article>
+
+    <footer class="footer">&copy; Jian Zhou</footer>
+  </main>
+  <script src="/_edit/inline-edit.js" defer></script>
+</body>
+</html>

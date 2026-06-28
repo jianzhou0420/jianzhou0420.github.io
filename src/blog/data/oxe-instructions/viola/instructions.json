@@ -1,0 +1,19 @@
+{
+  "dataset": "viola",
+  "oxe_tfds_name": "viola",
+  "source": {
+    "type": "lerobot-mirror",
+    "repo": "IPEC-COMMUNITY/viola_lerobot",
+    "file": "meta/tasks.jsonl",
+    "file_url": "https://huggingface.co/datasets/IPEC-COMMUNITY/viola_lerobot/resolve/main/meta/tasks.jsonl",
+    "format": "jsonl",
+    "method": "curl the HF LeRobot mirror's meta/tasks.jsonl (one JSON obj per line, {task_index, task}); collected unique non-empty 'task' values",
+    "retrieved": "2026-06-19"
+  },
+  "num_instructions": 3,
+  "instructions": [
+    "pick up the bowl from the lazy Susan and put bowl on the plate",
+    "arrange plate and fork",
+    "make coffee"
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "dataset": "utokyo_xarm_bimanual",
+  "oxe_tfds_name": "utokyo_xarm_bimanual_converted_externally_to_rlds",
+  "source": {
+    "type": "lerobot-mirror",
+    "repo": "lerobot/utokyo_xarm_bimanual",
+    "file": "meta/tasks.parquet",
+    "file_url": "https://huggingface.co/datasets/lerobot/utokyo_xarm_bimanual/resolve/main/meta/tasks.parquet",
+    "format": "parquet",
+    "method": "curl the HF LeRobot mirror's meta/tasks.parquet (LeRobot v3.0; the task string is the parquet index); collected unique non-empty task strings",
+    "retrieved": "2026-06-19"
+  },
+  "num_instructions": 2,
+  "instructions": [
+    "Reach a towel.",
+    "Unfold a wrinkled towel."
+  ]
+}

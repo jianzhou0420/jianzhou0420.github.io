@@ -1,24 +1,118 @@
+<!--
+  Draft control: add the data-draft attribute to any <a class="post"> below to keep
+  it OFF the public site (github.io). Such posts still show in local preview
+  (file://, localhost, or a 10.x / 192.168.x LAN address) with a DRAFT badge.
+  Remove the attribute to publish. Filtering logic lives in index.html.
+-->
 <div class="posts">
 
-    <!-- Example post 1 -->
-    <a class="post" href="src/blog/hello-world.html">
-        <span class="post__date">2025-11-18</span>
+    <a class="post" href="src/blog/counting-oxe-instructions.html">
+        <span class="post__date">2026-06-20</span>
         <div class="post__body">
-            <h3 class="post__title">Hello, world</h3>
+            <h3 class="post__title">The Semantic Poverty of Open X-Embodiment</h3>
             <p class="post__excerpt">
-                Kicking off this blog — a place for notes on imitation learning, VLA models, and whatever else
-                comes up along the way.
+                Every natural-language instruction in all 55 Open X-Embodiment sub-datasets, pulled first-hand —
+                including the six no public mirror carries. kuka records 580,392 demonstrations and teaches them with
+                one sentence, "pick anything." Across the release the data is enormous and the language tiny; Wanna et
+                al.'s "fewer than 2% of robot instructions are unique" holds at full scale. Browse every set inline.
             </p>
             <div class="post__tags">
-                <span class="post__tag">meta</span>
+                <span class="post__tag">embodied-ai</span>
+                <span class="post__tag">vla</span>
+                <span class="post__tag">data</span>
             </div>
         </div>
     </a>
 
+    <a class="post" data-draft href="src/blog/coding-agent-harness.html">
+        <span class="post__date">2026-06-19</span>
+        <div class="post__body">
+            <h3 class="post__title">Inside the Coding-Agent Harness</h3>
+            <p class="post__excerpt">
+                The coding agent crossed into autonomous, long-horizon ReAct because of Base Model × Harness — not the
+                model alone. A dissection of the harness half (loop, tools, state, verification, recovery, safety,
+                context), and why each piece is free in code yet must be rebuilt for embodied agents.
+            </p>
+            <div class="post__tags">
+                <span class="post__tag">coding-agents</span>
+                <span class="post__tag">agentic</span>
+                <span class="post__tag">harness</span>
+            </div>
+        </div>
+    </a>
+
+    <a class="post" data-draft href="src/blog/vla-io-landscape.html">
+        <span class="post__date">2026-06-18</span>
+        <div class="post__body">
+            <h3 class="post__title">VLA 模型大全表：I/O + 训练数据全景（尽量穷尽版）</h3>
+            <p class="post__excerpt">
+                尽量穷尽地收录约 80 个 Vision-Language-Action 模型，分七张表对照其输入/输出与<strong>训练数据</strong>
+                （数据集构成 + 规模）。补齐数据列后，几条规律浮现：奠基模型靠 Open X-Embodiment 公共井，领先玩家转向
+                自采专有数据当护城河，新一代普遍用"网络视频 + 合成 + 真机遥操作"的数据金字塔。
+            </p>
+            <div class="post__tags">
+                <span class="post__tag">vla</span>
+                <span class="post__tag">embodied-ai</span>
+                <span class="post__tag">training-data</span>
+                <span class="post__tag">survey</span>
+            </div>
+        </div>
+    </a>
+
+    <a class="post" data-draft href="src/blog/react-embodiment-architecture-brief.html">
+        <span class="post__date">2026-06-18</span>
+        <div class="post__body">
+            <h3 class="post__title">What It Takes to Build a ReAct-Style Embodied Agent</h3>
+            <p class="post__excerpt">
+                VLA and WAM research keeps improving embodied base models, but a deployable embodied agent needs a
+                harness — the physical-world analogue of a coding-agent runtime. Why today's embodied systems are still
+                workflows, what a ReAct-style embodied harness looks like, the obstacles versus coding agents, and the
+                adjacent attempts circling the problem.
+            </p>
+            <div class="post__tags">
+                <span class="post__tag">embodied-ai</span>
+                <span class="post__tag">agentic</span>
+                <span class="post__tag">react</span>
+            </div>
+        </div>
+    </a>
+
+    <a class="post" data-draft href="src/blog/rethinking-vla-story.html">
+        <span class="post__date">2026-06-09</span>
+        <div class="post__body">
+            <h3 class="post__title">Rethinking the VLA Story</h3>
+            <p class="post__excerpt">
+                Part 1 — Data. Two tables: embodied training data sits 4–5 orders of magnitude below a single LLM
+                run, and fewer than 2% of robot instructions are even unique.
+            </p>
+            <div class="post__tags">
+                <span class="post__tag">embodied-ai</span>
+                <span class="post__tag">vla</span>
+                <span class="post__tag">data</span>
+            </div>
+        </div>
+    </a>
+
+    <a class="post" data-draft href="src/blog/vision-of-household-embodied-agent.html">
+        <span class="post__date">2026-06-09</span>
+        <div class="post__body">
+            <h3 class="post__title">Why Embodied AI Will Converge on Agentic Systems</h3>
+            <p class="post__excerpt">
+                Even granting a unified end-to-end model and solvable data, a household embodied robot still
+                needs a harness around the base model — agentic isn't a choice, it's where end-to-end converges.
+            </p>
+            <div class="post__tags">
+                <span class="post__tag">embodied-ai</span>
+                <span class="post__tag">agentic</span>
+            </div>
+        </div>
+    </a>
+
+
 </div>
 
-<!-- Template for adding new posts:
-<a class="post" href="src/blog/post-slug.html">
+<!-- Template for adding new posts (add data-draft to keep it off the public site):
+<a class="post" data-draft href="src/blog/post-slug.html">
     <span class="post__date">YYYY-MM-DD</span>
     <div class="post__body">
         <h3 class="post__title">Post title</h3>

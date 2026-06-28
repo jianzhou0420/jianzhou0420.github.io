@@ -1,0 +1,17 @@
+{
+  "dataset": "austin_buds_dataset",
+  "oxe_tfds_name": "austin_buds_dataset_converted_externally_to_rlds",
+  "source": {
+    "type": "lerobot-mirror",
+    "repo": "IPEC-COMMUNITY/austin_buds_dataset_lerobot",
+    "file": "meta/tasks.jsonl",
+    "file_url": "https://huggingface.co/datasets/IPEC-COMMUNITY/austin_buds_dataset_lerobot/resolve/main/meta/tasks.jsonl",
+    "format": "jsonl",
+    "method": "curl the HF LeRobot mirror's meta/tasks.jsonl (one JSON obj per line, {task_index, task}); collected unique non-empty 'task' values",
+    "retrieved": "2026-06-19"
+  },
+  "num_instructions": 1,
+  "instructions": [
+    "Take the lid off the pot, put the pot on the plate, and use the tool to push to pot to the front of the table."
+  ]
+}

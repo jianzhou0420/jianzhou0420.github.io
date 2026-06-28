@@ -1,0 +1,19 @@
+{
+  "dataset": "cmu_franka_exploration_dataset",
+  "oxe_tfds_name": "cmu_franka_exploration_dataset_converted_externally_to_rlds",
+  "source": {
+    "type": "lerobot-mirror",
+    "repo": "lerobot/cmu_franka_exploration_dataset",
+    "file": "meta/tasks.parquet",
+    "file_url": "https://huggingface.co/datasets/lerobot/cmu_franka_exploration_dataset/resolve/main/meta/tasks.parquet",
+    "format": "parquet",
+    "method": "curl the HF LeRobot mirror's meta/tasks.parquet (LeRobot v3.0; the task string is the parquet index); collected unique non-empty task strings",
+    "retrieved": "2026-06-19"
+  },
+  "num_instructions": 3,
+  "instructions": [
+    "lift the knife",
+    "lift the vegetable",
+    "open the cabinet"
+  ]
+}
