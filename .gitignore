@@ -1,0 +1,4 @@
+# Local caches / tooling state — not site content
+__pycache__/
+*.pyc
+.omc/
