@@ -1,0 +1,60 @@
+/* ============================================================================
+   page-layout.css — shared layout template for jianzhou0420.github.io
+   project pages (e.g. src/works/<Project>/*.html).
+
+   This is the single source of truth for the page skeleton: the centered
+   reading column + sticky left outliner. Link it from a page's <head>:
+
+       <link rel="stylesheet" href="../../assets/page-layout.css">
+
+   ...then build the page body as:
+
+       <div class="wrap">
+         <div class="topbar"> … brand / back-link … </div>
+         <div class="layout">
+           <aside class="rail"> … sticky outliner nav … </aside>
+           <main> … sections: eyebrow / h2 / p / figures / blocks … </main>
+         </div>
+       </div>
+
+   The page's own inline <style> still owns colors, fonts (it must define the
+   --mono / --body / --display + color tokens this file's rules inherit),
+   accents, and per-section components. This file owns LAYOUT only.
+
+   --- Tuning -----------------------------------------------------------------
+   --measure is the one knob for reading-column width; --maxw is computed from
+   it, so the page width auto-adapts. Override either in the page's inline
+   :root (loaded after this file) if a page genuinely needs a different column.
+
+   --- Centering principle ----------------------------------------------------
+   Content sits to the RIGHT of the outliner, so:
+     • centering the content column      → rail's weight makes it look left-shifted
+     • centering the [rail+content] group → content then looks too far right
+   So we hug the group with --maxw, then nudge it left by --lean, landing the
+   content's optical center just right of the viewport center. The nudge is a
+   clamped asymmetric margin (max(16px, …)) so it never overflows on narrow
+   screens (where the rail is hidden anyway). Raise --lean to lean further
+   left; set it to 0 for a perfectly centered group.
+
+   --- Do not -----------------------------------------------------------------
+   Don't add max-width to individual content blocks (figures, card grids,
+   tables). The grid column already pins the whole column to --measure, so
+   every block inside <main> auto-fits and stays aligned.
+
+   Reference implementation: src/works/AgentCanvas/index.html + paper.html.
+   ============================================================================ */
+
+:root {
+    --maxw: calc(var(--rail) + var(--measure) + 100px); /* rail + gap(44) + measure + wrap padding(2×28) */
+    --rail: 150px;    /* width of the left outliner nav */
+    --measure: 760px; /* reading-column width */
+    --lean: 48px;     /* optical nudge left (see header) */
+}
+
+.wrap   { position: relative; z-index: 1; max-width: var(--maxw); margin-left: max(16px, calc((100vw - var(--maxw)) / 2 - var(--lean))); margin-right: auto; padding: 0 28px 80px; }
+.layout { display: grid; grid-template-columns: var(--rail) minmax(0, 1fr); gap: 44px; align-items: start; }
+.rail   { position: sticky; top: 22px; align-self: start; font-family: var(--mono); font-size: 12px; padding-left: 4px; }
+p       { max-width: var(--measure); }
+
+@media (max-width: 900px) { .rail { display: none; } .layout { grid-template-columns: 1fr; } }
+@media (max-width: 620px) { .wrap { padding: 0 18px 60px; } }

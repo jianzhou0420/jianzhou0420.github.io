@@ -274,7 +274,7 @@
 
         <!-- Header -->
         <header class="header">
-            <h1>Decoupled Action Expert: Confining Task Knowledge to the Conditioning Pathway</h1>
+            <h1 data-eid="h1-1">Decoupled Action Expert: Confining Task Knowledge to the Conditioning Pathway</h1>
             <div class="authors">
                 <strong>Jian Zhou</strong>, Sihao Lin, Shuai Fu, Zerui Li, Gengze Zhou, Qi Wu
             </div>
@@ -292,9 +292,9 @@
 
         <!-- Abstract -->
         <section>
-            <h2>Abstract</h2>
+            <h2 data-eid="h2-1">Abstract</h2>
             <div class="abstract">
-                <p>
+                <p data-eid="p-1">
                     Many recent Vision-Language-Action models employ diffusion or flow-matching backbones with hundreds
                     of millions of parameters for action generation. However, unlike image synthesis where the output
                     spans millions of diverse pixels, a manipulation policy generates only short sequences of
@@ -302,7 +302,7 @@
                     such capacity. We confirm this intuition and show that task-specific knowledge in these policies can
                     be fully confined to the conditioning pathway, leaving the action backbone task-agnostic.
                 </p>
-                <p>
+                <p data-eid="p-2">
                     To establish this, we introduce a decoupled training recipe: a general-purpose action head is first
                     pretrained on observation-free forward-kinematics data, then frozen while only the conditioning
                     pathway is trained for downstream tasks. Using Diffusion Policy as a testbed, we show that on both
@@ -319,42 +319,42 @@
 
         <!-- Key Highlights -->
         <section class="highlights">
-            <h2>Key Findings</h2>
+            <h2 data-eid="h2-2">Key Findings</h2>
             <ul>
-                <li><strong>Task knowledge lives in conditioning, not the backbone.</strong> A frozen, pretrained action
+                <li data-eid="li-1"><strong>Task knowledge lives in conditioning, not the backbone.</strong> A frozen, pretrained action
                     backbone shared across all tasks matches end-to-end trained counterparts on MimicGen and LIBERO.
                 </li>
-                <li><strong>Pretraining signal doesn't matter.</strong> Joint positions, end-effector poses, or no
+                <li data-eid="li-2"><strong>Pretraining signal doesn't matter.</strong> Joint positions, end-effector poses, or no
                     conditioning at all &mdash; the backbone learns only general trajectory structure regardless of the
                     pretraining signal.</li>
-                <li><strong>5M MLP replaces 244M U-Net.</strong> A lightweight MLP backbone matches or exceeds the
+                <li data-eid="li-3"><strong>5M MLP replaces 244M U-Net.</strong> A lightweight MLP backbone matches or exceeds the
                     performance of the much larger U-Net in Diffusion Policy (65.9% vs 63.6% on MimicGen).</li>
-                <li><strong>Modulation-based conditioning is key.</strong> Methods like AdaLN-Zero maintain effectiveness
+                <li data-eid="li-4"><strong>Modulation-based conditioning is key.</strong> Methods like AdaLN-Zero maintain effectiveness
                     when backbones are frozen, while token-based approaches fail.</li>
-                <li><strong>Out-of-distribution pretraining helps.</strong> Forward-kinematics data from DROID yields
+                <li data-eid="li-5"><strong>Out-of-distribution pretraining helps.</strong> Forward-kinematics data from DROID yields
                     performance improvements despite distribution mismatch with downstream tasks.</li>
             </ul>
         </section>
 
         <!-- Method Overview -->
         <section>
-            <h2>Method Overview</h2>
-            <p>
+            <h2 data-eid="h2-3">Method Overview</h2>
+            <p data-eid="p-3">
                 We propose a two-stage decoupled training recipe that separates the action backbone from task-specific
                 conditioning:
             </p>
             <figure class="method-figure">
                 <img src="method.png" alt="Decoupled Action Expert architecture overview">
-                <figcaption>Figure 1: Overview of the Decoupled Action Expert. Stage 1 pretrains the action backbone on
+                <figcaption data-eid="figcaption-1">Figure 1: Overview of the Decoupled Action Expert. Stage 1 pretrains the action backbone on
                     observation-free forward-kinematics data. Stage 2 freezes the backbone and trains only the
                     conditioning pathway for downstream manipulation tasks.</figcaption>
             </figure>
-            <p>
+            <p data-eid="p-4">
                 <strong>Stage 1 &mdash; Pretrain:</strong> A general-purpose action expert is trained on
                 observation-free forward-kinematics data, learning general trajectory structure without any
                 task-specific information.
             </p>
-            <p>
+            <p data-eid="p-5">
                 <strong>Stage 2 &mdash; Adapt:</strong> The pretrained action backbone is frozen, and only the
                 conditioning pathway (which ingests visual observations and language instructions) is trained for
                 downstream manipulation tasks.
@@ -363,10 +363,10 @@
 
         <!-- Teaser -->
         <section>
-            <h2>Motivation</h2>
+            <h2 data-eid="h2-4">Motivation</h2>
             <figure class="method-figure">
                 <img src="teaser.png" alt="Motivation: scale mismatch between image diffusion and manipulation policies">
-                <figcaption>Image diffusion models generate millions of diverse pixel values, yet manipulation policies
+                <figcaption data-eid="figcaption-2">Image diffusion models generate millions of diverse pixel values, yet manipulation policies
                     produce only short sequences of low-dimensional, physically correlated actions &mdash; a far simpler
                     target that should not demand the same capacity.</figcaption>
             </figure>
@@ -374,39 +374,39 @@
 
         <!-- Results -->
         <section class="highlights">
-            <h2>Results</h2>
-            <p>
+            <h2 data-eid="h2-5">Results</h2>
+            <p data-eid="p-6">
                 We evaluate on MimicGen (8 manipulation tasks) and LIBERO (4 task suites), comparing normally trained
                 policies against our decoupled approach with frozen backbones.
             </p>
             <ul>
-                <li><strong>Decoupled matches end-to-end:</strong> A single frozen backbone shared across all tasks
+                <li data-eid="li-6"><strong>Decoupled matches end-to-end:</strong> A single frozen backbone shared across all tasks
                     achieves 62.2% on MimicGen, comparable to 63.6% with standard end-to-end training.</li>
-                <li><strong>Lightweight MLP outperforms U-Net:</strong> Replacing the 244M-parameter U-Net with a
+                <li data-eid="li-7"><strong>Lightweight MLP outperforms U-Net:</strong> Replacing the 244M-parameter U-Net with a
                     5M-parameter MLP yields 65.9% on MimicGen, exceeding the U-Net baseline.</li>
-                <li><strong>Pretraining signal is irrelevant:</strong> Whether pretrained on joint positions,
+                <li data-eid="li-8"><strong>Pretraining signal is irrelevant:</strong> Whether pretrained on joint positions,
                     end-effector poses, or with no conditioning at all, downstream performance remains the same.</li>
-                <li><strong>Out-of-distribution data helps:</strong> Pretraining on DROID forward-kinematics data
+                <li data-eid="li-9"><strong>Out-of-distribution data helps:</strong> Pretraining on DROID forward-kinematics data
                     improves performance despite distribution mismatch with downstream benchmarks.</li>
             </ul>
         </section>
 
         <!-- Ablation -->
         <section>
-            <h2>Conditioning Ablation</h2>
-            <p>
+            <h2 data-eid="h2-6">Conditioning Ablation</h2>
+            <p data-eid="p-7">
                 We ablate 7 conditioning mechanisms to understand which approaches survive backbone freezing.
             </p>
             <figure class="method-figure" style="max-width: 500px; margin-left: auto; margin-right: auto;">
                 <img src="cond_ablation.png" alt="Conditioning mechanism ablation">
-                <figcaption>Modulation-based methods (e.g., AdaLN-Zero, FiLM) maintain effectiveness with frozen
+                <figcaption data-eid="figcaption-3">Modulation-based methods (e.g., AdaLN-Zero, FiLM) maintain effectiveness with frozen
                     backbones, while token-based approaches degrade significantly.</figcaption>
             </figure>
         </section>
 
         <!-- Citation -->
         <section>
-            <h2>Citation</h2>
+            <h2 data-eid="h2-7">Citation</h2>
             <div class="citation-box">
                 <button class="copy-button" onclick="copyToClipboard()">Copy</button>
                 <pre id="citation-text">@article{zhou2025decoupled,
@@ -436,6 +436,7 @@
             });
         }
     </script>
+  <script src="/_edit/inline-edit.js" defer></script>
 </body>
 
 </html>
