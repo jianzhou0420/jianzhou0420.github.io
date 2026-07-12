@@ -363,6 +363,12 @@ body.is-local .post[data-draft] .post__title::after {        /* hidden from gith
   line-height: 1.25;
 }
 
+.post-comments {
+  margin-top: 48px;
+  padding-top: 28px;
+  border-top: 1px solid var(--border);
+}
+
 .prose { font-size: 16px; line-height: 1.75; }
 .prose p { margin: 0 0 1.1em; }
 .prose h2 {
