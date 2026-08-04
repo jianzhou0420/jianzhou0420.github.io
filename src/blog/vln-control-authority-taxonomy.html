@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Who Decides What Happens Next? A Control-Authority Taxonomy of VLN Systems — Jian Zhou</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+  <style>
+    :root{
+      --bg:#fdfdfb;--ink:#1b1d21;--muted:#6b7280;--faint:#9aa1ab;
+      --line:#e6e7e3;--line-soft:#eeefea;--accent:#2f6f5e;--accent-soft:#eef4f1;
+      --code-bg:#f3f4f0;
+    }
+    *{box-sizing:border-box}
+    html{-webkit-text-size-adjust:100%}
+    body{margin:0;background:var(--bg);color:var(--ink);
+      font-family:'Inter',system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+      font-size:17px;line-height:1.72;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+    .container{max-width:960px;margin:0 auto;padding:0 26px}
+
+    .tabs{display:flex;gap:26px;padding:30px 0 0;font-size:14px}
+    .tabs__link{color:var(--muted);text-decoration:none;letter-spacing:.01em;
+      padding-bottom:3px;border-bottom:1.5px solid transparent;transition:color .15s}
+    .tabs__link:hover{color:var(--ink)}
+    .tabs__link.is-active{color:var(--ink);border-bottom-color:var(--accent)}
+
+    .post-page__header{padding:54px 0 8px}
+    .post-page__date{margin:0 0 14px;font-family:'JetBrains Mono',monospace;font-size:13px;
+      letter-spacing:.06em;color:var(--faint)}
+    .post-page__title{margin:0;font-size:clamp(28px,4.6vw,40px);font-weight:700;
+      letter-spacing:-.022em;line-height:1.16}
+
+    .prose{padding:14px 0 8px}
+    .prose p{margin:0 0 1.35em}
+    .prose strong{font-weight:600;color:#15171a}
+    .prose em{font-style:italic;color:#33363b}
+    .prose a{color:var(--accent);text-decoration:none;border-bottom:1px solid #cfe0d9}
+    .prose a:hover{border-bottom-color:var(--accent)}
+    .prose ul{margin:0 0 1.35em;padding-left:1.35em}
+    .prose li{margin:.5em 0}
+    .prose li ul{margin:.5em 0 .3em}
+
+    .lede{font-size:18.5px;line-height:1.6;color:#34383d;margin:6px 0 0;padding-bottom:6px}
+    .lede em{color:#1d2b26;font-style:normal;font-weight:600}
+
+    .prose h2{font-size:clamp(21px,3vw,26px);font-weight:700;letter-spacing:-.012em;line-height:1.25;
+      margin:1.5em 0 .15em;padding-top:1.4em;border-top:1px solid var(--line)}
+    .prose h2 .sn{color:var(--accent);font-weight:700;margin-right:.55em}
+
+    code{font-family:'JetBrains Mono',monospace;font-size:.86em;background:var(--code-bg);
+      border-radius:4px;padding:.1em .4em;color:#2c2f34;border:1px solid #e8e9e4}
+
+    /* hand-drawn SVG figures — the argument lives here */
+    svg.fig{width:100%;height:auto;max-width:780px;display:block;margin:2em auto}
+    .fig text{font-family:'Inter',system-ui,sans-serif;font-size:13px;fill:var(--ink)}
+    .fig .t{font-weight:600}
+    .fig .dim{fill:var(--muted);font-size:11.5px}
+    .fig .mono{font-family:'JetBrains Mono',monospace;font-size:11.5px;fill:#4b5058}
+    .fig .box{fill:#ffffff;stroke:#c9cbc4;stroke-width:1.2}
+    .fig .accent{fill:var(--accent-soft);stroke:var(--accent);stroke-width:1.6}
+    .fig .at{fill:var(--accent);font-weight:600}
+    .fig .ghost{fill:none;stroke:#c9cbc4;stroke-width:1.1;stroke-dasharray:5 4}
+    .fig .edge{stroke:#8b9096;stroke-width:1.4;fill:none;marker-end:url(#bl-m)}
+    .fig .edgeA{stroke:var(--accent);stroke-width:1.6;fill:none;marker-end:url(#bl-a)}
+    .fig .edgeAd{stroke:var(--accent);stroke-width:1.6;fill:none;stroke-dasharray:6 5;marker-end:url(#bl-a)}
+
+    /* comparison table: stays inside the prose column, scrolls only on narrow screens */
+    .table-wrap{overflow-x:auto;margin:1.6em 0;-webkit-overflow-scrolling:touch;
+      border:1px solid var(--line);border-radius:8px}
+    table{width:100%;min-width:560px;border-collapse:collapse;font-size:13.5px;line-height:1.55;background:#fff}
+    thead th{text-align:left;font-weight:600;font-size:12px;letter-spacing:.02em;color:var(--muted);
+      background:#fafaf7;padding:11px 14px;border-bottom:1px solid var(--line);vertical-align:bottom}
+    tbody td{padding:12px 14px;border-bottom:1px solid var(--line-soft);vertical-align:top}
+    tbody tr:last-child td{border-bottom:none}
+    tbody tr:hover{background:#fafaf8}
+    td:first-child{font-weight:600;color:#202327;min-width:135px}
+    td+td{border-left:1px solid var(--line-soft);color:#41454b}
+    table strong{font-weight:600;color:#1d2b26}
+
+    blockquote{margin:2.2em 0;padding:18px 22px;background:var(--accent-soft);border-left:3px solid var(--accent);
+      border-radius:0 6px 6px 0;font-size:16.5px;line-height:1.66;color:#2c3a35}
+    blockquote strong{color:#1d2b26}
+
+    /* folded supplementary notes */
+    details.fold{margin:1.1em 0 1.8em;border:1px solid var(--line);border-radius:8px;background:#fbfbf8}
+    details.fold summary{cursor:pointer;padding:10px 16px;font-size:13.5px;color:var(--muted);
+      font-weight:500;user-select:none;list-style-position:inside}
+    details.fold summary:hover{color:var(--ink)}
+    details.fold[open] summary{border-bottom:1px solid var(--line-soft)}
+    details.fold .fold__body{padding:12px 18px 2px;font-size:15px;line-height:1.66;color:#41454b}
+
+    .refs{margin-top:10px}
+    .refs__item{position:relative;padding-left:2.9em;margin:0 0 .7em;font-size:14px;line-height:1.62;color:#41454b}
+    .refs__n{position:absolute;left:0;top:0;font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--faint)}
+    .refs__item em{font-style:italic;color:#5c6066}
+    .refs a{color:var(--accent);border-bottom:1px solid #cfe0d9}
+
+    .footer{margin-top:48px;padding:26px 0 60px;border-top:1px solid var(--line);
+      font-size:13px;color:var(--faint);font-family:'JetBrains Mono',monospace;letter-spacing:.04em}
+
+    @media(max-width:600px){
+      body{font-size:16px}
+      table{font-size:13px}
+      thead th,tbody td{padding:10px 11px}
+    }
+  </style>
+</head>
+
+<body>
+  <main class="container">
+    <nav class="tabs">
+      <a class="tabs__link" href="../../index.html#home">Home</a>
+      <a class="tabs__link is-active" href="../../index.html#blog">Blog</a>
+    </nav>
+
+    <article class="post-page">
+      <header class="post-page__header">
+        <p class="post-page__date">2026-08-04</p>
+        <h1 class="post-page__title">Who Decides What Happens Next? A Control-Authority Taxonomy of VLN Systems</h1>
+      </header>
+
+      <div class="prose">
+
+        <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+          <marker id="bl-m" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#8b9096"/></marker>
+          <marker id="bl-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#2f6f5e"/></marker>
+        </defs></svg>
+
+        <p class="lede">
+          VLN systems describe themselves in architecture words — dual-system, slow&ndash;fast, planner, agentic.
+          Those words answer the wrong question. For our recent paper on minimal-interface navigation agents
+          (<a href="https://arxiv.org/abs/2607.26148">MIP</a> [1]) we needed labels that survive contact with released
+          code, and settled on two questions that do: at inference time, <em>who decides what happens next</em> — and
+          <em>where does the navigation competence live</em>? The first sorts every system into policy, workflow, or
+          agentic; the second into trained or zero-shot. Everything else a system carries — maps, memory, waypoint
+          predictors, chain of thought — is equipment inside a cell, not a new cell.
+        </p>
+
+        <h2><span class="sn">1</span>Two Questions, Six Cells</h2>
+
+        <p>
+          <strong>Control authority</strong> is the primary axis: at inference time, who decides what happens next.
+          Three values.
+        </p>
+        <ul>
+          <li><strong>Policy</strong> — one end-to-end model, invoked by an external loop once per control step.
+            Observation and history in, action out. No orchestration across separately invoked components.</li>
+          <li><strong>Workflow</strong> — a fixed, human-authored pipeline. Control passes among components in an
+            order fixed by code; branch conditions are hand-written; the models fill slots in it.</li>
+          <li><strong>Agentic</strong> — the model directs the loop itself: which action or tool to invoke, when to
+            observe or re-plan, when to stop. The loop's shape is determined at run time.</li>
+        </ul>
+
+        <details class="fold"><summary>note — "policy" here is a rough shorthand for the end-to-end model</summary><div class="fold__body">
+          <p>
+            Neighboring fields each read this word differently, so it is worth being explicit. In RL, a policy is any
+            rule mapping observation (or state) to action — a property of the agent's <em>behavior</em>, so read that
+            way an entire workflow would qualify: from the environment's seat, the whole pipeline is one
+            obs&nbsp;&rarr;&nbsp;action function. Control theory's analogous object is the control law. And in the
+            robot-learning literature the word has drifted onto the model itself — a "diffusion policy", a "visuomotor
+            policy" — the trained network that emits the actions.
+          </p>
+          <p>
+            Our usage is that last one, and we state it roughly: by <em>policy</em> we mean one end-to-end model whose
+            forward pass is the direct mapping from observation (and history) to action. The label sits on the model,
+            not on the system boundary. This is a deliberately rough way of speaking — in the RL sense "policy" names
+            behavior, not architecture — but it is the reading the taxonomy needs to keep the three classes disjoint:
+            a fixed pipeline of frozen components also maps observation to action, yet no single model in it does, so
+            it files under workflow. Internal structure does not break the label — caching, token merging, split
+            computation inside one invoked model are still one policy; the seam that matters is a handoff between
+            separately <em>invoked</em> components (§3).
+          </p>
+        </div></details>
+
+        <svg class="fig" viewBox="0 0 760 678" role="img" aria-label="Three loop shapes, one per control-authority value. Top, policy: a cycle of observe, model, act, and a shaded env.step box — the model is the whole body of a loop owned by code. Middle, workflow: a fixed pipeline of perceive, build map and prompt, a model that fills a slot, and execute subgoal, closed by a shaded 'next — same order, always' stage; solid arrows mark the route fixed by code. Bottom, agentic: a shaded model box with dashed arrows fanning out to observe, act, and stop — the model chooses one each turn, results return to it, and stop ends a loop the model could have continued. Legend: shaded box is who decides what happens next; dashed arrows are run-time choices; solid arrows are routes fixed by code.">
+          <!-- ===== policy ===== -->
+          <text x="40" y="28" class="t"><tspan class="at">policy</tspan> — one model, stepped by an external loop</text>
+          <rect x="40" y="60" width="84" height="32" rx="7" class="box"/><text x="82" y="80" text-anchor="middle">observe</text>
+          <rect x="160" y="60" width="110" height="32" rx="7" class="box"/><text x="215" y="80" text-anchor="middle">model</text>
+          <rect x="306" y="60" width="64" height="32" rx="7" class="box"/><text x="338" y="80" text-anchor="middle">act</text>
+          <path class="edge" d="M124,76 H160"/>
+          <path class="edge" d="M270,76 H306"/>
+          <rect x="160" y="135" width="110" height="32" rx="7" class="accent"/><text x="215" y="155" text-anchor="middle" class="at">env.step</text>
+          <path class="edge" d="M338,92 C338,151 322,151 274,151"/>
+          <path class="edge" d="M160,151 C90,151 82,140 82,96"/>
+          <text x="420" y="72" class="dim">the model is the whole body of a code-owned loop:</text>
+          <text x="420" y="90" class="dim">it maps observation to action, and nothing else runs</text>
+          <text x="420" y="118" class="mono">NaVid · StreamVLN · Qwen-RobotNav (bare)</text>
+
+          <!-- ===== workflow ===== -->
+          <text x="40" y="238" class="t"><tspan class="at">workflow</tspan> — a fixed pipeline; the model fills a slot</text>
+          <rect x="40" y="270" width="84" height="32" rx="7" class="box"/><text x="82" y="290" text-anchor="middle">perceive</text>
+          <rect x="150" y="270" width="126" height="32" rx="7" class="box"/><text x="213" y="290" text-anchor="middle">build map · prompt</text>
+          <rect x="302" y="270" width="132" height="32" rx="7" class="box"/><text x="368" y="290" text-anchor="middle">model — fills slot</text>
+          <rect x="460" y="270" width="118" height="32" rx="7" class="box"/><text x="519" y="290" text-anchor="middle">execute subgoal</text>
+          <path class="edge" d="M124,286 H150"/>
+          <path class="edge" d="M276,286 H302"/>
+          <path class="edge" d="M434,286 H460"/>
+          <text x="368" y="322" text-anchor="middle" class="dim">the slot: waypoint · subgoal · frontier</text>
+          <rect x="264" y="336" width="166" height="28" rx="14" class="accent"/><text x="347" y="354" text-anchor="middle" class="at" style="font-size:12px">next — same order, always</text>
+          <path class="edge" d="M519,302 C519,350 480,350 434,350"/>
+          <path class="edge" d="M264,350 C110,350 82,336 82,302"/>
+          <text x="40" y="392" class="dim">control always passes the same way — a different subgoal is a different value in the slot, not a different route</text>
+          <text x="40" y="410" class="dim">a slow–fast dual-brain is this same shape, with a model in each of two slots</text>
+          <text x="40" y="430" class="mono">MapGPT · SmartWay · DiscussNav · ABot-N1 · InternVLA-N1 / DualVLN</text>
+
+          <!-- ===== agentic ===== -->
+          <g transform="translate(0,18)">
+          <text x="40" y="460" class="t"><tspan class="at">agentic</tspan> — the model directs the loop</text>
+          <rect x="60" y="498" width="110" height="46" rx="7" class="accent"/><text x="115" y="525" text-anchor="middle" class="at">model</text>
+          <rect x="320" y="466" width="96" height="30" rx="7" class="box"/><text x="368" y="485" text-anchor="middle">observe</text>
+          <rect x="320" y="511" width="96" height="30" rx="7" class="box"/><text x="368" y="530" text-anchor="middle">act</text>
+          <rect x="320" y="556" width="96" height="30" rx="7" class="ghost"/><text x="368" y="575" text-anchor="middle">stop</text>
+          <path class="edgeAd" d="M170,504 C240,504 252,481 316,481"/>
+          <path class="edge"   d="M316,493 C252,493 244,512 174,512"/>
+          <path class="edgeAd" d="M170,520 C240,520 250,522 316,522"/>
+          <path class="edge"   d="M316,534 C250,534 244,528 174,528"/>
+          <path class="edgeAd" d="M170,536 C240,536 252,571 316,571"/>
+          <path class="edge" d="M416,571 H468"/>
+          <text x="476" y="567" class="dim">episode ends — a loop the model</text>
+          <text x="476" y="583" class="dim">could have continued</text>
+          <text x="470" y="481" class="dim">each turn the model picks the next operation;</text>
+          <text x="470" y="499" class="dim">the harness executes that choice — and only that</text>
+          <text x="40" y="620" class="mono">NavGPT · AgenticNav · planner × Qwen-RobotNav · the Minimal-Interface Probe</text>
+
+          <text x="380" y="652" text-anchor="middle" class="dim">shaded box = who decides what happens next · dashed arrow = a choice made at run time · solid arrow = a route fixed by code</text>
+          </g>
+        </svg>
+
+        <p>
+          <strong>Capability source</strong> is the secondary axis: where does the navigation competence live. Binary.
+        </p>
+        <ul>
+          <li><strong>Trained</strong> — the weights were optimized on navigation data; competence is at least partly
+            in the parameters.</li>
+          <li><strong>Zero-shot</strong> — two checkable conditions, jointly:
+            <ul>
+              <li>the builder performs no weight update of any kind after the vendor's release — no navigation
+                fine-tuning, nothing trained on the evaluation benchmark;</li>
+              <li>the checkpoint was released as a <em>general-purpose</em> model, not a navigation-specialized one —
+                judged by the vendor's own positioning, the only public fact there is.</li>
+            </ul>
+            Navigation behavior comes from eliciting what the released model already knows, through prompting and
+            orchestration. Why the line sits at the released checkpoint — see the note below.</li>
+        </ul>
+
+        <details class="fold"><summary>note — what "zero-shot" claims, and what it deliberately does not</summary><div class="fold__body">
+          <p>
+            The word used to carry three claims at once: <em>I</em> trained nothing for the task; <em>nobody</em>
+            trained the model's navigation competence in; the model <em>never saw</em> this benchmark. In 2023 the
+            three happened to coincide. They are coming apart: vendors will certainly tune navigation and spatial
+            understanding in post-training — embodied applications are exactly where these models are heading — and
+            no web-scale pretraining corpus can be certified free of a public benchmark's images. Only the first
+            claim can ever be audited, so the label here keeps only that one, plus the general-purpose-release
+            condition above.
+          </p>
+          <p>
+            The other two claims get handled differently, not folded into the definition. What the vendor's
+            post-training installed is <em>provenance</em>: disclose it where known, mark it unknown where not —
+            embodied data appearing incidentally in pre-training, generic spatial post-training, in-domain navigation
+            SFT or RL are different rungs, and for closed models most rungs are unreadable. Crucially, when vendors do
+            start installing embodied skill, a zero-shot system does not become invalid — the number it reports
+            changes meaning, which is the point of a probe: it reads out how much embodied competence ships in general
+            models at a given date. A zero-shot claim is therefore time-indexed; it names its checkpoint and its date.
+          </p>
+          <p>
+            Benchmark contamination, finally, is not a taxonomy question at all but an evaluation-validity one — it
+            afflicts trained systems equally, since their base models also saw the web. Its remedies are empirical:
+            new benchmarks, held-out splits, real-robot transfer. A definition that promises "never saw the test set"
+            promises something no one can verify.
+          </p>
+        </div></details>
+
+        <svg class="fig" viewBox="0 0 800 375" role="img" aria-label="A two-by-three grid. Columns: policy (one call per step, no orchestration), workflow (fixed pipeline, model fills slots), agentic (the model directs the loop). Rows: trained (competence in the weights) and zero-shot (frozen models, prompted). Trained-policy holds NaVid, StreamVLN, bare Qwen-RobotNav, and OmniNav on R2R-CE. Trained-workflow holds ABot-N1, InternVLA-N1 / DualVLN, Vesta, and OmniNav in its full configuration — every dual-system navigator. Trained-agentic holds planner times Qwen-RobotNav, a frozen planner re-invoking a trained policy as a tool. Zero-shot-policy is empty by structure. Zero-shot-workflow holds MapGPT, SmartWay, DiscussNav, and most of the zero-shot line. Zero-shot-agentic, highlighted, holds NavGPT as an early minimal instance, AgenticNav, and the Minimal-Interface Probe. Caption: each system is placed by the loop it executes on its reported benchmark, not by its architecture figure.">
+          <text x="247" y="34" text-anchor="middle" class="t">policy</text>
+          <text x="247" y="52" text-anchor="middle" class="dim">one call per step, no orchestration</text>
+          <text x="467" y="34" text-anchor="middle" class="t">workflow</text>
+          <text x="467" y="52" text-anchor="middle" class="dim">fixed pipeline; model fills slots</text>
+          <text x="687" y="34" text-anchor="middle" class="t">agentic</text>
+          <text x="687" y="52" text-anchor="middle" class="dim">the model directs the loop</text>
+
+          <text x="20" y="120" class="t">trained</text>
+          <text x="20" y="140" class="dim">competence in</text>
+          <text x="20" y="156" class="dim">the weights</text>
+
+          <rect x="140" y="64" width="215" height="130" rx="9" class="box"/>
+          <text x="152" y="90">NaVid · StreamVLN</text>
+          <text x="152" y="110">Qwen-RobotNav (bare)</text>
+          <text x="152" y="130">OmniNav (R2R-CE)</text>
+          <text x="152" y="158" class="dim">the VLA mainstream</text>
+
+          <rect x="360" y="64" width="215" height="130" rx="9" class="box"/>
+          <text x="372" y="90">ABot-N1</text>
+          <text x="372" y="110">InternVLA-N1 / DualVLN</text>
+          <text x="372" y="130">Vesta · OmniNav (full)</text>
+          <text x="372" y="158" class="dim">every dual-system navigator</text>
+
+          <rect x="580" y="64" width="205" height="130" rx="9" class="box"/>
+          <text x="592" y="90">planner ×</text>
+          <text x="592" y="110">Qwen-RobotNav</text>
+          <text x="592" y="138" class="dim">a frozen planner re-invokes</text>
+          <text x="592" y="154" class="dim">a trained policy as a tool</text>
+
+          <text x="20" y="260" class="t">zero-shot</text>
+          <text x="20" y="280" class="dim">frozen models,</text>
+          <text x="20" y="296" class="dim">prompted</text>
+
+          <rect x="140" y="204" width="215" height="130" rx="9" class="ghost"/>
+          <text x="247" y="252" text-anchor="middle" class="dim">empty by structure —</text>
+          <text x="247" y="270" text-anchor="middle" class="dim">a frozen generalist has no</text>
+          <text x="247" y="288" text-anchor="middle" class="dim">navigation prior to run end-to-end</text>
+
+          <rect x="360" y="204" width="215" height="130" rx="9" class="box"/>
+          <text x="372" y="230">MapGPT · SmartWay</text>
+          <text x="372" y="250">DiscussNav …</text>
+          <text x="372" y="278" class="dim">most of the zero-shot line</text>
+
+          <rect x="580" y="204" width="205" height="130" rx="9" class="accent"/>
+          <text x="592" y="230">NavGPT (early, minimal)</text>
+          <text x="592" y="250">AgenticNav</text>
+          <text x="592" y="278" class="at">the Minimal-Interface Probe</text>
+
+          <text x="400" y="364" text-anchor="middle" class="dim">each system is placed by the loop it executes on its reported benchmark — not by its architecture figure</text>
+        </svg>
+
+        <p>Two things fall out of the grid before any argument starts.</p>
+        <ul>
+          <li><strong>The placement rule</strong> — each label reflects the loop the system <em>executes</em> on its
+            reported benchmark, not the diagram in its figure&nbsp;1. A paper can ship a planner and never run it
+            (§3 has a live example).</li>
+          <li><strong>The empty corner</strong> — zero-shot&nbsp;×&nbsp;policy is empty for a structural reason: an
+            end-to-end navigation policy just is competence in the weights, so a frozen generalist cannot be one.
+            Its competence has to enter through scaffolding, which already makes it a workflow or an agent.</li>
+        </ul>
+
+        <h2><span class="sn">2</span>The Test: Dynamic Control Flow, Not Dynamic Content</h2>
+
+        <p>
+          The workflow&ndash;agentic line is where classification usually goes wrong, so it gets one decisive test:
+          <strong>dynamic control flow, not dynamic content</strong>.
+        </p>
+        <ul>
+          <li><strong>Content</strong> — a different waypoint, subgoal, or frontier is a <em>value in a fixed
+            slot</em>. The pipeline around it runs exactly as it would have run for any other value.</li>
+          <li><strong>Control flow</strong> — agency requires changing <em>what happens next</em>: selecting a tool,
+            taking a branch, deciding to re-plan. Sharpened: <strong>sequencing authority</strong> — agentic when the
+            model's output determines which operation runs next and the harness is a pure executor of that choice.
+            A flag the model produces but code consumes is still content.</li>
+          <li><strong>Stopping shows the same line</strong> — a policy's STOP token is one more value handled by its
+            external loop; an agentic stop terminates a loop the model could have continued.</li>
+          <li><strong>Corollary: architecture depth is not control authority</strong> — a "brain", a planner, or a
+            chain of thought adds computation inside the loop; it confers no agency while its role stays fixed.</li>
+        </ul>
+
+        <h2><span class="sn">3</span>Why Dual-System Navigators Are Workflows</h2>
+
+        <p>
+          The trained dual-brain wave — <a href="https://arxiv.org/abs/2607.10383">ABot-N1</a> [10],
+          <a href="https://arxiv.org/abs/2512.08186">InternVLA-N1 / DualVLN</a> [11],
+          <a href="https://arxiv.org/abs/2606.20905">Vesta</a> [12] — is the case most easily misread as agentic,
+          because the language-reasoning slow half looks like a planner. <strong>The division of labour is latency,
+          not authority.</strong> The slow brain grounds the instruction and accumulated observations into a subgoal —
+          a pixel goal, a latent plan, a chain of thought. The fast brain combines that subgoal with the live frame to
+          produce short-horizon motion. They are decoupled to hit real-time control rates, not to let either
+          restructure the loop.
+        </p>
+
+        <p>
+          <strong>Neither brain decides when the other runs.</strong> InternVLA-N1 hard-wires System-2 at roughly
+          2&nbsp;Hz, System-1 at 30&nbsp;Hz, its controller at 200&nbsp;Hz; ABot-N1 caches the slow reasoner's pixel
+          goal for its fast expert to track. The handoff — slow produces subgoal, fast executes subgoal — is the only
+          route control ever takes, and it is fixed by code. That is a workflow, and joint training does not remove
+          the seam.
+        </p>
+
+        <p>
+          <strong>One checkpoint, two cells.</strong> <a href="https://arxiv.org/abs/2509.25687">OmniNav</a> [9] shows
+          why the executed loop, not the checkpoint, carries the label. On R2R-CE it runs only its fast branch — one
+          model mapping observations to waypoints — a policy. In its full exploration setting, a slow pass of the same
+          VLM picks the next frontier and, once the target is detected, commits to it. The choice redirects the route,
+          but it always fills the same prescribed slot: map construction, frontier generation, and the slow-to-fast
+          handoff are fixed, and exploration ends because the fixed handoff executes the commit subgoal to arrival —
+          not because the model exits a loop it owns. One architecture, two cells, agentic in neither.
+        </p>
+
+        <h2><span class="sn">4</span>The Hard Calls</h2>
+
+        <p>
+          <strong><a href="https://arxiv.org/abs/2305.16986">NavGPT</a> [2]</strong> — the earliest zero-shot VLN
+          system is also the first agentic one. It runs a <a href="https://arxiv.org/abs/2210.03629">ReAct</a> [14]
+          loop with a single movement tool: each turn the model returns an action or <em>finish</em>, and the loop
+          continues only through that choice. Its stop ends a loop the model could have continued — agentic under the
+          test. What makes people hesitate is its thinness: one tool, nothing else. By these axes, thinness is
+          scaffolding width, not control authority, so NavGPT is recorded as an early, minimal instance of the cell
+          rather than a canonical example. The rest of the zero-shot line that followed it —
+          <a href="https://arxiv.org/abs/2401.07314">MapGPT</a> [3],
+          <a href="https://arxiv.org/abs/2503.10069">SmartWay</a> [5],
+          <a href="https://arxiv.org/abs/2309.11382">DiscussNav</a> [4] — moved the other way, into fixed
+          perception&ndash;map&ndash;prompt pipelines: zero-shot workflows.
+        </p>
+
+        <p>
+          <strong>planner × <a href="https://arxiv.org/abs/2606.18112">Qwen-RobotNav</a> [8]</strong> — run bare on
+          R2R-CE, Qwen-RobotNav is a trained policy regressing waypoints per step. But its call surface is
+          parameterized — task mode, observation configuration — and in whole-system EQA deployments a frozen planner
+          re-invokes it mid-episode and switches its modes. Under that orchestration the system is agentic, with the
+          authority sitting in the planner and the trained policy serving as a tool. Same weights, two cells: labels
+          attach to executed configurations, not to checkpoints.
+        </p>
+
+        <p>
+          <strong><a href="https://arxiv.org/abs/2606.10577">AgenticNav</a> [13] and our probe</strong> — the same
+          cell, opposite ends of the scaffolding dimension. AgenticNav gives a frozen model depth queries, visual
+          recall, pixel-grounded movement, and stop, built over a trajectory map, explicit visual memory, and geometric
+          safety checks; the model calls them in any order, so it owns the sequence. The Minimal-Interface Probe [1]
+          gives a general agent two functions — observe and act — and nothing else: no map, no memory, no waypoint
+          machinery. On the same 100-episode R2R-CE board with the same nominal model, AgenticNav reports 55&nbsp;SR /
+          48.41&nbsp;SPL against the probe's 52 / 44.24 (serving paths uncontrolled, so no module-level conclusion).
+          That gap is scaffolding, not control — which is why scaffolding stays a <em>descriptive</em> dimension
+          rather than a third axis: it measures what a system carries, not who decides.
+        </p>
+
+        <h2><span class="sn">5</span>How the Map Was Made</h2>
+
+        <p>
+          A taxonomy is cheap to assert and expensive to apply — every label above is a claim about somebody's code.
+          The placements come from reading executed loops, at three depths:
+        </p>
+        <ul>
+          <li><strong>Anatomy notes</strong> — for each of seventeen trained navigators, a per-system note built from
+            the paper and its released code, recording the executed loop: what gets invoked, what passes between
+            components on what schedule, who consumes the stop signal. That is where the 2/30/200&nbsp;Hz numbers and
+            the "caches the pixel goal" details come from.</li>
+          <li><strong>A 37-method survey</strong> of the zero-shot line, with per-method code links.</li>
+          <li><strong>End-to-end reproduction</strong> of several zero-shot systems on our own platform — the
+            strictest reading of a paper there is.</li>
+        </ul>
+
+        <p>Three house rules kept the labels honest:</p>
+        <ul>
+          <li><strong>Classify the trace, not the title</strong> — a paper named "agentic" can execute a workflow.</li>
+          <li><strong>Unexecuted layers earn no credit</strong> — OmniNav's slow brain does not count on R2R-CE.</li>
+          <li><strong>Multiple values allowed, vagueness not</strong> — one system may take two rows, each with its
+            own evidence.</li>
+        </ul>
+        <p>
+          The full adjudications, including the borderline ones this post compresses, are in the taxonomy appendix of
+          the paper [1].
+        </p>
+
+        <h2><span class="sn">6</span>Position</h2>
+
+        <blockquote>
+          Classify navigation systems by the loop they execute, not the architecture they draw. Two questions place
+          every system we examined: <strong>who decides what happens next</strong>, and <strong>where does the
+          competence live</strong>. Read the grid and the dual-system wave resolves into workflow engineering — real
+          and useful, but not agency — while the zero-shot&nbsp;×&nbsp;agentic cell, open since NavGPT, is the one
+          general agents now enter for free. The probe result says the entry fee is lower than the field assumed: a
+          two-function interface with no navigation machinery lands within a few points of an engineered navigation
+          harness on the same board. The burden of proof has moved to the scaffolding.
+        </blockquote>
+
+        <details class="fold"><summary>References ([1]&ndash;[14])</summary><div class="fold__body">
+        <div class="refs">
+          <p class="refs__item"><span class="refs__n">[1]</span> "Embodied agents take control: Minimal-interface zero-shot agents rival industrial-scale policies in vision-and-language navigation," 2026. arXiv:<a href="https://arxiv.org/abs/2607.26148">2607.26148</a>.</p>
+          <p class="refs__item"><span class="refs__n">[2]</span> "NavGPT: Explicit reasoning in vision-and-language navigation with large language models," in <em>Proc. AAAI Conf. Artif. Intell. (AAAI)</em>, 2024. arXiv:<a href="https://arxiv.org/abs/2305.16986">2305.16986</a>.</p>
+          <p class="refs__item"><span class="refs__n">[3]</span> "MapGPT: Map-guided prompting with adaptive path planning for vision-and-language navigation," in <em>Proc. Annu. Meeting Assoc. Comput. Linguistics (ACL)</em>, 2024. arXiv:<a href="https://arxiv.org/abs/2401.07314">2401.07314</a>.</p>
+          <p class="refs__item"><span class="refs__n">[4]</span> "Discuss before moving: Visual language navigation via multi-expert discussions," in <em>Proc. IEEE Int. Conf. Robot. Autom. (ICRA)</em>, 2024. arXiv:<a href="https://arxiv.org/abs/2309.11382">2309.11382</a>.</p>
+          <p class="refs__item"><span class="refs__n">[5]</span> "SmartWay: Enhanced waypoint prediction and backtracking for zero-shot vision-and-language navigation," in <em>Proc. IEEE/RSJ Int. Conf. Intell. Robots Syst. (IROS)</em>, 2025. arXiv:<a href="https://arxiv.org/abs/2503.10069">2503.10069</a>.</p>
+          <p class="refs__item"><span class="refs__n">[6]</span> "NaVid: Video-based VLM plans the next step for vision-and-language navigation," 2024. arXiv:<a href="https://arxiv.org/abs/2402.15852">2402.15852</a>.</p>
+          <p class="refs__item"><span class="refs__n">[7]</span> "StreamVLN: Streaming vision-and-language navigation via slow-fast context modeling," 2025. arXiv:<a href="https://arxiv.org/abs/2507.05240">2507.05240</a>.</p>
+          <p class="refs__item"><span class="refs__n">[8]</span> "Qwen-RobotNav technical report: A scalable navigation model designed for an agentic navigation system," 2026. arXiv:<a href="https://arxiv.org/abs/2606.18112">2606.18112</a>.</p>
+          <p class="refs__item"><span class="refs__n">[9]</span> "OmniNav: A unified framework for prospective exploration and visual-language navigation," 2025. arXiv:<a href="https://arxiv.org/abs/2509.25687">2509.25687</a>.</p>
+          <p class="refs__item"><span class="refs__n">[10]</span> "ABot-N1: Toward a general visual language navigation foundation model," 2026. arXiv:<a href="https://arxiv.org/abs/2607.10383">2607.10383</a>.</p>
+          <p class="refs__item"><span class="refs__n">[11]</span> "Ground slow, move fast: A dual-system foundation model for generalizable vision-and-language navigation," 2025. arXiv:<a href="https://arxiv.org/abs/2512.08186">2512.08186</a>.</p>
+          <p class="refs__item"><span class="refs__n">[12]</span> "Vesta: A generalist embodied reasoning model," 2026. arXiv:<a href="https://arxiv.org/abs/2606.20905">2606.20905</a>.</p>
+          <p class="refs__item"><span class="refs__n">[13]</span> "AgenticNav: Zero-shot vision-and-language navigation as a tool-calling harness," 2026. arXiv:<a href="https://arxiv.org/abs/2606.10577">2606.10577</a>.</p>
+          <p class="refs__item"><span class="refs__n">[14]</span> "ReAct: Synergizing reasoning and acting in language models," in <em>Proc. Int. Conf. Learn. Representations (ICLR)</em>, 2023. arXiv:<a href="https://arxiv.org/abs/2210.03629">2210.03629</a>.</p>
+        </div>
+        </div></details>
+
+        <p style="margin-top:2em">
+          <a href="../../index.html#blog">&larr; Back to blog</a>
+        </p>
+      </div>
+
+      <section class="post-comments">
+        <script src="https://giscus.app/client.js"
+                data-repo="jianzhou0420/jianzhou0420.github.io"
+                data-repo-id="R_kgDOKGTs0g"
+                data-category="Comments"
+                data-category-id="DIC_kwDOKGTs0s4DBBIZ"
+                data-mapping="pathname"
+                data-strict="0"
+                data-reactions-enabled="1"
+                data-emit-metadata="0"
+                data-input-position="bottom"
+                data-theme="light"
+                data-lang="en"
+                data-loading="lazy"
+                crossorigin="anonymous"
+                async>
+        </script>
+      </section>
+    </article>
+
+    <footer class="footer">&copy; Jian Zhou</footer>
+  </main>
+  <script src="/_edit/inline-edit.js" defer></script>
+</body>
+</html>
