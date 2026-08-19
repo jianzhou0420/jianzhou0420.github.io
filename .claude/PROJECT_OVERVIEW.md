@@ -4,7 +4,7 @@
 Jian Zhou's personal academic website, hosted on GitHub Pages. A static HTML site showcasing his bio, publications, and project pages. Design based on Jon Barron's website template.
 
 ## Owner
-Jian Zhou — MPhil candidate at AIML (University of Adelaide), supervised by Prof. Qi Wu. Research interests: imitation learning, reinforcement learning, VLA models for household robots.
+Jian Zhou — PhD student at AIML (University of Adelaide), supervised by Prof. Qi Wu. Research interests: imitation learning, reinforcement learning, VLA models for household robots.
 
 ## Directory Structure
 
