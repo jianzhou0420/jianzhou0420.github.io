@@ -43,7 +43,7 @@
             <a href="mailto:jianzhou0420@outlook.com">Email</a>
             <a href="https://github.com/jianzhou0420">GitHub</a>
           </nav>
-          <p data-eid="p-1" class="hero__meta">Last updated: 2026-06-22</p>
+          <p data-eid="p-1" class="hero__meta">Last updated: 2026-08-20</p>
         </div>
         <img class="hero__photo" alt="Jian Zhou" src="./Jian Zhou_files/jian_zhou.jpg">
       </header>
@@ -91,6 +91,11 @@
           p.hidden = !match;
         });
         window.scrollTo({ top: 0 });
+        // Keep the bare URL canonical for Home: drop the hash so browser
+        // history/autocomplete doesn't learn "#home"/"#blog" as the default.
+        if (name === 'home' && location.hash) {
+          history.replaceState(null, '', location.pathname + location.search);
+        }
       }
 
       function current() {

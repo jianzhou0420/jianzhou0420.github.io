@@ -126,6 +126,11 @@
         @media (max-width: 900px) { .cap-grid { grid-template-columns: repeat(2, 1fr); } }
         @media (max-width: 620px) { .gallery, .cap-grid { grid-template-columns: 1fr; } }
         @media (prefers-reduced-motion: reduce) { .reveal { animation: none; opacity: 1; transform: none; } html { scroll-behavior: auto; } }
+        /* Citation */
+        .cite-box { position: relative; border: 1px solid var(--line); border-radius: var(--r); background: var(--node-2); overflow: hidden; }
+        .cite-box pre { font-family: var(--mono); font-size: 12.5px; color: #c9d0e1; padding: 22px; overflow-x: auto; line-height: 1.7; }
+        .cite-box .copy { position: absolute; top: 12px; right: 12px; font-family: var(--mono); font-size: 11px; color: var(--ink); background: var(--node); border: 1px solid var(--line); border-radius: 7px; padding: 6px 12px; cursor: pointer; transition: .2s var(--ease); }
+        .cite-box .copy:hover { border-color: var(--amber); color: var(--amber); }
     </style>
 </head>
 
@@ -156,6 +161,7 @@
                     <li><a href="#evidence"><span class="dot"></span><span class="idx">05</span> evidence</a></li>
                     <li><a href="#capabilities"><span class="dot"></span><span class="idx">06</span> usage</a></li>
                     <li><a href="#start"><span class="dot"></span><span class="idx">07</span> get started</a></li>
+                    <li><a href="#cite"><span class="dot"></span><span class="idx">08</span> cite</a></li>
                 </ul>
             </aside>
 
@@ -602,6 +608,25 @@
                     </div>
                 </section>
 
+                <!-- ===== 08 CITE ===== -->
+                <section id="cite">
+                    <div class="eyebrow"><span class="port amber"></span>08 — cite</div>
+                    <h2>Citation</h2>
+                    <p>If AgentCanvas or its embodied Agent Architecture Search results are useful in your research, please cite the paper.</p>
+                    <div class="cite-box">
+                        <button class="copy" onclick="copyCite()">copy</button>
+                        <pre id="cite-text">@misc{jian2026AgentCanvas,
+  title         = {Automating the Design of Embodied Agent Architectures},
+  author        = {Jian Zhou and Sihao Lin and Jin Li and Shuai Fu and Gengze Zhou and Qi Wu},
+  year          = {2026},
+  eprint        = {2606.30111},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.RO},
+  url           = {https://arxiv.org/abs/2606.30111}
+}</pre>
+                    </div>
+                </section>
+
                 <footer>
                     <span>&copy; 2026 Jian Zhou · AgentCanvas</span>
                     <span><a href="paper.html">paper project page</a> · <a href="https://jianzhou0420.github.io/AgentCanvas/" target="_blank" rel="noopener">documentation</a></span>
@@ -619,6 +644,12 @@
             }, { rootMargin: "-12% 0px -70% 0px", threshold: 0 });
             document.querySelectorAll("main section").forEach(s => obs.observe(s));
         })();
+
+        // ===================== Copy citation =====================
+        function copyCite() {
+            const t = document.getElementById("cite-text").innerText;
+            navigator.clipboard.writeText(t).then(() => { const b = document.querySelector(".cite-box .copy"); b.textContent = "copied ✓"; setTimeout(() => b.textContent = "copy", 1800); });
+        }
     </script>
     <!-- in-place text editor (activates only with ?edit) -->
     <script src="/_edit/inline-edit.js" defer></script>
