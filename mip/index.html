@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Embodied Agents Take Control — Minimal-Interface Zero-Shot Navigation</title>
+    <meta name="author" content="Jian Zhou">
+    <meta name="description"
+        content="Agentic embodied control: a general-purpose coding agent, given one monocular RGB camera and four primitive actions, sustains the whole perceive-reason-act loop itself and rivals industrial-scale trained navigation policies on R2R-CE — zero-shot, no map, no memory, no navigation training.">
+
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Embodied Agents Take Control — Minimal-Interface Zero-Shot Navigation">
+    <meta property="og:description"
+        content="One camera. Four actions. No navigation training. A general-purpose agent sustains the embodied control loop itself — and rivals industrial-scale trained policies on R2R-CE.">
+    <meta property="og:image" content="https://jianzhou0420.github.io/mip/teaser.png">
+    <meta property="og:url" content="https://jianzhou0420.github.io/mip/">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Embodied Agents Take Control — Minimal-Interface Zero-Shot Navigation">
+    <meta name="twitter:image" content="https://jianzhou0420.github.io/mip/teaser.png">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800;900&family=Hanken+Grotesk:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Shared page layout (centered column + sticky outliner). Single source of truth; see the file header. -->
+    <link rel="stylesheet" href="/assets/page-layout.css">
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-17341V1NQ5"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-17341V1NQ5');
+    </script>
+
+    <style>
+        :root {
+            --canvas: #090c13; --canvas-2: #0c1019; --node: #111726; --node-2: #0e1422;
+            --line: #212c44; --ink: #eef1f7; --muted: #9da8c0; --faint: #6e7994;
+            --blue: #5b8cff; --blue-2: #8fb0ff; --blue-soft: #5b8cff22;
+            --teal: #34e0bf; --amber: #ff8a5c; --amber-d: #e0703a; --violet: #a98bff;
+            --r: 12px; --ease: cubic-bezier(.22, .61, .36, 1); /* layout tokens (--maxw/--rail/--measure/--lean) live in assets/page-layout.css */
+            --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+            --body: 'Hanken Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+            --display: 'Archivo', var(--body);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body { font-family: var(--body); background: var(--canvas); color: var(--ink); line-height: 1.65; -webkit-font-smoothing: antialiased; position: relative; overflow-x: hidden; }
+        /* faint scanline field instead of the canvas dot-grid — the page is a session, not a canvas */
+        body::before { content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none; background-image: repeating-linear-gradient(0deg, rgba(255,255,255,.022) 0 1px, transparent 1px 4px); mask-image: radial-gradient(ellipse 120% 90% at 50% 0%, #000 30%, transparent 100%); }
+        body::after { content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none; background: radial-gradient(60% 45% at 78% 8%, rgba(91,140,255,.10), transparent 70%), radial-gradient(50% 40% at 12% 22%, rgba(255,138,92,.06), transparent 70%); }
+        .topbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 22px 0 14px; position: relative; z-index: 3; }
+        .brand { display: inline-flex; align-items: center; gap: 10px; font-family: var(--mono); font-weight: 700; letter-spacing: .02em; font-size: 15px; color: var(--ink); text-decoration: none; }
+        .brand b { color: var(--blue); }
+        .back { font-family: var(--mono); font-size: 12.5px; color: var(--muted); text-decoration: none; border: 1px solid var(--line); padding: 7px 12px; border-radius: 8px; transition: .25s var(--ease); white-space: nowrap; }
+        .back:hover { color: var(--ink); border-color: var(--blue); background: #5b8cff18; }
+        .rail__title { color: var(--faint); text-transform: uppercase; letter-spacing: .18em; font-size: 10px; margin-bottom: 14px; }
+        .rail__list { list-style: none; position: relative; }
+        .rail__list::before { content: ""; position: absolute; left: 4px; top: 8px; bottom: 8px; width: 1px; background: linear-gradient(var(--line), transparent); }
+        .rail a { display: flex; align-items: center; gap: 11px; color: var(--muted); text-decoration: none; padding: 6px 0; transition: color .2s var(--ease); }
+        .rail a .dot { width: 9px; height: 9px; border-radius: 50%; border: 1.5px solid var(--line); background: var(--canvas); flex: none; position: relative; z-index: 1; transition: .25s var(--ease); }
+        .rail a:hover { color: var(--ink); }
+        .rail a.active { color: var(--ink); }
+        .rail a.active .dot { border-color: var(--blue); background: var(--blue); box-shadow: 0 0 0 4px #5b8cff22; }
+        .rail a .idx { color: var(--faint); }
+        section { scroll-margin-top: 24px; margin-bottom: 80px; }
+        .eyebrow { display: inline-flex; align-items: center; gap: 9px; font-family: var(--mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin-bottom: 18px; }
+        .eyebrow .port { width: 8px; height: 8px; border-radius: 50%; background: var(--blue); box-shadow: 0 0 0 4px #5b8cff22; }
+        .eyebrow .port.amber { background: var(--amber); box-shadow: 0 0 0 4px #ff8a5c22; }
+        .eyebrow .port.teal { background: var(--teal); box-shadow: 0 0 0 4px #34e0bf22; }
+        h2 { font-family: var(--display); font-weight: 800; font-size: clamp(1.55rem, 3.3vw, 2.2rem); letter-spacing: -.02em; line-height: 1.08; margin-bottom: 18px; }
+        h3 { font-family: var(--display); font-weight: 700; font-size: 1.06rem; letter-spacing: -.01em; margin-bottom: 6px; }
+        p { color: #ccd4e3; margin-bottom: 16px; }
+        strong { color: var(--ink); font-weight: 600; }
+        .accent { color: var(--amber); } .accent-b { color: var(--blue-2); } .accent-t { color: var(--teal); }
+        /* terminal card — the page's framing device */
+        .term { position: relative; background: linear-gradient(180deg, var(--node) 0%, var(--node-2) 100%); border: 1px solid var(--line); border-radius: var(--r); box-shadow: 0 24px 60px -32px rgba(0,0,0,.9), inset 0 1px 0 rgba(255,255,255,.03); }
+        .term__bar { display: flex; align-items: center; gap: 10px; padding: 11px 14px; border-bottom: 1px solid var(--line); font-family: var(--mono); font-size: 12px; color: var(--muted); }
+        .term__bar .tdot { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+        .tdot.b { background: var(--blue); } .tdot.a { background: var(--amber); } .tdot.t { background: var(--teal); }
+        .term__bar .grow { margin-left: auto; color: var(--faint); }
+        .hero { margin: 14px 0 60px; }
+        .hero__brandline { font-family: var(--mono); font-size: 12px; letter-spacing: .26em; text-transform: uppercase; color: var(--blue-2); margin-bottom: 20px; }
+        .hero h1 { font-family: var(--display); font-weight: 900; font-size: clamp(2.4rem, 7vw, 4.6rem); line-height: .98; letter-spacing: -.04em; margin-bottom: 20px; }
+        .hero h1 .em { color: var(--blue); }
+        .hero__tldr { font-size: clamp(1.05rem, 1.8vw, 1.3rem); color: #cfd6e6; max-width: 62ch; margin-bottom: 26px; }
+        .links { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 34px; }
+        .btn { display: inline-flex; align-items: center; gap: 9px; font-family: var(--mono); font-size: 13px; font-weight: 600; text-decoration: none; padding: 11px 18px; border-radius: 9px; border: 1px solid var(--line); color: var(--ink); background: var(--node); transition: .22s var(--ease); }
+        .btn .pdot { width: 7px; height: 7px; border-radius: 50%; background: var(--amber); }
+        .btn:hover { transform: translateY(-2px); border-color: var(--amber); box-shadow: 0 14px 30px -18px #ff8a5c99; }
+        .btn.primary { background: var(--blue); border-color: var(--blue); color: #071026; }
+        .btn.primary .pdot { background: #071026; }
+        .btn.primary:hover { box-shadow: 0 16px 34px -16px var(--blue); border-color: var(--blue); }
+        .btn small { color: var(--muted); font-weight: 400; }
+        .btn.primary small { color: #37507e; }
+        /* headline stat strip */
+        .statstrip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 34px; }
+        .stat { border: 1px solid var(--line); border-radius: var(--r); background: var(--node-2); padding: 16px 18px 14px; position: relative; }
+        .stat .n { font-family: var(--display); font-weight: 900; font-size: clamp(1.9rem, 3.6vw, 2.7rem); letter-spacing: -.03em; line-height: 1; color: var(--muted); }
+        .stat .l { font-family: var(--mono); font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--faint); margin-top: 8px; line-height: 1.5; }
+        .stat.ours { border-color: var(--blue); background: linear-gradient(180deg, #14203c, #0e1730); }
+        .stat.ours .n { color: var(--blue-2); }
+        .stat.ours .l { color: var(--muted); }
+        .stat.human .n { color: var(--faint); }
+        .caption { font-family: var(--mono); font-size: 12px; color: var(--muted); padding: 12px 16px; border-top: 1px solid var(--line); display: flex; gap: 10px; align-items: flex-start; line-height: 1.55; }
+        .caption .ico { color: var(--blue); flex: none; }
+        .figure { margin: 26px 0 0; }
+        .figure img, .figure video { display: block; width: 100%; height: auto; background: #0a0d14; }
+        .findings { display: grid; gap: 14px; margin-top: 8px; }
+        .finding { display: grid; grid-template-columns: auto 1fr; gap: 16px; align-items: start; padding: 18px 20px; border: 1px solid var(--line); border-radius: var(--r); background: linear-gradient(180deg, #0f1523, #0c111c); transition: .25s var(--ease); }
+        .finding:hover { border-color: #2d3b5a; transform: translateX(3px); }
+        .finding .n { font-family: var(--mono); font-size: 12px; color: var(--blue); border: 1px solid var(--blue); border-radius: 6px; padding: 2px 8px; line-height: 1.5; }
+        .finding p { margin: 0; font-size: .97rem; max-width: none; }
+        /* probe interface columns */
+        .probe-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 22px 0 0; }
+        .probe-list { list-style: none; padding: 16px 18px; font-family: var(--mono); font-size: 13px; line-height: 2.05; }
+        .probe-list li { color: var(--muted); }
+        .probe-list .gone { color: var(--faint); text-decoration: line-through; text-decoration-color: #ff8a5c88; text-decoration-thickness: 1.5px; }
+        .probe-list .gone::after { content: " ✕"; color: var(--amber); text-decoration: none; font-size: 11px; }
+        .probe-list .keep { color: var(--ink); }
+        .probe-list .keep b { color: var(--blue-2); font-weight: 600; }
+        .probe-list .sub { color: var(--faint); font-size: 11.5px; line-height: 1.6; padding-left: 14px; }
+        pre.prompt { font-family: var(--mono); font-size: 12.3px; color: #c9d0e1; padding: 18px 20px; overflow-x: auto; line-height: 1.7; white-space: pre-wrap; }
+        pre.prompt .k { color: var(--blue-2); }
+        pre.prompt .c { color: var(--faint); }
+        /* ===== episode player ===== */
+        .player { display: grid; grid-template-columns: minmax(0, 46%) 1fr; gap: 0; min-height: 380px; }
+        .player__view { position: relative; border-right: 1px solid var(--line); background: #05070c; display: flex; align-items: center; }
+        .player__view img { width: 100%; height: auto; display: block; }
+        .player__view .obsno { position: absolute; top: 10px; left: 10px; font-family: var(--mono); font-size: 11px; color: var(--ink); background: rgba(9,12,19,.82); border: 1px solid var(--line); border-radius: 6px; padding: 3px 9px; }
+        .player__tr { padding: 18px 20px 16px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+        .tr-think { font-style: italic; color: var(--muted); font-size: .93rem; line-height: 1.6; border-left: 2px solid #2a3752; padding-left: 12px; max-height: 172px; overflow-y: auto; }
+        .tr-think::before { content: "✱ thinking"; display: block; font-style: normal; font-family: var(--mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--faint); margin-bottom: 5px; }
+        .tr-say { color: #d7ddea; font-size: .95rem; line-height: 1.55; }
+        .tr-call { font-family: var(--mono); font-size: 13px; color: var(--blue-2); background: #0c1322; border: 1px solid #23345c; border-radius: 8px; padding: 9px 12px; overflow-x: auto; white-space: nowrap; }
+        .tr-call .fn { color: var(--ink); }
+        .tr-call.stop { color: var(--teal); border-color: #1d5c4e; }
+        .tr-chip { font-family: var(--mono); font-size: 11px; color: var(--faint); }
+        .tr-done { display: none; font-family: var(--mono); font-size: 12.5px; color: var(--teal); border: 1px solid #1d5c4e; background: #0d1a19; border-radius: 8px; padding: 9px 12px; }
+        .player__ctrl { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-top: 1px solid var(--line); }
+        .pbtn { font-family: var(--mono); font-size: 12px; color: var(--ink); background: var(--node); border: 1px solid var(--line); border-radius: 7px; padding: 6px 13px; cursor: pointer; transition: .2s var(--ease); }
+        .pbtn:hover { border-color: var(--blue); color: var(--blue-2); }
+        .pbtn.playing { border-color: var(--blue); color: var(--blue-2); background: #10203f; }
+        .tape { display: flex; gap: 5px; overflow-x: auto; padding: 2px 0; flex: 1; min-width: 0; scrollbar-width: thin; }
+        .tk { flex: none; font-family: var(--mono); font-size: 10.5px; color: var(--muted); background: #0c1120; border: 1px solid var(--line); border-radius: 6px; padding: 3px 8px; cursor: pointer; transition: .18s var(--ease); white-space: nowrap; }
+        .tk:hover { color: var(--ink); border-color: #33456e; }
+        .tk.amber { color: var(--amber); border-color: #6e4630; }
+        .tk.stopk { color: var(--teal); border-color: #1d5c4e; }
+        .tk.cur { color: #071026; background: var(--blue); border-color: var(--blue); font-weight: 700; }
+        .tk.cur.amber { background: var(--amber-d); border-color: var(--amber-d); }
+        .tk.cur.stopk { background: var(--teal); border-color: var(--teal); }
+        .instrband { padding: 12px 16px; border-bottom: 1px solid var(--line); font-size: .93rem; color: #cfd6e6; display: flex; gap: 14px; align-items: baseline; flex-wrap: wrap; }
+        .instrband .lbl { font-family: var(--mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--blue-2); flex: none; }
+        .instrband .outcome { margin-left: auto; font-family: var(--mono); font-size: 11px; color: var(--teal); white-space: nowrap; }
+        /* results board table */
+        .board { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: 13.5px; }
+        .board th, .board td { padding: 8px 10px; text-align: right; border-bottom: 1px solid #1a2338; color: #ccd4e3; white-space: nowrap; }
+        .board th { font-weight: 600; color: var(--faint); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; }
+        .board th:first-child, .board td:first-child { text-align: left; color: var(--muted); }
+        .board td.hi { color: var(--blue-2); font-weight: 700; }
+        .board tr:last-child td { border-bottom: none; }
+        .boardwrap { overflow-x: auto; }
+        .cap-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 8px; }
+        .cap { border: 1px solid var(--line); border-radius: var(--r); background: var(--node-2); padding: 18px; transition: .25s var(--ease); }
+        .cap:hover { border-color: var(--blue); }
+        .cap .cn { font-family: var(--display); font-weight: 700; font-size: 1.02rem; margin-bottom: 4px; }
+        .cap .cd { font-size: .9rem; color: #bfc8da; max-width: none; margin: 0; }
+        .cap .ct { font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--faint); margin-top: 10px; }
+        .cta { margin-top: 30px; border: 1px solid var(--line); border-radius: var(--r); background: linear-gradient(180deg, #0f1523, #0c111c); padding: 26px; display: flex; flex-wrap: wrap; gap: 16px; align-items: center; justify-content: space-between; }
+        .cta .ctitle { font-family: var(--display); font-weight: 800; font-size: 1.3rem; }
+        footer { border-top: 1px solid var(--line); padding-top: 26px; margin-top: 30px; display: flex; flex-wrap: wrap; gap: 10px 20px; justify-content: space-between; font-family: var(--mono); font-size: 12px; color: var(--faint); }
+        footer a { color: var(--muted); text-decoration: none; } footer a:hover { color: var(--blue); }
+        .reveal { opacity: 0; transform: translateY(16px); animation: rise .8s var(--ease) forwards; }
+        @keyframes rise { to { opacity: 1; transform: none; } }
+        @media (max-width: 900px) { .cap-grid { grid-template-columns: 1fr; } .statstrip { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 760px) { .player { grid-template-columns: 1fr; } .player__view { border-right: none; border-bottom: 1px solid var(--line); } .probe-grid { grid-template-columns: 1fr; } }
+        @media (prefers-reduced-motion: reduce) { .reveal { animation: none; opacity: 1; transform: none; } html { scroll-behavior: auto; } }
+        /* Citation */
+        .cite-box { position: relative; border: 1px solid var(--line); border-radius: var(--r); background: var(--node-2); overflow: hidden; }
+        .cite-box pre { font-family: var(--mono); font-size: 12.5px; color: #c9d0e1; padding: 22px; overflow-x: auto; line-height: 1.7; }
+        .cite-box .copy { position: absolute; top: 12px; right: 12px; font-family: var(--mono); font-size: 11px; color: var(--ink); background: var(--node); border: 1px solid var(--line); border-radius: 7px; padding: 6px 12px; cursor: pointer; transition: .2s var(--ease); }
+        .cite-box .copy:hover { border-color: var(--amber); color: var(--amber); }
+    </style>
+</head>
+
+<body>
+    <div class="wrap">
+        <div class="topbar">
+            <a class="brand" href="/#works" aria-label="MIP home">
+                <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true">
+                    <rect x="3" y="3" width="16" height="16" rx="3.5" stroke="#5b8cff" stroke-width="1.6"/>
+                    <circle cx="11" cy="11" r="3.2" stroke="#ff8a5c" stroke-width="1.6"/>
+                    <path d="M11 1.2v2.6M11 18.2v2.6M1.2 11h2.6M18.2 11h2.6" stroke="#3a466a" stroke-width="1.5"/>
+                </svg>
+                take<b>control</b>
+            </a>
+            <a class="back" href="/#works">&larr; index / works</a>
+        </div>
+
+        <div class="layout">
+            <aside class="rail" aria-label="Section navigation">
+                <div class="rail__title">// outliner</div>
+                <ul class="rail__list">
+                    <li><a href="#top" class="active"><span class="dot"></span><span class="idx">00</span> overview</a></li>
+                    <li><a href="#shift"><span class="dot"></span><span class="idx">01</span> the shift</a></li>
+                    <li><a href="#probe"><span class="dot"></span><span class="idx">02</span> the probe</a></li>
+                    <li><a href="#watch"><span class="dot"></span><span class="idx">03</span> watch it run</a></li>
+                    <li><a href="#results"><span class="dot"></span><span class="idx">04</span> results</a></li>
+                    <li><a href="#axes"><span class="dot"></span><span class="idx">05</span> what moves it</a></li>
+                    <li><a href="#limits"><span class="dot"></span><span class="idx">06</span> limits</a></li>
+                    <li><a href="#cite"><span class="dot"></span><span class="idx">07</span> cite</a></li>
+                </ul>
+            </aside>
+
+            <main>
+                <!-- ===== 00 HERO ===== -->
+                <section id="top" class="hero">
+                    <div class="hero__brandline reveal" style="animation-delay:.02s" data-eid="hero-brand">The minimal-interface probe · agentic embodied control</div>
+                    <h1 class="reveal" style="animation-delay:.08s" data-eid="hero-title">Embodied agents<br><span class="em">take control</span></h1>
+                    <p class="hero__tldr reveal" style="animation-delay:.16s" data-eid="hero-tldr">Give a <strong>general-purpose coding agent</strong> one monocular RGB camera and four primitive
+                        actions — nothing else. <strong class="accent-b">Zero-shot</strong>, it sustains the whole
+                        perceive&nbsp;→&nbsp;reason&nbsp;→&nbsp;act loop itself and <strong>rivals industrial-scale trained
+                        navigation policies</strong> on R2R-CE. No map, no explicit memory, no planner, no navigation
+                        training: the model is not called by a navigator — <strong class="accent">it is the navigator</strong>.</p>
+                    <div class="links reveal" style="animation-delay:.24s">
+                        <a class="btn primary" href="https://arxiv.org/abs/2607.26148" target="_blank" rel="noopener"><span class="pdot"></span>arXiv <small>2607.26148</small></a>
+                        <a class="btn" href="https://arxiv.org/pdf/2607.26148" target="_blank" rel="noopener"><span class="pdot"></span>Paper PDF</a>
+                        <a class="btn" href="/agentcanvas/"><span class="pdot"></span>AgentCanvas platform</a>
+                        <a class="btn" href="#cite"><span class="pdot"></span>Cite</a>
+                    </div>
+                    <div class="statstrip reveal" style="animation-delay:.30s">
+                        <div class="stat"><div class="n">55</div><div class="l">best engineered zero-shot agent · panorama + depth · map, memory, action tools</div></div>
+                        <div class="stat"><div class="n">72</div><div class="l">best trained policy · panorama · in-domain navigation data</div></div>
+                        <div class="stat ours"><div class="n">78</div><div class="l">ours · one camera · four actions · zero-shot, no nav machinery</div></div>
+                        <div class="stat human"><div class="n">94</div><div class="l">human tester · same board, same minimal interface</div></div>
+                    </div>
+                    <figure class="term figure reveal" style="animation-delay:.38s">
+                        <div class="term__bar"><span class="tdot b"></span><span class="tdot a"></span><span class="tdot t"></span><span style="margin-left:6px">session — fable-5 · R2R-CE ep&nbsp;10</span><span class="grow">// recorded run · left: agent session · right: what it sees</span></div>
+                        <video src="hero.mp4" poster="hero_poster.jpg" autoplay muted loop playsinline controls preload="metadata"></video>
+                        <figcaption class="caption"><span class="ico">▶</span><span><strong style="color:var(--ink)">A real episode, replayed from its log.</strong> Left: the agent's session — its own thinking and every <code style="font-family:var(--mono);font-size:11.5px">observe()</code> / <code style="font-family:var(--mono);font-size:11.5px">step()</code> call, verbatim. Right: the monocular camera view it acts on. It turns around, rounds the bed, recovers from a wrong room, and stops in the correct room — <strong style="color:var(--teal)">SUCCESS, 2.98&nbsp;m from goal</strong>.</span></figcaption>
+                    </figure>
+                </section>
+
+                <!-- ===== 01 THE SHIFT ===== -->
+                <section id="shift">
+                    <div class="eyebrow"><span class="port"></span>01 — the shift</div>
+                    <h2 data-eid="sec-h2-1">Who holds the control loop?</h2>
+                    <p data-eid="sec-p-1">Embodied navigation has answered this question two ways. <strong>Trained
+                        policies</strong> bake the loop into weights — capable, but offering limited flexibility across
+                        environments and weak recovery when execution goes wrong. <strong>Workflow systems</strong> keep
+                        the loop in human-authored code: the foundation model is one reasoning module inside a hand-wired
+                        pipeline of maps, memory, planners, and verifiers — the dominant zero-shot recipe — and even
+                        recent dual-brain systems fix the handoff between reasoning and control.</p>
+                    <p data-eid="sec-p-1b">We study the case where <strong class="accent-b">the model itself holds the
+                        loop</strong> — <strong class="accent-b">agentic embodied control</strong>: the reasoning model
+                        directly steers every action through plain tool calls, so reasoning and control stay aligned
+                        with no fixed handoff. It is the organization coding agents already use to write software;
+                        frontier models' multimodal, multi-turn, and spatial abilities may have made it viable for
+                        embodiment. The probe asks how far it goes with <strong>no navigation machinery at
+                        all</strong>.</p>
+                    <figure class="term figure">
+                        <div class="term__bar"><span class="tdot b"></span><span style="margin-left:2px">fig 1</span><span class="grow">who holds the loop · and how far that gets it</span></div>
+                        <img src="fig1_teaser.png" alt="The paper's Figure 1. Left: navigation systems placed by who holds the interaction loop — policy, workflow, or agentic — each tagged trained or zero-shot. Middle: our probe, a coding-agent harness with observe() and step() only, sits in the agentic zero-shot cell with no navigation scaffolding. Right: R2R-CE success against the strongest zero-shot and trained systems." style="padding:14px;background:#f7f8f9">
+                        <figcaption class="caption"><span class="ico">◆</span><span>The paper's Fig.&nbsp;1 — <strong style="color:var(--ink)">who holds the interaction loop, and how far that gets it</strong>. <em>Left:</em> systems by who holds the loop (policy · workflow · agentic), each tagged trained&nbsp;(T) or zero-shot&nbsp;(ZS). <em>Middle:</em> our probe sits in the <strong style="color:var(--blue-2)">agentic × zero-shot</strong> cell with <strong style="color:var(--ink)">no navigation scaffolding</strong>. <em>Right:</em> R2R-CE success against the strongest zero-shot (AgenticNav) and trained (Qwen-RobotNav) systems.</span></figcaption>
+                    </figure>
+                </section>
+
+                <!-- ===== 02 THE PROBE ===== -->
+                <section id="probe">
+                    <div class="eyebrow"><span class="port amber"></span>02 — the probe</div>
+                    <h2 data-eid="sec-h2-2">One camera. Basic actions. Nothing else.</h2>
+                    <p data-eid="sec-p-2">The minimal interface is a <strong>diagnostic lower bound</strong>, not a
+                        convenience baseline. Everything a navigation system usually leans on is deliberately taken away;
+                        whatever performance remains must come from the <strong class="accent-b">model itself</strong>. If
+                        the agent succeeds under these conditions, no hidden navigation module can claim the credit — and
+                        where it fails, the missing capability is named.</p>
+                    <div class="probe-grid">
+                        <div class="term">
+                            <div class="term__bar"><span class="tdot a"></span><span style="margin-left:2px">removed</span><span class="grow">the usual machinery</span></div>
+                            <ul class="probe-list">
+                                <li class="gone">panoramic observation</li>
+                                <li class="gone">depth &amp; pose sensors</li>
+                                <li class="gone">metric / topological map</li>
+                                <li class="gone">explicit memory module</li>
+                                <li class="gone">planner &amp; search</li>
+                                <li class="gone">waypoint predictor</li>
+                                <li class="gone">navigation-specific training</li>
+                            </ul>
+                        </div>
+                        <div class="term">
+                            <div class="term__bar"><span class="tdot b"></span><span style="margin-left:2px">remaining</span><span class="grow">the whole interface</span></div>
+                            <ul class="probe-list">
+                                <li class="keep"><b>observe()</b> → one monocular RGB frame</li>
+                                <li class="sub">forward-facing camera, 512×512</li>
+                                <li class="keep"><b>step(actions)</b> → primitives, in order</li>
+                                <li class="sub">0 STOP · 1 FWD 0.25 m · 2 L 15° · 3 R 15°</li>
+                                <li class="keep"><b>one instruction</b>, natural language</li>
+                                <li class="sub">success = STOP within 3 m of the endpoint</li>
+                                <li class="keep"><b>500-action budget</b>, fully autonomous</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <p style="margin-top:22px" data-eid="sec-p-2b">Three <strong>coding-agent harnesses</strong> drive it —
+                        Claude Agent SDK, Codex CLI, and the small open-source mini-swe-agent — each connected to the
+                        simulator through the same two tools. The entire task specification is one system prompt:</p>
+                    <figure class="term figure" style="margin-top:14px">
+                        <div class="term__bar"><span class="tdot b"></span><span style="margin-left:2px">system_prompt</span><span class="grow">verbatim · the complete task spec</span></div>
+                        <pre class="prompt">You are controlling a robot in a real indoor environment (a photorealistic
+3D scan of a building). You interact only through these tools:
+
+- <span class="k">observe()</span>: look through the robot's forward-facing camera (returns an RGB image).
+- <span class="k">step(actions)</span>: execute movement actions in order. 0 = STOP (permanently ends
+  the episode — declares you have reached the goal), 1 = move forward 0.25 m,
+  2 = turn left 15 degrees, 3 = turn right 15 degrees.
+
+Your task is to follow this navigation instruction to its endpoint:
+
+<span class="c">"{instruction}"</span>
+
+Rules:
+- Alternate observing and stepping: look, decide where the instruction wants
+  you to go next, move, look again.
+- You have a budget of 500 movement actions.
+- You succeed only if you issue action 0 (STOP) while within 3 meters of the
+  instruction's endpoint. STOP is permanent — issue it only when you believe
+  you are at the goal.
+- Turning in place (e.g. step([2,2,2,2,2,2])) is a cheap way to look around
+  when unsure.
+- Work autonomously until you stop; nobody can answer questions.</pre>
+                        <figcaption class="caption"><span class="ico">◆</span><span>The full task specification, verbatim from the episode logs. No few-shot examples, no navigation heuristics, no chain-of-thought template — the harness's generic agent loop does the rest.</span></figcaption>
+                    </figure>
+                </section>
+
+                <!-- ===== 03 WATCH IT RUN ===== -->
+                <section id="watch">
+                    <div class="eyebrow"><span class="port"></span>03 — watch it run</div>
+                    <h2 data-eid="sec-h2-3">A real episode, decision by decision</h2>
+                    <p data-eid="sec-p-3">This is <strong>episode 10</strong> of the board, replayed from its log —
+                        every frame is the exact image the agent saw, every quote is its own recorded reasoning, every
+                        <code style="font-family:var(--mono);font-size:.85em">step()</code> is the exact call it issued.
+                        It turns around, fights its way past the bed corner, wanders into the wrong room,
+                        <strong class="accent">rebuilds its mental map out loud</strong>, and stops — correctly — in the
+                        bathroom. The paper's Fig.&nbsp;2 shows this same episode.</p>
+                    <figure class="term figure">
+                        <div class="term__bar"><span class="tdot b"></span><span class="tdot a"></span><span class="tdot t"></span><span style="margin-left:6px">replay — mini-swe-agent × fable-5 · ep 10 · R2R-CE val-unseen</span><span class="grow">// from episode_10.jsonl</span></div>
+                        <div class="instrband">
+                            <span class="lbl">instruction</span>
+                            <span>&ldquo;Turn around and walk to the end of the bed. At the end of the bed turn right and walk to the hallway. Once at the entrance way, walk through the hallway to the next room.&rdquo;</span>
+                            <span class="outcome">SUCCESS · stops 2.98 m from goal</span>
+                        </div>
+                        <div class="player">
+                            <div class="player__view">
+                                <img id="pv-img" src="ep10/obs01.jpg" alt="Agent's monocular camera view for the current observation">
+                                <span class="obsno" id="pv-obsno">obs 1 / 20</span>
+                            </div>
+                            <div class="player__tr" id="pv-tr" aria-live="polite"></div>
+                        </div>
+                        <div class="player__ctrl">
+                            <button class="pbtn" id="pv-play" aria-label="Play or pause the replay">▶ play</button>
+                            <div class="tape" id="pv-tape"></div>
+                        </div>
+                        <figcaption class="caption"><span class="ico">◆</span><span>20 <code style="font-family:var(--mono);font-size:11.5px">observe()</code> · 20 <code style="font-family:var(--mono);font-size:11.5px">step()</code> · 111 primitives · 332 s. <strong style="color:var(--amber)">Amber</strong> marks the segments the model itself described as blocked or off-route: the bed-corner scrape (5–8) and the wrong-room detour it detects and unwinds (14–15). Use the tape or arrow keys to scrub.</span></figcaption>
+                    </figure>
+                </section>
+
+                <!-- ===== 04 RESULTS ===== -->
+                <section id="results">
+                    <div class="eyebrow"><span class="port teal"></span>04 — results</div>
+                    <h2 data-eid="sec-h2-4">They add machinery. We expose what the model already knows.</h2>
+                    <p data-eid="sec-p-4">On R2R-CE, engineered zero-shot agents top out at <strong>55 SR</strong> with
+                        panoramas, depth, maps, memory, and action tools. The best industrial-scale trained policy
+                        reports <strong>72</strong> with panoramic input and in-domain data. The minimal-interface agent
+                        — one camera, four actions, no training — reaches <strong class="accent-b">72 with a small
+                        open-source harness</strong> and <strong class="accent-b">78 at maximum effort</strong>.</p>
+                    <figure class="term figure">
+                        <div class="term__bar"><span class="tdot t"></span><span style="margin-left:2px">landscape</span><span class="grow">SR on R2R-CE · minimal interface in blue</span></div>
+                        <svg viewBox="0 0 860 700" width="100%" role="img" aria-labelledby="dr1" style="display:block;background:#0a0d14" preserveAspectRatio="xMidYMid meet">
+                            <title id="dr1">Success rate comparison on R2R-CE along the paper's two axes: groups show who holds the loop (policy, workflow, agentic), and every row carries a trained or zero-shot badge. Trained policies span 37 to 72, workflow systems 44 to 71, the best agentic zero-shot system 55, our minimal-interface rows 68.3 to 78, human reference 94.</title>
+                            <!-- scale: x = 290 + SR*5.1  (SR 100 -> 800) -->
+                            <g stroke="#1a2338" stroke-width="1">
+                                <line x1="290" y1="42" x2="290" y2="650"/><line x1="417.5" y1="42" x2="417.5" y2="650"/><line x1="545" y1="42" x2="545" y2="650"/><line x1="672.5" y1="42" x2="672.5" y2="650"/><line x1="800" y1="42" x2="800" y2="650"/>
+                            </g>
+                            <g font-family="'JetBrains Mono',monospace" font-size="10.5" fill="#6e7994" text-anchor="middle">
+                                <text x="290" y="670">0</text><text x="417.5" y="670">25</text><text x="545" y="670">50</text><text x="672.5" y="670">75</text><text x="800" y="670">100</text>
+                                <text x="800" y="688">SR</text>
+                            </g>
+                            <!-- source-axis legend (left) · human reference (right) -->
+                            <text x="24" y="30" font-family="'JetBrains Mono',monospace" font-size="11" fill="#6e7994">capability source: <tspan fill="#a98bff" font-weight="700">T</tspan> trained · <tspan fill="#34e0bf" font-weight="700">ZS</tspan> zero-shot</text>
+                            <line x1="769.4" y1="42" x2="769.4" y2="650" stroke="#9da8c0" stroke-width="1.2" stroke-dasharray="5 4"/>
+                            <text x="761" y="58" text-anchor="end" font-family="'JetBrains Mono',monospace" font-size="11" fill="#9da8c0">human 94 · same board</text>
+                            <g font-family="'JetBrains Mono',monospace" font-size="11.5">
+                                <text x="24" y="70" fill="#a98bff" font-size="13" font-weight="700" letter-spacing="1">POLICY</text><text x="24" y="86" fill="#6e7994" font-size="10">full val-unseen · context</text>
+                                <g fill="none" stroke="#4a5878" stroke-width="1.2">
+                                    <rect x="290" y="96" width="188.7" height="15" rx="4"/>
+                                    <rect x="290" y="122" width="275.4" height="15" rx="4"/>
+                                    <rect x="290" y="148" width="290.7" height="15" rx="4"/>
+                                    <rect x="290" y="174" width="295.8" height="15" rx="4"/>
+                                    <rect x="290" y="200" width="300.9" height="15" rx="4"/>
+                                    <rect x="290" y="226" width="316.2" height="15" rx="4"/>
+                                    <rect x="290" y="252" width="357" height="15" rx="4"/>
+                                    <rect x="290" y="278" width="367.2" height="15" rx="4"/>
+                                </g>
+                                <g fill="#9da8c0" text-anchor="end">
+                                    <text x="282" y="108">NaVid · monocular</text>
+                                    <text x="282" y="134">NaVILA · monocular</text>
+                                    <text x="282" y="160">StreamVLN · monocular</text>
+                                    <text x="282" y="186">Hy-Embodied-VLM · monocular</text>
+                                    <text x="282" y="212">RynnBrain-Nav · monocular</text>
+                                    <text x="282" y="238">NavFoM · panorama</text>
+                                    <text x="282" y="264">OmniNav · monocular</text>
+                                    <text x="282" y="290">Qwen-RobotNav · panorama</text>
+                                </g>
+                                <g fill="#b9c3d6">
+                                    <text x="487" y="108">37 <tspan fill="#a98bff">T</tspan></text><text x="573" y="134">54 <tspan fill="#a98bff">T</tspan></text><text x="589" y="160">57 <tspan fill="#a98bff">T</tspan></text><text x="594" y="186">58 <tspan fill="#a98bff">T</tspan></text><text x="599" y="212">59 <tspan fill="#a98bff">T</tspan></text><text x="614" y="238">62 <tspan fill="#a98bff">T</tspan></text><text x="655" y="264">70 <tspan fill="#a98bff">T</tspan></text><text x="665" y="290">72 <tspan fill="#a98bff">T</tspan></text>
+                                </g>
+                                <text x="24" y="329" fill="#ff8a5c" font-size="13" font-weight="700" letter-spacing="1">WORKFLOW</text>
+                                <g fill="none" stroke="#4a5878" stroke-width="1.2">
+                                    <rect x="290" y="339" width="224.4" height="15" rx="4"/>
+                                    <rect x="290" y="365" width="285.6" height="15" rx="4"/>
+                                    <rect x="290" y="391" width="326.4" height="15" rx="4"/>
+                                    <rect x="290" y="417" width="362.1" height="15" rx="4"/>
+                                </g>
+                                <g fill="#9da8c0" text-anchor="end">
+                                    <text x="282" y="351">SmartWay · pano+depth</text>
+                                    <text x="282" y="377">Vesta · monocular</text>
+                                    <text x="282" y="403">InternVLA-N1/DualVLN · monocular</text>
+                                    <text x="282" y="429">ABot-N1 · 3-cam</text>
+                                </g>
+                                <g fill="#b9c3d6">
+                                    <text x="522" y="351">44 <tspan fill="#34e0bf">ZS</tspan></text><text x="584" y="377">56 <tspan fill="#a98bff">T</tspan></text><text x="624" y="403">64 <tspan fill="#a98bff">T</tspan></text><text x="660" y="429">71 <tspan fill="#a98bff">T</tspan></text>
+                                </g>
+                                <text x="24" y="468" fill="#34e0bf" font-size="13" font-weight="700" letter-spacing="1">AGENTIC</text>
+                                <g fill="none" stroke="#4a5878" stroke-width="1.2">
+                                    <rect x="290" y="478" width="280.5" height="15" rx="4"/>
+                                </g>
+                                <text x="282" y="490" fill="#9da8c0" text-anchor="end">AgenticNav · pano+depth+tools</text>
+                                <text x="578" y="490" fill="#b9c3d6">55 <tspan fill="#34e0bf">ZS</tspan></text>
+                                <text x="24" y="529" fill="#5b8cff" font-size="13" font-weight="700" letter-spacing="1">AGENTIC · OURS</text><text x="24" y="545" fill="#6e7994" font-size="10">no nav machinery · ×3 = mean of three runs</text>
+                                <g fill="#5b8cff">
+                                    <rect x="290" y="555" width="367.2" height="15" rx="4" fill-opacity=".28" stroke="#5b8cff" stroke-width="1.3"/>
+                                    <rect x="290" y="581" width="348.3" height="15" rx="4" fill-opacity=".28" stroke="#5b8cff" stroke-width="1.3"/>
+                                    <rect x="290" y="607" width="360.6" height="15" rx="4" fill-opacity=".28" stroke="#5b8cff" stroke-width="1.3"/>
+                                    <rect x="290" y="633" width="397.8" height="15" rx="4" fill-opacity=".28" stroke="#5b8cff" stroke-width="1.3"/>
+                                </g>
+                                <g fill="#8fb0ff" text-anchor="end">
+                                    <text x="282" y="567">fable-5 × mini-swe-agent · monocular</text>
+                                    <text x="282" y="593">fable-5 × Claude SDK ×3 · monocular</text>
+                                    <text x="282" y="619">opus-5 × Claude SDK ×3 · monocular</text>
+                                    <text x="282" y="645">fable-5 × Claude SDK max · monocular</text>
+                                </g>
+                                <!-- ±1 s.d. whiskers over the three-replication means -->
+                                <g stroke="#8fb0ff" stroke-width="1.5">
+                                    <line x1="630.7" y1="588.5" x2="646" y2="588.5"/><line x1="630.7" y1="584" x2="630.7" y2="593"/><line x1="646" y1="584" x2="646" y2="593"/>
+                                    <line x1="632.7" y1="614.5" x2="668.4" y2="614.5"/><line x1="632.7" y1="610" x2="632.7" y2="619"/><line x1="668.4" y1="610" x2="668.4" y2="619"/>
+                                </g>
+                                <g fill="#8fb0ff" font-weight="700">
+                                    <text x="665" y="567">72 <tspan fill="#34e0bf">ZS</tspan></text><text x="652" y="593">68.3 <tspan font-weight="400" font-size="10">±1.5</tspan> <tspan fill="#34e0bf">ZS</tspan></text><text x="674" y="619">70.7 <tspan font-weight="400" font-size="10">±3.5</tspan> <tspan fill="#34e0bf">ZS</tspan></text><text x="696" y="645">78 <tspan fill="#34e0bf">ZS</tspan></text>
+                                </g>
+                            </g>
+                        </svg>
+                        <figcaption class="caption"><span class="ico">◆</span><span><strong style="color:var(--ink)">The paper's Table&nbsp;1, drawn along its two axes:</strong> the group is <strong style="color:var(--ink)">who holds the loop</strong> (policy · workflow · agentic), and every row carries a <strong style="color:var(--ink)">capability-source</strong> badge — <strong style="color:var(--violet)">T</strong>&nbsp;trained&nbsp;/&nbsp;<strong style="color:var(--teal)">ZS</strong>&nbsp;zero-shot — with its visual input in the label. Contextual comparison, stated honestly: external rows are their papers' full val-unseen numbers; ours run the frozen rand100 board — a performance-range reference, not a same-split leaderboard. ×3 rows are means over three replications, whiskers&nbsp;=&nbsp;±1&nbsp;s.d. (68.3&nbsp;±&nbsp;1.5, 70.7&nbsp;±&nbsp;3.5).</span></figcaption>
+                    </figure>
+                    <figure class="term figure" style="margin-top:18px">
+                        <div class="term__bar"><span class="tdot b"></span><span style="margin-left:2px">board</span><span class="grow">SR · default effort · frozen protocol · n=100</span></div>
+                        <div class="boardwrap">
+                        <table class="board">
+                            <thead><tr><th>harness \ model</th><th>sonnet-5</th><th>opus-4.8</th><th>fable-5</th><th>opus-5</th><th>gpt-5.5</th><th>gpt-5.6</th></tr></thead>
+                            <tbody>
+                                <tr><td>Claude SDK <span style="color:#6e7994">· mean of 3</span></td><td>51.3 ±1.2</td><td>55.7 ±2.3</td><td class="hi">68.3 ±1.5</td><td class="hi">70.7 ±3.5</td><td>—</td><td>—</td></tr>
+                                <tr><td>mini-swe-agent <span style="color:#3a466a">· open</span></td><td>53</td><td>63</td><td class="hi">72</td><td class="hi">69</td><td>52</td><td>60</td></tr>
+                                <tr><td>Codex CLI</td><td>—</td><td>—</td><td>—</td><td>—</td><td>45</td><td>56</td></tr>
+                            </tbody>
+                        </table>
+                        </div>
+                        <figcaption class="caption"><span class="ico">◆</span><span>Model ordering is <strong style="color:var(--ink)">harness-invariant</strong> (fable &gt; opus-4.8 &gt; sonnet on both Claude harnesses), and max effort lifts fable-5 to <strong style="color:var(--blue-2)">78</strong>. The same frozen loop, unchanged, transfers beyond R2R-CE: <strong style="color:var(--ink)">84 SR</strong> on VLNVerse fine-grained instructions and <strong style="color:var(--ink)">76%</strong> on HM-EQA — matching or exceeding the trained state of the art on both.</span></figcaption>
+                    </figure>
+                </section>
+
+                <!-- ===== 05 WHAT MOVES IT ===== -->
+                <section id="axes">
+                    <div class="eyebrow"><span class="port"></span>05 — what moves the number</div>
+                    <h2 data-eid="sec-h2-5">Model, harness, interface</h2>
+                    <p data-eid="sec-p-5">The board factorizes the system into three layers and moves one at a time.
+                        The answer: <strong>model choice dominates</strong>, harness differences are modest and
+                        descriptive, and <strong>the interface is the capability boundary</strong> — decisive
+                        compensation for weaker models, optional acceleration for the strongest. Model-centered, but not
+                        model-only.</p>
+                    <figure class="term figure">
+                        <div class="term__bar"><span class="tdot b"></span><span style="margin-left:2px">capability.axes</span><span class="grow">move one layer at a time</span></div>
+                        <img src="capability_axes.png" alt="The paper's Figure 3, three panels on a shared SR scale. A: same harness and interface, swapping the model spans 5 to 72 SR. B: same model, vendor versus open mini-swe-agent harness differs by 2 to 7 SR. C: same model and harness, a waypoint interface rescues weak models on R2R-CE but reverses for strong models on VLNVerse." style="padding:14px;background:#f7f8f9">
+                        <figcaption class="caption"><span class="ico">◆</span><span><strong style="color:var(--ink)">A:</strong> harness and interface fixed, only the VLM changes — SR spans 5→72, the dominant axis. <strong style="color:var(--ink)">B:</strong> open and vendor harnesses differ by 2–7 SR — modest, and read as descriptive since serving paths differ. <strong style="color:var(--ink)">C:</strong> a trained waypoint tool rescues weak models but hurts strong ones when forced; offered as an <em>optional</em> tool, fable-5 adopts a coarse-to-fine strategy nobody prescribed — waypoints early, primitives near the goal — and nearly matches peak SR at a quarter of the wall time.</span></figcaption>
+                    </figure>
+                    <div class="cap-grid" style="margin-top:18px">
+                        <div class="cap"><div class="cn">Model → intelligence center</div><p class="cd">Capability lives in the weights. Same loop, same tools: swapping the VLM moves SR more than any other change on the board.</p><div class="ct">axis A</div></div>
+                        <div class="cap"><div class="cn">Harness → sustains, doesn't decide</div><p class="cd">A few-hundred-line open ReAct loop is competitive with vendor harnesses — gaps of 2–7 SR, read as descriptive since serving paths differ. Model choice matters more than the loop around it.</p><div class="ct">axis B</div></div>
+                        <div class="cap"><div class="cn">Interface → capability boundary</div><p class="cd">Tools still set what a model can express: decisive compensation for weak models, optional acceleration for strong ones.</p><div class="ct">axis C</div></div>
+                    </div>
+                </section>
+
+                <!-- ===== 06 LIMITS ===== -->
+                <section id="limits">
+                    <div class="eyebrow"><span class="port amber"></span>06 — limits</div>
+                    <h2 data-eid="sec-h2-6">Where it still fails</h2>
+                    <p data-eid="sec-p-6">The probe is a diagnostic; its failures are as informative as its wins.</p>
+                    <div class="findings">
+                        <div class="finding"><span class="n">F1</span><p><strong>Failure is silent, and route-level rather than stop-level.</strong> Auditing all 30 failures of the strongest replicated fable-5 run: 26 end with a voluntary STOP and 23 <em>claim success</em> while 3.1–34.1&nbsp;m from the goal — yet only 5 ever enter the 3&nbsp;m success region, so most failures diverge early (wrong referent binding is the largest category), not merely stop at the wrong point.</p></div>
+                        <div class="finding"><span class="n">F2</span><p><strong>Self-diagnosis without self-correction.</strong> In at least 15 of those episodes the reasoning states the correct doubt — and still commits to the wrong endpoint. Keeping reasoning and control aligned makes behavior consistent with reasoning, not necessarily correct: reliability shifts to verification and self-correction inside the agent.</p></div>
+                        <div class="finding"><span class="n">F3</span><p><strong>Strong R2R-CE is a short-horizon result.</strong> Matched fable-5 runs fall from 70 SR on R2R-CE to 26 on longer-horizon RxR-CE (39 with waypoints) — a capability ceiling, not general embodied competence. Effort is no free lever either: fable-5 gains +9.7 at max effort, but other shifts span −5 to +6 with no consistent direction — small beside the 67-point model axis.</p></div>
+                        <div class="finding"><span class="n">F4</span><p><strong>Context growth and latency bar sustained operation.</strong> The minimal loop re-sends its full history every call: final-turn context reaches a median of 33k and a maximum of 169k tokens; median wall time is 206&nbsp;s with 18.6% of episodes over ten minutes — and RxR-CE doubles to triples the context.</p></div>
+                        <div class="finding"><span class="n">F5</span><p><strong>On a real robot, reasoning transfers — embodiment does not.</strong> On a Unitree Go2 the agent resolves conditional instructions and keeps task state across fetch-and-return, but it barely knows its own body (the camera clears a doorway while the rear wedges), <code style="font-family:var(--mono);font-size:.85em">step()</code> reports requested rather than realized motion, and without persistent spatial memory it fails at counting, revisits, and distance.</p></div>
+                        <div class="finding"><span class="n">F6</span><p><strong>Read the comparisons as stated.</strong> External numbers are full val-unseen; ours is a frozen 100-episode board — a contextual range, not a same-split leaderboard. The harness comparison is descriptive: serving paths and product defaults were not independently controlled.</p></div>
+                    </div>
+                </section>
+
+                <!-- ===== 07 CITE ===== -->
+                <section id="cite">
+                    <div class="eyebrow"><span class="port amber"></span>07 — cite</div>
+                    <h2>Citation</h2>
+                    <p>If the probe, the board, or the agentic-embodied-control framing is useful in your research, please cite the paper.</p>
+                    <div class="cite-box">
+                        <button class="copy" onclick="copyCite()">copy</button>
+                        <pre id="cite-text">@misc{zhou2026embodiedagentstakecontrol,
+  title         = {Embodied Agents Take Control: Minimal-Interface Zero-Shot
+                   Agents Rival Industrial-Scale Policies in
+                   Vision-and-Language Navigation},
+  author        = {Jian Zhou and Xunyi Zhao and Gengze Zhou and Zerui Li and
+                   Sihao Lin and Jiajun Liu and Qi Wu},
+  year          = {2026},
+  eprint        = {2607.26148},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.RO},
+  url           = {https://arxiv.org/abs/2607.26148}
+}</pre>
+                    </div>
+                    <div class="cta">
+                        <span class="ctitle">Run agents on the same substrate →</span>
+                        <span style="display:flex;gap:10px;flex-wrap:wrap">
+                            <a class="btn primary" href="https://arxiv.org/abs/2607.26148" target="_blank" rel="noopener"><span class="pdot"></span>Read the paper</a>
+                            <a class="btn" href="/agentcanvas/"><span class="pdot"></span>AgentCanvas</a>
+                        </span>
+                    </div>
+                </section>
+
+                <footer>
+                    <span>&copy; 2026 Jian Zhou · Embodied Agents Take Control</span>
+                    <span><a href="https://arxiv.org/abs/2607.26148" target="_blank" rel="noopener">arXiv 2607.26148</a> · <a href="/agentcanvas/">AgentCanvas</a></span>
+                </footer>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        (function () {
+            const links = document.querySelectorAll(".rail a"), map = {};
+            links.forEach(l => map[l.getAttribute("href").slice(1)] = l);
+            const obs = new IntersectionObserver(entries => {
+                entries.forEach(e => { if (e.isIntersecting) { links.forEach(l => l.classList.remove("active")); if (map[e.target.id]) map[e.target.id].classList.add("active"); } });
+            }, { rootMargin: "-12% 0px -70% 0px", threshold: 0 });
+            document.querySelectorAll("main section").forEach(s => obs.observe(s));
+        })();
+
+        // ===================== Copy citation =====================
+        function copyCite() {
+            const t = document.getElementById("cite-text").innerText;
+            navigator.clipboard.writeText(t).then(() => { const b = document.querySelector(".cite-box .copy"); b.textContent = "copied ✓"; setTimeout(() => b.textContent = "copy", 1800); });
+        }
+    </script>
+    <script src="player.js"></script>
+    <!-- in-place text editor (activates only with ?edit) -->
+    <script src="/_edit/inline-edit.js" defer></script>
+</body>
+
+</html>

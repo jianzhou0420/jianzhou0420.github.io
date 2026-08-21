@@ -1,11 +1,11 @@
 /* ============================================================================
    page-layout.css — shared layout template for jianzhou0420.github.io
-   project pages (e.g. src/works/<Project>/*.html).
+   project pages (e.g. <project>/index.html served at /<project>/).
 
    This is the single source of truth for the page skeleton: the centered
    reading column + sticky left outliner. Link it from a page's <head>:
 
-       <link rel="stylesheet" href="../../assets/page-layout.css">
+       <link rel="stylesheet" href="/assets/page-layout.css">
 
    ...then build the page body as:
 
@@ -41,7 +41,7 @@
    tables). The grid column already pins the whole column to --measure, so
    every block inside <main> auto-fits and stays aligned.
 
-   Reference implementation: src/works/AgentCanvas/index.html + paper.html.
+   Reference implementation: agentcanvas/index.html + agentcanvas/paper/index.html.
    ============================================================================ */
 
 :root {

@@ -14,8 +14,8 @@ Two **project pages** + one external **documentary**, deliberately separated:
 
 | Property | File / URL | Purpose | Accent |
 |---|---|---|---|
-| **Paper project page** | `src/works/AgentCanvas/paper.html` | The CoRL paper *"Automating the Design of Embodied Agent Architectures."* AgentCanvas appears here only as a **brief intro** with a CTA out to the canvas page. | amber |
-| **AgentCanvas project page** | `src/works/AgentCanvas/index.html` | The platform itself, showcased in depth. A **project page, not documentation.** | teal |
+| **Paper project page** | `agentcanvas/paper/index.html` (URL `/agentcanvas/paper/`) | The CoRL paper *"Automating the Design of Embodied Agent Architectures."* AgentCanvas appears here only as a **brief intro** with a CTA out to the canvas page. | amber |
+| **AgentCanvas project page** | `agentcanvas/index.html` (URL `/agentcanvas/`) | The platform itself, showcased in depth. A **project page, not documentation.** | teal |
 | **Documentary (docs)** | `https://jianzhou0420.github.io/AgentCanvas/` (separate repo) | Developer docs (capabilities, tutorials, NodeSets, 113+ pages). | — |
 
 **Link topology (a rule from the user):**
@@ -26,7 +26,7 @@ Two **project pages** + one external **documentary**, deliberately separated:
   landing) — needs cleaning into a link-sink. Separate repo; not done here.
 
 The repo is its own git project (`github.com/jianzhou0420/jianzhou0420.github.io`,
-GitHub Pages). `src/works.html` lists both the paper and AgentCanvas as separate cards.
+GitHub Pages). `partials/papers.html` + `partials/projects.html` list both the paper and AgentCanvas as separate cards.
 
 ---
 
@@ -286,7 +286,7 @@ interactive 3×4 matrix; ↻ port marks everywhere; teaser video; Part-A editor 
 - Double-blind review: real per-iteration data *is* on the page; the user has been OK
   with it so far (flag before adding anything more identifying).
 - Local preview: a static server runs at **`http://localhost:8090`** (repo root) →
-  `http://localhost:8090/src/works/AgentCanvas/index.html` (and `paper.html`). Serving via
+  `http://localhost:8090/agentcanvas/` (and `/agentcanvas/paper/`). Serving via
   http (not `file://`) lets the videos autoplay. Restart with
   `python3 <repo-root>/_preview_server.py 8090`. **Use this, not `python3 -m http.server`** —
   stdlib `http.server` ignores HTTP `Range`, so the hero `<video>` can't be **scrubbed**
@@ -298,7 +298,7 @@ interactive 3×4 matrix; ↻ port marks everywhere; teaser video; Part-A editor 
 ## 7. In-place text editing (author convenience)
 
 Edit the page copy **in the browser** and save back to the HTML source — no hand-editing HTML.
-- Open any page with **`?edit=1`** (e.g. `http://localhost:8090/src/works/AgentCanvas/index.html?edit=1`).
+- Open any page with **`?edit=1`** (e.g. `http://localhost:8090/agentcanvas/?edit=1`).
   A floating toolbar appears; every `[data-eid]` element gets a dashed outline and is editable.
 - Edit text (inline `<strong>`/`<em>`/links are preserved; paste is forced to plain text;
   Enter commits). **Save** → `POST /save` → `_preview_server.py` rewrites only those elements'

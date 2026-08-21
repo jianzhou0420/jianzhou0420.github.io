@@ -108,25 +108,25 @@
     })();
 
     // Load partials
-    fetch('src/intro.html')
+    fetch('partials/intro.html')
       .then(r => r.text())
       .then(html => { document.getElementById('intro').innerHTML = html; })
       .catch(err => console.error('Failed to load intro.html:', err));
 
-    fetch('src/projects.html')
+    fetch('partials/projects.html')
       .then(r => r.text())
       .then(html => { document.getElementById('projects').innerHTML = html; })
       .catch(err => console.error('Failed to load projects.html:', err));
 
-    fetch('src/papers.html')
+    fetch('partials/papers.html')
       .then(r => r.text())
       .then(html => { document.getElementById('papers').innerHTML = html; })
       .catch(err => console.error('Failed to load papers.html:', err));
 
-    // Blog draft control (see src/blog.html): locally — file://, localhost, or a
+    // Blog draft control (see partials/blog.html): locally — file://, localhost, or a
     // private-LAN preview — every post shows and drafts get a badge; on the public
     // site any <a class="post" data-draft> is removed before render.
-    fetch('src/blog.html')
+    fetch('partials/blog.html')
       .then(r => r.text())
       .then(html => {
         const blog = document.getElementById('blog');

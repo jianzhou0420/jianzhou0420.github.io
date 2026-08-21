@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Rollout Loop vs. Agent Loop: Naming the Two Clocks of an Embodied Agent — Jian Zhou</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+  <style>
+    :root{
+      --bg:#fdfdfb;--ink:#1b1d21;--muted:#6b7280;--faint:#9aa1ab;
+      --line:#e6e7e3;--line-soft:#eeefea;--accent:#2f6f5e;--accent-soft:#eef4f1;
+      --code-bg:#f3f4f0;
+    }
+    *{box-sizing:border-box}
+    html{-webkit-text-size-adjust:100%}
+    body{margin:0;background:var(--bg);color:var(--ink);
+      font-family:'Inter',system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+      font-size:17px;line-height:1.72;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+    .container{max-width:960px;margin:0 auto;padding:0 26px}
+
+    .tabs{display:flex;gap:26px;padding:30px 0 0;font-size:14px}
+    .tabs__link{color:var(--muted);text-decoration:none;letter-spacing:.01em;
+      padding-bottom:3px;border-bottom:1.5px solid transparent;transition:color .15s}
+    .tabs__link:hover{color:var(--ink)}
+    .tabs__link.is-active{color:var(--ink);border-bottom-color:var(--accent)}
+
+    .post-page__header{padding:54px 0 8px}
+    .post-page__date{margin:0 0 14px;font-family:'JetBrains Mono',monospace;font-size:13px;
+      letter-spacing:.06em;color:var(--faint)}
+    .post-page__title{margin:0;font-size:clamp(28px,4.6vw,40px);font-weight:700;
+      letter-spacing:-.022em;line-height:1.16}
+
+    .prose{padding:14px 0 8px}
+    .prose p{margin:0 0 1.35em}
+    .prose strong{font-weight:600;color:#15171a}
+    .prose em{font-style:italic;color:#33363b}
+    .prose a{color:var(--accent);text-decoration:none;border-bottom:1px solid #cfe0d9}
+    .prose a:hover{border-bottom-color:var(--accent)}
+
+    .lede{font-size:18.5px;line-height:1.6;color:#34383d;margin:6px 0 0;padding-bottom:6px}
+    .lede em{color:#1d2b26;font-style:normal;font-weight:600}
+
+    .prose h2{font-size:clamp(21px,3vw,26px);font-weight:700;letter-spacing:-.012em;line-height:1.25;
+      margin:1.5em 0 .15em;padding-top:1.4em;border-top:1px solid var(--line)}
+    .prose h2 .sn{color:var(--accent);font-weight:700;margin-right:.55em}
+
+    code{font-family:'JetBrains Mono',monospace;font-size:.86em;background:var(--code-bg);
+      border-radius:4px;padding:.1em .4em;color:#2c2f34;border:1px solid #e8e9e4}
+
+    /* hand-drawn SVG figures — the argument lives here */
+    svg.fig{width:100%;height:auto;max-width:780px;display:block;margin:2em auto}
+    .fig text{font-family:'Inter',system-ui,sans-serif;font-size:13px;fill:var(--ink)}
+    .fig .t{font-weight:600}
+    .fig .dim{fill:var(--muted);font-size:11.5px}
+    .fig .mono{font-family:'JetBrains Mono',monospace;font-size:11.5px;fill:#4b5058}
+    .fig .box{fill:#ffffff;stroke:#c9cbc4;stroke-width:1.2}
+    .fig .accent{fill:var(--accent-soft);stroke:var(--accent);stroke-width:1.6}
+    .fig .at{fill:var(--accent);font-weight:600}
+    .fig .ghost{fill:none;stroke:#c9cbc4;stroke-width:1.1;stroke-dasharray:5 4}
+    .fig .ghostA{fill:none;stroke:var(--accent);stroke-width:1.2;stroke-dasharray:5 4}
+    .fig .edge{stroke:#8b9096;stroke-width:1.4;fill:none;marker-end:url(#bl-m)}
+    .fig .edgeA{stroke:var(--accent);stroke-width:1.6;fill:none;marker-end:url(#bl-a)}
+    .fig .edgeAd{stroke:var(--accent);stroke-width:1.6;fill:none;stroke-dasharray:6 5;marker-end:url(#bl-a)}
+
+    /* comparison table: stays inside the prose column, scrolls only on narrow screens */
+    .table-wrap{overflow-x:auto;margin:1.6em 0;-webkit-overflow-scrolling:touch;
+      border:1px solid var(--line);border-radius:8px}
+    table{width:100%;min-width:560px;border-collapse:collapse;font-size:13.5px;line-height:1.55;background:#fff}
+    thead th{text-align:left;font-weight:600;font-size:12px;letter-spacing:.02em;color:var(--muted);
+      background:#fafaf7;padding:11px 14px;border-bottom:1px solid var(--line);vertical-align:bottom}
+    tbody td{padding:12px 14px;border-bottom:1px solid var(--line-soft);vertical-align:top}
+    tbody tr:last-child td{border-bottom:none}
+    tbody tr:hover{background:#fafaf8}
+    td:first-child{font-weight:600;color:#202327;min-width:135px}
+    td+td{border-left:1px solid var(--line-soft);color:#41454b}
+    table strong{font-weight:600;color:#1d2b26}
+
+    blockquote{margin:2.2em 0;padding:18px 22px;background:var(--accent-soft);border-left:3px solid var(--accent);
+      border-radius:0 6px 6px 0;font-size:16.5px;line-height:1.66;color:#2c3a35}
+    blockquote strong{color:#1d2b26}
+
+    /* folded supplementary notes */
+    details.fold{margin:1.1em 0 1.8em;border:1px solid var(--line);border-radius:8px;background:#fbfbf8}
+    details.fold summary{cursor:pointer;padding:10px 16px;font-size:13.5px;color:var(--muted);
+      font-weight:500;user-select:none;list-style-position:inside}
+    details.fold summary:hover{color:var(--ink)}
+    details.fold[open] summary{border-bottom:1px solid var(--line-soft)}
+    details.fold .fold__body{padding:12px 18px 2px;font-size:15px;line-height:1.66;color:#41454b}
+
+    .refs{margin-top:10px}
+    .refs__item{position:relative;padding-left:2.9em;margin:0 0 .7em;font-size:14px;line-height:1.62;color:#41454b}
+    .refs__n{position:absolute;left:0;top:0;font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--faint)}
+    .refs__item em{font-style:italic;color:#5c6066}
+    .refs a{color:var(--accent);border-bottom:1px solid #cfe0d9}
+
+    .footer{margin-top:48px;padding:26px 0 60px;border-top:1px solid var(--line);
+      font-size:13px;color:var(--faint);font-family:'JetBrains Mono',monospace;letter-spacing:.04em}
+
+    @media(max-width:600px){
+      body{font-size:16px}
+      table{font-size:13px}
+      thead th,tbody td{padding:10px 11px}
+    }
+  </style>
+</head>
+
+<body>
+  <main class="container">
+    <nav class="tabs">
+      <a class="tabs__link" href="/">Home</a>
+      <a class="tabs__link is-active" href="/#blog">Blog</a>
+    </nav>
+
+    <article class="post-page">
+      <header class="post-page__header">
+        <p class="post-page__date">2026-07-12</p>
+        <h1 class="post-page__title">Rollout Loop vs. Agent Loop: Naming the Two Clocks of an Embodied Agent</h1>
+      </header>
+
+      <div class="prose">
+
+        <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+          <marker id="bl-m" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#8b9096"/></marker>
+          <marker id="bl-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#2f6f5e"/></marker>
+        </defs></svg>
+
+        <p class="lede">
+          This post does one thing: pin down the loop vocabulary for embodied agents. "Loop" crossed from the LLM-agent
+          world into embodied AI and quietly changed meaning on the way — a coding agent's loop ticks on LLM turns, an
+          embodied agent's loop ticks on environment steps, and calling both "the agent loop" hides the difference.
+          Two terms and one composition rule: the <em>rollout loop</em> runs on the environment's clock, the
+          <em>agent loop</em> (<a href="https://arxiv.org/abs/2210.03629">ReAct</a> [1]) runs on the reasoner's clock,
+          and a real system couples the two — one nested inside the other, or both running side by side.
+        </p>
+
+        <h2><span class="sn">1</span>Two Loops, Two Clocks</h2>
+
+        <svg class="fig" viewBox="0 0 760 290" role="img" aria-label="Two loops side by side. Left: the rollout loop — observe, body, act, env.step cycling back to observe; the env.step box is shaded because the environment owns the clock. Right: the agent loop — reason, call tool, read result, cycling back to reason; the reason box is shaded because the reasoner owns the clock.">
+          <text x="190" y="26" text-anchor="middle" class="t">rollout loop</text>
+          <text x="570" y="26" text-anchor="middle" class="t">agent loop</text>
+
+          <rect x="20" y="60" width="84" height="32" rx="7" class="box"/><text x="62" y="80" text-anchor="middle">observe</text>
+          <rect x="140" y="60" width="76" height="32" rx="7" class="box"/><text x="178" y="80" text-anchor="middle">body</text>
+          <rect x="252" y="60" width="64" height="32" rx="7" class="box"/><text x="284" y="80" text-anchor="middle">act</text>
+          <path class="edge" d="M104,76 H140"/>
+          <path class="edge" d="M216,76 H252"/>
+          <rect x="140" y="150" width="84" height="32" rx="7" class="accent"/><text x="182" y="170" text-anchor="middle" class="at">env.step</text>
+          <path class="edge" d="M284,92 C284,166 262,166 228,166"/>
+          <path class="edge" d="M140,166 C82,166 62,150 62,96"/>
+          <text x="190" y="216" text-anchor="middle" class="mono">one iteration = one environment step</text>
+          <text x="190" y="236" text-anchor="middle" class="dim">ends when the episode ends</text>
+          <text x="190" y="254" text-anchor="middle" class="dim">body: frozen VLA · scripted controller · LLM — anything</text>
+
+          <rect x="400" y="60" width="84" height="32" rx="7" class="accent"/><text x="442" y="80" text-anchor="middle" class="at">reason</text>
+          <rect x="520" y="60" width="84" height="32" rx="7" class="box"/><text x="562" y="80" text-anchor="middle">call tool</text>
+          <rect x="640" y="60" width="100" height="32" rx="7" class="box"/><text x="690" y="80" text-anchor="middle">read result</text>
+          <path class="edge" d="M484,76 H520"/>
+          <path class="edge" d="M604,76 H640"/>
+          <path class="edge" d="M690,92 C690,164 442,164 442,96"/>
+          <text x="570" y="216" text-anchor="middle" class="mono">one iteration = one LLM turn</text>
+          <text x="570" y="236" text-anchor="middle" class="dim">ends when the task is judged done</text>
+          <text x="570" y="254" text-anchor="middle" class="dim">no environment — tool results are the world (ReAct)</text>
+
+          <text x="380" y="284" text-anchor="middle" class="dim">shaded = who owns the clock: the environment on the left, the reasoner on the right</text>
+        </svg>
+
+        <p>
+          The <strong>rollout loop</strong> is not a design choice — embodiment imposes it. Whatever sits in the body is
+          stepped by the environment, once per tick, until the episode ends; a frozen policy like
+          <a href="https://arxiv.org/abs/2406.09246">OpenVLA</a> [2] or
+          <a href="https://arxiv.org/abs/2410.24164">π0</a> [3] loops thousands of times with zero reasoning anywhere in
+          the cycle. The <strong>agent loop</strong> is the opposite in every column:
+          <a href="https://arxiv.org/abs/2210.03629">ReAct</a> [1] made it canonical, the LLM turn is the iteration,
+          and no environment is required — coding agents run it for hundreds of turns with no world attached.
+        </p>
+
+        <h2><span class="sn">2</span>They Compose: Nested or Concurrent</h2>
+
+        <p>Four couplings recur, in two families. <strong>Nested</strong> — one loop contains the other and blocks on
+          it: the agent loop as the rollout's policy (1), or the rollout as the agent's tool (2).
+          <strong>Concurrent</strong> — neither waits: coupled by buffers (3), or gated by events (4).</p>
+
+        <svg class="fig" viewBox="0 0 760 356" role="img" aria-label="The composition. An outer rollout loop — observe, deliberate, act, env.step, cycling until the episode ends — where the deliberate stage contains an inner agent loop of reason, call tool, read result, running zero to N turns per environment step. Legend: zero turns is a frozen policy, one turn is the NavGPT shape, N turns is the DiscussNav shape.">
+          <text x="24" y="22" class="t at">rollout loop — the environment's clock</text>
+          <rect x="10" y="34" width="740" height="240" rx="10" class="ghost"/>
+
+          <rect x="40" y="78" width="84" height="32" rx="7" class="box"/><text x="82" y="98" text-anchor="middle">observe</text>
+          <rect x="168" y="56" width="300" height="150" rx="10" class="ghostA"/>
+          <text x="318" y="78" text-anchor="middle" class="at">agent loop — the reasoner's clock</text>
+          <text x="318" y="96" text-anchor="middle" class="dim">0…N turns per env step</text>
+          <rect x="190" y="120" width="70" height="28" rx="6" class="box"/><text x="225" y="138" text-anchor="middle" class="mono">reason</text>
+          <rect x="285" y="120" width="78" height="28" rx="6" class="box"/><text x="324" y="138" text-anchor="middle" class="mono">call tool</text>
+          <rect x="388" y="120" width="60" height="28" rx="6" class="box"/><text x="418" y="138" text-anchor="middle" class="mono">read</text>
+          <path class="edge" d="M260,134 H285"/>
+          <path class="edge" d="M363,134 H388"/>
+          <path class="edge" d="M418,148 C418,184 225,184 225,150"/>
+
+          <rect x="500" y="78" width="64" height="32" rx="7" class="box"/><text x="532" y="98" text-anchor="middle">act</text>
+          <rect x="600" y="78" width="88" height="32" rx="7" class="accent"/><text x="644" y="98" text-anchor="middle" class="at">env.step</text>
+          <path class="edge" d="M124,94 H168"/>
+          <path class="edge" d="M468,94 H500"/>
+          <path class="edge" d="M564,94 H600"/>
+          <path class="edgeA" d="M644,110 C644,244 82,244 82,112"/>
+          <text x="363" y="256" text-anchor="middle" class="dim">next tick — until the episode ends</text>
+
+          <text x="24" y="306" class="mono">0 turns · frozen policy — a pure rollout (a VLA eval)</text>
+          <text x="24" y="326" class="mono">1 turn  · one LLM call per step — the NavGPT shape</text>
+          <text x="24" y="346" class="mono">N turns · a discussion per step — the DiscussNav shape</text>
+        </svg>
+
+        <p>
+          <strong>1 · Agent-as-policy</strong>: the agent loop sits in the rollout's <em>policy slot</em>, and
+          <code>env.step</code> blocks while it deliberates — the natural shape wherever the world can hold still
+          (simulation, turn-based settings). One number governs it: <strong>LLM turns per environment step</strong> —
+          zero, one turn every K steps, or many per step. (A turn may emit one action or a K-step chunk; as long as the
+          world waits for the turn, it is still this coupling.)
+        </p>
+
+        <details class="fold"><summary>notes — who sits where on the 0…N dial</summary><div class="fold__body">
+          <p>
+            <a href="https://arxiv.org/abs/2305.16986">NavGPT</a> [4] fixes it at one;
+            <a href="https://arxiv.org/abs/2309.11382">DiscussNav</a> [5] spends a multi-expert discussion before every
+            step; a VLA eval spends zero. The corners are the degenerate cases — rollout-only (a frozen policy),
+            agent-only (a coding agent, no world) — and everything between is legitimate design space. In
+            <a href="https://jianzhou0420.github.io/AgentCanvas/pages/developer-guide/capabilities/graph-expressible-agents.html">AgentCanvas</a> [6]
+            the distinction is structural: the iteration primitive is deliberately called just a <em>loop</em>, whether
+            it is a rollout loop or an agent loop is decided by what you draw in its body, and nesting is scope-in-scope
+            — the ordinary case, not a special one.
+          </p>
+        </div></details>
+
+        <svg class="fig" viewBox="0 0 760 250" role="img" aria-label="Rollout-as-tool. An outer agent loop — reason, then a tool call that is an entire rollout of observe, act, env.step, then read result, and back to reason. The whole episode ticks once on the agent's clock.">
+          <rect x="10" y="34" width="740" height="180" rx="10" class="ghostA"/>
+          <text x="24" y="56" class="at">agent loop — the reasoner's clock</text>
+          <rect x="40" y="90" width="84" height="32" rx="7" class="accent"/><text x="82" y="110" text-anchor="middle" class="at">reason</text>
+          <rect x="180" y="66" width="300" height="120" rx="10" class="ghost"/>
+          <text x="330" y="88" text-anchor="middle" class="dim">rollout — one tool call</text>
+          <rect x="200" y="110" width="80" height="28" rx="6" class="box"/><text x="240" y="128" text-anchor="middle" class="mono">observe</text>
+          <rect x="310" y="110" width="56" height="28" rx="6" class="box"/><text x="338" y="128" text-anchor="middle" class="mono">act</text>
+          <rect x="390" y="110" width="76" height="28" rx="6" class="accent"/><text x="428" y="128" text-anchor="middle" class="at">env.step</text>
+          <path class="edge" d="M280,124 H310"/>
+          <path class="edge" d="M366,124 H390"/>
+          <path class="edge" d="M428,138 C428,168 240,168 240,140"/>
+          <rect x="540" y="90" width="100" height="32" rx="7" class="box"/><text x="590" y="110" text-anchor="middle">read result</text>
+          <path class="edge" d="M124,106 H180"/>
+          <path class="edge" d="M480,106 H540"/>
+          <path class="edge" d="M590,122 C590,202 82,202 82,124"/>
+          <text x="380" y="240" text-anchor="middle" class="dim">the whole episode ticks once on the agent's clock — SayCan at skill granularity · Reflexion at episode granularity</text>
+        </svg>
+
+        <p>
+          <strong>2 · Rollout-as-tool</strong> — the mirror of 1: the environment's clock sits inside the reasoner's,
+          and the rollout serves as a tool of the agent loop exactly as the agent loop in 1 serves as the rollout's
+          policy. One whole rollout per tool call — at skill granularity
+          (<a href="https://arxiv.org/abs/2204.01691">SayCan</a> [7]: each "execute skill" is a closed-loop rollout) or
+          at episode granularity (<a href="https://arxiv.org/abs/2303.11366">Reflexion</a> [8]: reason, launch a
+          rollout, read the log, go again).
+        </p>
+
+        <details class="fold"><summary>notes — works with this shape</summary><div class="fold__body">
+          <p>
+            <a href="https://arxiv.org/abs/2305.16291">Voyager</a> [9] grows a skill library by launching Minecraft
+            rollouts and reading what happened; <a href="https://arxiv.org/abs/2310.12931">Eureka</a> [10] has GPT-4
+            write reward code, launch full RL training runs as tool calls, and iterate on the rollout statistics. At
+            the largest granularity this is the shape of any automated design or policy search in which an LLM operates
+            the experiment loop.
+          </p>
+        </div></details>
+
+        <p>The concurrent family next: nothing waits.</p>
+
+        <svg class="fig" viewBox="0 0 760 280" role="img" aria-label="The parallel coupling. Left: the rollout loop free-runs on the fast control clock — observe, act, env.step. Right: the agent loop free-runs on the slow LLM clock — reason, call tool, read. Between them two buffers: the rollout loop acts on the latest plan; the agent loop reasons over the latest observation. Neither loop waits for the other.">
+          <text x="160" y="26" text-anchor="middle" class="t">rollout loop — fast, free-running</text>
+          <text x="600" y="26" text-anchor="middle" class="t">agent loop — slow, free-running</text>
+
+          <rect x="10" y="40" width="300" height="180" rx="10" class="ghost"/>
+          <rect x="35" y="80" width="80" height="28" rx="6" class="box"/><text x="75" y="98" text-anchor="middle">observe</text>
+          <rect x="185" y="80" width="60" height="28" rx="6" class="box"/><text x="215" y="98" text-anchor="middle">act</text>
+          <rect x="100" y="150" width="84" height="28" rx="6" class="accent"/><text x="142" y="168" text-anchor="middle" class="at">env.step</text>
+          <path class="edge" d="M115,94 H185"/>
+          <path class="edge" d="M215,108 C215,164 202,164 188,164"/>
+          <path class="edge" d="M100,164 C62,164 75,124 75,108"/>
+          <text x="160" y="206" text-anchor="middle" class="dim">ticks every control step — does not wait</text>
+
+          <rect x="450" y="40" width="300" height="180" rx="10" class="ghost"/>
+          <rect x="470" y="80" width="74" height="28" rx="6" class="accent"/><text x="507" y="98" text-anchor="middle" class="at">reason</text>
+          <rect x="570" y="80" width="74" height="28" rx="6" class="box"/><text x="607" y="98" text-anchor="middle">call tool</text>
+          <rect x="668" y="80" width="60" height="28" rx="6" class="box"/><text x="698" y="98" text-anchor="middle">read</text>
+          <path class="edge" d="M544,94 H570"/>
+          <path class="edge" d="M644,94 H668"/>
+          <path class="edge" d="M698,108 C698,166 507,166 507,108"/>
+          <text x="600" y="206" text-anchor="middle" class="dim">ticks every LLM turn — seconds or more</text>
+
+          <rect x="332" y="76" width="96" height="26" rx="13" class="accent"/><text x="380" y="93" text-anchor="middle" class="mono">latest plan</text>
+          <path class="edgeA" d="M450,89 H430"/>
+          <path class="edgeA" d="M332,89 H312"/>
+          <rect x="332" y="150" width="96" height="26" rx="13" class="box"/><text x="380" y="167" text-anchor="middle" class="mono">latest obs</text>
+          <path class="edge" d="M310,163 H330"/>
+          <path class="edge" d="M428,163 H448"/>
+
+          <text x="380" y="266" text-anchor="middle" class="dim">neither loop waits for the other — the coupling is a buffer, not a call</text>
+        </svg>
+
+        <p>
+          <strong>3 · Parallel</strong>: real time does not wait for a turn. Both loops free-run on their own clocks; the
+          coupling is a pair of buffers — act on the <em>latest plan</em>, reason over the <em>latest observation</em>.
+          The exchange rate is no longer designed: it is the ratio of the two clock speeds.
+        </p>
+
+        <details class="fold"><summary>notes — the same shape in robots and in speech</summary><div class="fold__body">
+          <p>
+            Dual-system robots are this coupling: a fast System-1 controller with a slow System-2 reasoner riding
+            alongside (Figure's Helix, NVIDIA's GR00T N1), the controller at tens of hertz over a reasoner at seconds
+            per turn. Speech hit the same fork and named it first: turn-based dialogue is the nested coupling, and
+            full-duplex models — listening while speaking, as in Kyutai's Moshi — are the parallel one.
+          </p>
+        </div></details>
+
+        <details class="fold"><summary>boundary case — pipelined execution (1's schedule, 3's concurrency)</summary><div class="fold__body">
+          <p>
+            A policy needs ~100 ms per inference and emits a one-second action chunk (chunking:
+            <a href="https://arxiv.org/abs/2304.13705">ACT</a> [11]; <a href="https://arxiv.org/abs/2410.24164">π0</a> [3]
+            acts this way). Run blocking, this is coupling 1: move a second, freeze, move again. Pipelined execution
+            overlaps the two — compute plan k+1 while chunk k runs — so motion never stops, and the plan in use is
+            always exactly one chunk stale. <a href="https://arxiv.org/abs/2506.07339">Real-Time Chunking</a> [12] is
+            this, made to work for VLAs: freeze the actions certain to execute, inpaint the rest so the boundary stays
+            smooth; real-time MPC has run this way for decades. The exchange pattern is still 1's, only the concurrency
+            is 3's — a boundary case, not a mode.
+          </p>
+          <svg class="fig" viewBox="0 0 760 225" role="img" aria-label="Pipelined execution as a timeline. Top lane: act executes chunk k, then chunk k+1, then chunk k+2. Bottom lane: think computes plan k+1 during chunk k, plan k+2 during chunk k+1, and so on. At each chunk boundary an arrow hands the freshly computed plan up to the act lane. The plan in use is always exactly one chunk old.">
+            <text x="68" y="90" text-anchor="end" class="dim">act</text>
+            <text x="68" y="140" text-anchor="end" class="dim">think</text>
+            <rect x="80" y="72" width="150" height="28" rx="6" class="box"/><text x="155" y="90" text-anchor="middle" class="mono">chunk k</text>
+            <rect x="234" y="72" width="150" height="28" rx="6" class="box"/><text x="309" y="90" text-anchor="middle" class="mono">chunk k+1</text>
+            <rect x="388" y="72" width="150" height="28" rx="6" class="box"/><text x="463" y="90" text-anchor="middle" class="mono">chunk k+2</text>
+            <text x="560" y="92" class="dim">…</text>
+            <rect x="80" y="122" width="150" height="28" rx="6" class="accent"/><text x="155" y="140" text-anchor="middle" class="mono">plan k+1</text>
+            <rect x="234" y="122" width="150" height="28" rx="6" class="accent"/><text x="309" y="140" text-anchor="middle" class="mono">plan k+2</text>
+            <rect x="388" y="122" width="150" height="28" rx="6" class="accent"/><text x="463" y="140" text-anchor="middle" class="mono">plan k+3</text>
+            <text x="560" y="142" class="dim">…</text>
+            <path class="edgeA" d="M232,120 V104"/>
+            <path class="edgeA" d="M386,120 V104"/>
+            <path class="edgeA" d="M540,120 V104"/>
+            <path class="edge" d="M80,180 H600"/><text x="612" y="184" class="dim">time</text>
+            <text x="380" y="214" text-anchor="middle" class="dim">act ticks on the env clock, think on the LLM clock — the plan in use is always exactly one chunk old</text>
+          </svg>
+        </div></details>
+
+
+        <svg class="fig" viewBox="0 0 760 245" role="img" aria-label="Event-triggered coupling. Left: a rollout free-runs on a fast policy — observe, act, env.step. Right: the agent loop sits dormant. A dashed arrow carries an event — stuck, uncertain, or a human interjects — from the rollout to the agent loop, which wakes, deliberates, and returns a new plan on a solid arrow. Between events the loops do not exchange at all.">
+          <rect x="14" y="44" width="330" height="160" rx="10" class="ghost"/>
+          <text x="179" y="66" text-anchor="middle" class="t">rollout — fast policy, free-running</text>
+          <rect x="34" y="90" width="80" height="30" rx="7" class="box"/><text x="74" y="109" text-anchor="middle">observe</text>
+          <rect x="150" y="90" width="56" height="30" rx="7" class="box"/><text x="178" y="109" text-anchor="middle">act</text>
+          <rect x="240" y="90" width="84" height="30" rx="7" class="accent"/><text x="282" y="109" text-anchor="middle" class="at">env.step</text>
+          <path class="edge" d="M114,105 H150"/>
+          <path class="edge" d="M206,105 H240"/>
+          <path class="edge" d="M282,120 C282,162 74,162 74,122"/>
+          <rect x="460" y="84" width="280" height="90" rx="10" class="ghost"/>
+          <text x="600" y="122" text-anchor="middle" class="dim">agent loop — dormant</text>
+          <text x="600" y="144" text-anchor="middle" class="dim">(wakes on event)</text>
+          <path class="edgeAd" d="M344,110 H458"/>
+          <text x="401" y="100" text-anchor="middle" class="dim">stuck / uncertain / human</text>
+          <path class="edgeA" d="M460,150 H346"/>
+          <text x="403" y="168" text-anchor="middle" class="dim">new plan</text>
+          <text x="380" y="232" text-anchor="middle" class="dim">between events the loops do not exchange at all — a safe fallback holds the world</text>
+        </svg>
+
+        <p>
+          <strong>4 · Event-triggered</strong>: concurrency on a condition. Three pieces: the rollout free-runs on a
+          fast policy; the agent loop is not running; a monitor watches for a defined trigger — failure, uncertainty
+          crossing a threshold, a human interjecting. On the trigger the agent loop wakes, runs as many turns as it
+          needs, and hands back a new plan while the rollout keeps itself safe (hold, or follow the old plan). Unlike 3
+          there is no continuous flow — and no period: between events the coupling is exactly zero.
+        </p>
+
+        <details class="fold"><summary>notes — works with this shape</summary><div class="fold__body">
+          <p>
+            <a href="https://arxiv.org/abs/2207.05608">Inner Monologue</a> [13] replans when success detection or human
+            feedback flags a problem — feedback events gate the LLM's involvement.
+            <a href="https://arxiv.org/abs/2307.01928">KnowNo</a> [14] makes the trigger principled: conformal
+            uncertainty decides when the planner must stop and ask a human for help. The escalation pattern — run the
+            fast policy until something goes wrong, then wake the reasoner — is the deployed shape of most
+            "VLA with an LLM fallback" stacks.
+          </p>
+        </div></details>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Mode</th>
+                <th>Exchange initiated by</th>
+                <th>Who waits</th>
+                <th>Examples</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>1 · Agent-as-policy</strong></td>
+                <td>The rollout, every step.</td>
+                <td>The world.</td>
+                <td>DiscussNav in simulation.</td>
+              </tr>
+              <tr>
+                <td><strong>2 · Rollout-as-tool</strong></td>
+                <td>The agent, per skill or per episode.</td>
+                <td>The agent.</td>
+                <td>SayCan · Reflexion.</td>
+              </tr>
+              <tr>
+                <td><strong>3 · Parallel</strong></td>
+                <td>No one — buffers couple the loops.</td>
+                <td>Neither.</td>
+                <td>Helix · GR00T N1 · full-duplex dialogue.</td>
+              </tr>
+              <tr>
+                <td><strong>4 · Event-triggered</strong></td>
+                <td>An event raised by the rollout.</td>
+                <td>Neither — a fallback holds.</td>
+                <td>A VLA that escalates to an LLM when stuck.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2><span class="sn">3</span>The Definitions</h2>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th></th>
+                <th>Rollout loop</th>
+                <th>Agent loop</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>One iteration</strong></td>
+                <td>One environment step.</td>
+                <td>One LLM turn.</td>
+              </tr>
+              <tr>
+                <td><strong>Terminates when</strong></td>
+                <td>The episode ends — success, failure, or step budget.</td>
+                <td>The task is judged done, by the model or its harness.</td>
+              </tr>
+              <tr>
+                <td><strong>Loop body</strong></td>
+                <td>Anything mapping observation → action.</td>
+                <td>Reason → tool call → read result.</td>
+              </tr>
+              <tr>
+                <td><strong>Needs an LLM?</strong></td>
+                <td>No — the body can be a pure function.</td>
+                <td>Yes — the LLM turn <em>is</em> the iteration.</td>
+              </tr>
+              <tr>
+                <td><strong>Needs an environment?</strong></td>
+                <td>Yes — the env's transition <em>is</em> the loop.</td>
+                <td>No — tool results are the world.</td>
+              </tr>
+              <tr>
+                <td><strong>Budget currency</strong></td>
+                <td>Env steps.</td>
+                <td>LLM turns / tokens.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2><span class="sn">4</span>Position</h2>
+
+        <blockquote>
+          Reserve <strong>agent loop</strong> for the LLM-turn loop and call the embodied interaction loop the
+          <strong>rollout loop</strong>. An embodied agent always has the latter and only sometimes the former. The
+          interesting design space is the coupling between the two clocks — how much deliberation each environment step
+          buys, and whether the world waits for it (the nested couplings) or does not (the concurrent ones). A system
+          description should say which clock its loop runs on, and which coupling it assumes.
+        </blockquote>
+
+        <details class="fold"><summary>References ([1]&ndash;[14])</summary><div class="fold__body">
+        <div class="refs">
+          <p class="refs__item"><span class="refs__n">[1]</span> S. Yao et al., "ReAct: Synergizing reasoning and acting in language models," in <em>Proc. Int. Conf. Learn. Representations (ICLR)</em>, 2023. arXiv:<a href="https://arxiv.org/abs/2210.03629">2210.03629</a>.</p>
+          <p class="refs__item"><span class="refs__n">[2]</span> M. J. Kim et al., "OpenVLA: An open-source vision-language-action model," in <em>Proc. Conf. Robot Learn. (CoRL)</em>, 2024. arXiv:<a href="https://arxiv.org/abs/2406.09246">2406.09246</a>.</p>
+          <p class="refs__item"><span class="refs__n">[3]</span> K. Black et al., "π0: A vision-language-action flow model for general robot control," Physical Intelligence, 2024. arXiv:<a href="https://arxiv.org/abs/2410.24164">2410.24164</a>.</p>
+          <p class="refs__item"><span class="refs__n">[4]</span> G. Zhou, Y. Hong, and Q. Wu, "NavGPT: Explicit reasoning in vision-and-language navigation with large language models," in <em>Proc. AAAI Conf. Artif. Intell. (AAAI)</em>, 2024. arXiv:<a href="https://arxiv.org/abs/2305.16986">2305.16986</a>.</p>
+          <p class="refs__item"><span class="refs__n">[5]</span> Y. Long et al., "Discuss before moving: Visual language navigation via multi-expert discussions," in <em>Proc. IEEE Int. Conf. Robot. Autom. (ICRA)</em>, 2024. arXiv:<a href="https://arxiv.org/abs/2309.11382">2309.11382</a>.</p>
+          <p class="refs__item"><span class="refs__n">[6]</span> J. Zhou, "AgentCanvas: A typed-graph runtime for embodied agents," 2026. [Online]. Available: <a href="https://jianzhou0420.github.io/AgentCanvas/pages/developer-guide/capabilities/graph-expressible-agents.html">docs — Graph-Expressible Agents</a>.</p>
+          <p class="refs__item"><span class="refs__n">[7]</span> M. Ahn et al., "Do as I can, not as I say: Grounding language in robotic affordances," in <em>Proc. Conf. Robot Learn. (CoRL)</em>, 2022. arXiv:<a href="https://arxiv.org/abs/2204.01691">2204.01691</a>.</p>
+          <p class="refs__item"><span class="refs__n">[8]</span> N. Shinn et al., "Reflexion: Language agents with verbal reinforcement learning," in <em>Proc. Adv. Neural Inf. Process. Syst. (NeurIPS)</em>, 2023. arXiv:<a href="https://arxiv.org/abs/2303.11366">2303.11366</a>.</p>
+          <p class="refs__item"><span class="refs__n">[9]</span> G. Wang et al., "Voyager: An open-ended embodied agent with large language models," arXiv:<a href="https://arxiv.org/abs/2305.16291">2305.16291</a>, 2023.</p>
+          <p class="refs__item"><span class="refs__n">[10]</span> Y. J. Ma et al., "Eureka: Human-level reward design via coding large language models," in <em>Proc. Int. Conf. Learn. Representations (ICLR)</em>, 2024. arXiv:<a href="https://arxiv.org/abs/2310.12931">2310.12931</a>.</p>
+          <p class="refs__item"><span class="refs__n">[11]</span> T. Z. Zhao, V. Kumar, S. Levine, and C. Finn, "Learning fine-grained bimanual manipulation with low-cost hardware," in <em>Proc. Robot.: Sci. Syst. (RSS)</em>, 2023. arXiv:<a href="https://arxiv.org/abs/2304.13705">2304.13705</a>.</p>
+          <p class="refs__item"><span class="refs__n">[12]</span> K. Black, M. Y. Galliker, and S. Levine, "Real-time execution of action chunking flow policies," in <em>Proc. Adv. Neural Inf. Process. Syst. (NeurIPS)</em>, 2025. arXiv:<a href="https://arxiv.org/abs/2506.07339">2506.07339</a>.</p>
+          <p class="refs__item"><span class="refs__n">[13]</span> W. Huang et al., "Inner Monologue: Embodied reasoning through planning with language models," in <em>Proc. Conf. Robot Learn. (CoRL)</em>, 2022. arXiv:<a href="https://arxiv.org/abs/2207.05608">2207.05608</a>.</p>
+          <p class="refs__item"><span class="refs__n">[14]</span> A. Z. Ren et al., "Robots that ask for help: Uncertainty alignment for large language model planners," in <em>Proc. Conf. Robot Learn. (CoRL)</em>, 2023. arXiv:<a href="https://arxiv.org/abs/2307.01928">2307.01928</a>.</p>
+        </div>
+        </div></details>
+
+        <p style="margin-top:2em">
+          <a href="/#blog">&larr; Back to blog</a>
+        </p>
+      </div>
+
+      <section class="post-comments">
+        <script src="https://giscus.app/client.js"
+                data-repo="jianzhou0420/jianzhou0420.github.io"
+                data-repo-id="R_kgDOKGTs0g"
+                data-category="Comments"
+                data-category-id="DIC_kwDOKGTs0s4DBBIZ"
+                data-mapping="pathname"
+                data-strict="0"
+                data-reactions-enabled="1"
+                data-emit-metadata="0"
+                data-input-position="bottom"
+                data-theme="light"
+                data-lang="en"
+                data-loading="lazy"
+                crossorigin="anonymous"
+                async>
+        </script>
+      </section>
+    </article>
+
+    <footer class="footer">&copy; Jian Zhou</footer>
+  </main>
+  <script src="/_edit/inline-edit.js" defer></script>
+</body>
+</html>

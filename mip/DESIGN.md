@@ -14,7 +14,7 @@ Agents Rival Industrial-Scale Policies in Vision-and-Language Navigation"**
 (arXiv:2607.26148, internally "MIP" = Minimal-Interface Probe). A paper page,
 not a platform page — the AgentCanvas analog is `paper.html`, not `index.html`.
 
-`src/papers.html` card links here; `src/works/TEAPS/` was retired
+`partials/papers.html` card links here; `src/works/TEAPS/` was retired
 (`teaser.png` git-mv'd in).
 
 ## Design language
