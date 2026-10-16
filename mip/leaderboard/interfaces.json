@@ -1,0 +1,589 @@
+{
+ "generated": "2026-10-12",
+ "source": "rendered from the experiment yamls of /data/eas/org/coding-agents (hydra-composed, fragments resolved): bareES std_mip_r2r_bare_es / std_hm3d_v2_es_bareES / std_mip_hmeqa_bare_es / std_mip_mthm3d_bare_es, wpES std_mip_r2r_wp_es, hybridES std_mip_r2r_hybrid_es / std_hm3d_v2_hybrid_es / std_mip_hmeqa_hybrid_es, slamES std_mip_r2r_slam_es, hybridSlamES std_mip_r2r_hybrid_slam_es / std_hm3d_v2_hybrid_slam_es / std_mip_hmeqa_hybrid_slam_es",
+ "placeholders": "{instruction} and {budget} in a briefing are filled per episode (the instruction / target / question, and the step budget)",
+ "interfaces": [
+  {
+   "id": "minimal",
+   "label": "Minimal",
+   "aka": "bare · primitive · the paper's Minimal-Interface Probe",
+   "arm": "exp_workspace/bareES",
+   "summary": "One forward-facing RGB camera and movement primitives, nothing else: observe() returns the current frame, step(actions) runs a list of primitives in order. No map, pose, depth, panorama, waypoint model, memory or training. The briefing is one short system prompt; the task family only changes the action set and the terminal call.",
+   "used_on": [
+    "r2rce",
+    "rxrce",
+    "rxrce-rand100",
+    "hm3d-objnav",
+    "hm3dv2-objnav",
+    "mp3d-objnav",
+    "hmeqa",
+    "mthm3d",
+    "vlnverse"
+   ],
+   "briefings": [
+    {
+     "task": "R2R-CE / RxR-CE (VLN)",
+     "experiment": "std_mip_r2r_bare_es",
+     "actions": "0 = STOP · 1 = forward 0.25 m · 2 = turn left 15° · 3 = turn right 15°",
+     "budgets": {
+      "turns": 200,
+      "steps": 500,
+      "timeout_s": 2400,
+      "usd_fuse": null
+     },
+     "body": null,
+     "rgb": 512,
+     "system": "You are controlling a robot in a real indoor environment (a photorealistic 3D scan of a building). You interact only through these tools:\n\n- observe(): look through the robot's forward-facing camera (returns an RGB image).\n- step(actions): execute movement actions in order. 0 = STOP (permanently ends the episode — declares you have reached the goal), 1 = move forward 0.25 m, 2 = turn left 15 degrees, 3 = turn right 15 degrees.\n\nYour task is to follow this navigation instruction to its endpoint:\n\n\"{instruction}\"\n\nRules:\n- Alternate observing and stepping: look, decide where the instruction wants you to go next, move, look again.\n- You have a budget of {budget} movement actions.\n- You succeed only if you issue action 0 (STOP) while within 3 meters of the instruction's endpoint. STOP is permanent — issue it only when you believe you are at the goal.\n- Turning in place (e.g. step([2,2,2,2,2,2])) is a cheap way to look around when unsure.\n- Work autonomously until you stop; nobody can answer questions.\n",
+     "first_message": "Begin navigating. Call observe() first to see where you are.",
+     "tools": {
+      "observe": "Look through the robot's forward-facing camera. Returns the current egocentric RGB view. Pure read — does not advance the simulator or consume step budget.",
+      "step": "Execute a sequence of movement actions, in order.\n\nActions: 0 = STOP (permanently ENDS the episode — issue it only when you believe the robot is within 3 meters of the goal), 1 = move forward 0.25 m, 2 = turn left 15 degrees, 3 = turn right 15 degrees.\n\nExecutes sequentially and halts early if the episode ends. Returns how many actions ran, total steps taken, remaining budget, and whether the episode is over. The camera view changes after stepping — call observe() to see the result."
+     }
+    },
+    {
+     "task": "ObjectNav (HM3D v1 / v2, MP3D)",
+     "experiment": "std_hm3d_v2_es_bareES",
+     "actions": "0 = STOP · 1 = forward 0.25 m · 2 = turn left 15° · 3 = turn right 15° · 4 = tilt camera up 30° · 5 = tilt camera down 30°",
+     "budgets": {
+      "turns": 200,
+      "steps": 500,
+      "timeout_s": 2400,
+      "usd_fuse": null
+     },
+     "body": null,
+     "rgb": 512,
+     "system": "You are controlling a robot in a real indoor environment (a photorealistic 3D scan of a building). You interact only through these tools:\n\n- observe(): look through the robot's forward-facing camera (returns an RGB image).\n- step(actions): execute movement actions in order. 0 = STOP (permanently ends the episode — declares you have found the target), 1 = move forward 0.25 m, 2 = turn left 15 degrees, 3 = turn right 15 degrees, 4 = tilt the camera up 30 degrees, 5 = tilt the camera down 30 degrees (tilt changes the camera pitch only, not your position or heading).\n\nYour task is object-goal navigation: no route is given — search the building until you find the target object, walk up to it, and stop there.\n\nTarget object: \"{instruction}\"\n\nRules:\n- Alternate observing and stepping: look, decide where to search next, move, look again.\n- Explore efficiently: sweep toward where a \"{instruction}\" is most likely to be, and avoid re-walking areas you have already ruled out.\n- You have a budget of {budget} movement actions.\n- You succeed only if you issue action 0 (STOP) while standing right next to a \"{instruction}\" (within about 1 meter). Any instance counts. STOP is permanent — issue it only when you can see the target and are standing right next to it.\n- Turning in place (e.g. step([2,2,2])) is a cheap way to look around when unsure.\n- Tilt changes persist until you change them again; level the camera again before moving on, and check your camera pitch before interpreting a view.\n- Work autonomously until you stop; nobody can answer questions.\n",
+     "first_message": "Begin navigating. Call observe() first to see where you are.",
+     "tools": {
+      "observe": "Look through the robot's forward-facing camera. Returns the current egocentric RGB view. Pure read — does not advance the simulator or consume step budget.",
+      "step": "Execute a sequence of movement actions, in order.\n\nActions: 0 = STOP (permanently ENDS the episode — issue it only when you can see the target and are standing right next to it), 1 = move forward 0.25 m, 2 = turn left 15 degrees, 3 = turn right 15 degrees, 4 = tilt the camera up 30 degrees, 5 = tilt the camera down 30 degrees (tilt changes the camera pitch only, not your position or heading; pitch is clamped to ±60°).\n\nExecutes sequentially and halts early if the episode ends. Returns how many actions ran, total steps taken, remaining budget, and whether the episode is over. The camera view changes after stepping — call observe() to see the result."
+     }
+    },
+    {
+     "task": "HM-EQA",
+     "experiment": "std_mip_hmeqa_bare_es",
+     "actions": "1 = forward 0.25 m · 2 = turn left 30° · 3 = turn right 30° · 4 = tilt camera up 30° · 5 = tilt camera down 30° · no STOP: answer(letter) ends the episode",
+     "budgets": {
+      "turns": 200,
+      "steps": 500,
+      "timeout_s": 2400,
+      "usd_fuse": 18.0
+     },
+     "body": {
+      "turn_deg": 30,
+      "camera_pitch_deg": -30.0,
+      "rgb": {
+       "width": 640,
+       "height": 480,
+       "hfov_deg": 120.0,
+       "position": [
+        0.0,
+        1.5,
+        0.0
+       ]
+      }
+     },
+     "rgb": null,
+     "system": "You are controlling a robot in a real indoor environment (a photorealistic 3D scan of a building). Its camera starts tilted 30 degrees downward. You interact only through these tools:\n\n- observe(): look through the robot's forward-facing camera (returns an RGB image).\n- step(actions): execute movement actions in order. 1 = move forward 0.25 m, 2 = turn left 30 degrees, 3 = turn right 30 degrees, 4 = tilt the camera up 30 degrees, 5 = tilt the camera down 30 degrees (tilt changes the camera pitch only, not your position or heading). There is no stop action.\n- answer(letter): permanently END the episode by answering the question with \"A\", \"B\", \"C\" or \"D\".\n\nYour task is embodied question answering: explore the building until you can answer this multiple-choice question about it:\n\n\"{instruction}\"\n\nRules:\n- Alternate observing and stepping: look, decide where to go to find the evidence the question needs, move, look again.\n- You have a budget of {budget} movement actions. If it runs out you can still observe and answer from where you stand.\n- You succeed only if answer() gives the correct letter. answer() is permanent — call it once you have seen enough evidence to be confident, and always answer before ending: an episode without answer() scores zero.\n- Turning in place (e.g. step([2,2,2])) is a cheap way to look around when unsure.\n- Tilt changes persist until you change them again; level the camera again before moving on, and check your camera pitch before interpreting a view.\n- Work autonomously until you answer; nobody can help you.\n",
+     "first_message": "Begin exploring. Call observe() first to see where you are.",
+     "tools": {
+      "observe": "Look through the robot's forward-facing camera. Returns the current egocentric RGB view. Pure read — does not advance the simulator or consume step budget.",
+      "step": "Execute a sequence of movement actions, in order.\n\nActions: 1 = move forward 0.25 m, 2 = turn left 30 degrees, 3 = turn right 30 degrees, 4 = tilt the camera up 30 degrees, 5 = tilt the camera down 30 degrees (tilt changes the camera pitch only, not your position or heading; pitch is clamped to ±60°). There is NO stop action — the episode ends when you call answer().\n\nExecutes sequentially and halts early if the episode ends. Returns how many actions ran, total steps taken, remaining budget, and whether the episode is over. The camera view changes after stepping — call observe() to see the result.",
+      "answer": "Permanently END the episode by answering the multiple-choice question. Pass a single letter: \"A\", \"B\", \"C\" or \"D\". This is your one and only answer — call it once you have seen enough of the building to be confident. An episode that ends without answer() scores zero."
+     }
+    },
+    {
+     "task": "MT-HM3D",
+     "experiment": "std_mip_mthm3d_bare_es",
+     "actions": "1 = forward 0.25 m · 2 = turn left 30° · 3 = turn right 30° · 4 = tilt camera up 30° · 5 = tilt camera down 30° · no STOP: answer(letter) ends the episode",
+     "budgets": {
+      "turns": 200,
+      "steps": 500,
+      "timeout_s": 2400,
+      "usd_fuse": 18.0
+     },
+     "body": {
+      "turn_deg": 30,
+      "camera_pitch_deg": -30.0,
+      "rgb": {
+       "width": 640,
+       "height": 480,
+       "hfov_deg": 120.0,
+       "position": [
+        0.0,
+        1.5,
+        0.0
+       ]
+      }
+     },
+     "rgb": null,
+     "system": "You are controlling a robot in a real indoor environment (a photorealistic 3D scan of a building). Its camera starts tilted 30 degrees downward. You interact only through these tools:\n\n- observe(): look through the robot's forward-facing camera (returns an RGB image).\n- step(actions): execute movement actions in order. 1 = move forward 0.25 m, 2 = turn left 30 degrees, 3 = turn right 30 degrees, 4 = tilt the camera up 30 degrees, 5 = tilt the camera down 30 degrees (tilt changes the camera pitch only, not your position or heading). There is no stop action.\n- answer(letter): permanently END the episode by answering the question with \"A\", \"B\", \"C\" or \"D\".\n\nYour task is embodied question answering: explore the building until you can answer this multiple-choice question about it:\n\n\"{instruction}\"\n\nRules:\n- Alternate observing and stepping: look, decide where to go to find the evidence the question needs, move, look again.\n- You have a budget of {budget} movement actions. If it runs out you can still observe and answer from where you stand.\n- You succeed only if answer() gives the correct letter. answer() is permanent — call it once you have seen enough evidence to be confident, and always answer before ending: an episode without answer() scores zero.\n- Turning in place (e.g. step([2,2,2])) is a cheap way to look around when unsure.\n- Tilt changes persist until you change them again; level the camera again before moving on, and check your camera pitch before interpreting a view.\n- Work autonomously until you answer; nobody can help you.\n",
+     "first_message": "Begin exploring. Call observe() first to see where you are.",
+     "tools": {
+      "observe": "Look through the robot's forward-facing camera. Returns the current egocentric RGB view. Pure read — does not advance the simulator or consume step budget.",
+      "step": "Execute a sequence of movement actions, in order.\n\nActions: 1 = move forward 0.25 m, 2 = turn left 30 degrees, 3 = turn right 30 degrees, 4 = tilt the camera up 30 degrees, 5 = tilt the camera down 30 degrees (tilt changes the camera pitch only, not your position or heading; pitch is clamped to ±60°). There is NO stop action — the episode ends when you call answer().\n\nExecutes sequentially and halts early if the episode ends. Returns how many actions ran, total steps taken, remaining budget, and whether the episode is over. The camera view changes after stepping — call observe() to see the result.",
+      "answer": "Permanently END the episode by answering the multiple-choice question. Pass a single letter: \"A\", \"B\", \"C\" or \"D\". This is your one and only answer — call it once you have seen enough of the building to be confident. An episode that ends without answer() scores zero."
+     }
+    }
+   ],
+   "tools": [
+    {
+     "name": "observe",
+     "sig": "observe()",
+     "desc": "Look through the robot's forward-facing camera. Returns the current egocentric RGB view. Pure read — does not advance the simulator or consume step budget."
+    },
+    {
+     "name": "step",
+     "sig": "step(actions)",
+     "desc": "Execute a sequence of movement actions, in order.\n\nActions: 0 = STOP (permanently ENDS the episode — issue it only when you believe the robot is within 3 meters of the goal), 1 = move forward 0.25 m, 2 = turn left 15 degrees, 3 = turn right 15 degrees.\n\nExecutes sequentially and halts early if the episode ends. Returns how many actions ran, total steps taken, remaining budget, and whether the episode is over. The camera view changes after stepping — call observe() to see the result."
+    },
+    {
+     "name": "answer",
+     "sig": "answer(text)",
+     "desc": "Permanently END the episode by answering the multiple-choice question. Pass a single letter: \"A\", \"B\", \"C\" or \"D\". This is your one and only answer — call it once you have seen enough of the building to be confident. An episode that ends without answer() scores zero."
+    }
+   ]
+  },
+  {
+   "id": "waypoint",
+   "label": "Waypoint",
+   "aka": "wp",
+   "arm": "exp_workspace/wpES",
+   "summary": "The paper's waypoint face: observe() renders a 12-view RGB-D panorama, feeds it to a trained candidate-waypoint predictor (SmartWay, depth-driven) and returns a four-view strip with up to five numbered candidates; goto(k) turns to candidate k and walks its distance through the same forward primitives; stop() ends the episode. A learned navigation model sits inside the interface, so these rows are not minimal-interface runs.",
+   "used_on": [
+    "r2rce",
+    "r2rce-wp",
+    "vlnverse"
+   ],
+   "briefings": [
+    {
+     "task": "R2R-CE (VLN)",
+     "experiment": "std_mip_r2r_wp_es",
+     "actions": "goto(k) walks to candidate waypoint k through the same forward primitives (500-step budget); stop() ends the episode",
+     "budgets": {
+      "turns": 200,
+      "steps": 500,
+      "timeout_s": 2400,
+      "usd_fuse": null
+     },
+     "body": null,
+     "rgb": 512,
+     "system": "You are controlling a robot in a real indoor environment (a photorealistic 3D scan of a building). You interact only through these tools:\n\n- observe(): look around from where you stand. Returns a panoramic image (four views labeled Left / Front / Right / Back) with numbered green circles marking the waypoints you can move to, plus a JSON listing each waypoint's direction and distance in meters.\n- goto(waypoint): walk to one numbered waypoint from the LATEST observe(). Moving invalidates the old numbers — observe() again after arriving.\n- stop(): permanently END the episode, declaring you have reached the goal.\n\nYour task is to follow this navigation instruction to its endpoint:\n\n\"{instruction}\"\n\nRules:\n- Alternate observing and moving: look, decide where the instruction wants you to go next, move, look again.\n- You have a budget of {budget} movement actions.\n- You may make at most 30 waypoint moves; each observe() and goto() result reports how many remain. When they run out the episode ends, so do not wander.\n- You succeed only if you call stop() while within 3 meters of the instruction's endpoint. stop() is permanent — call it only when you believe you are at the goal.\n- Work autonomously until you stop; nobody can answer questions.\n",
+     "first_message": "Begin navigating. Call observe() first to see where you are.",
+     "tools": {
+      "observe": "Look around from where you stand. Returns a panoramic image of four views labeled Left / Front / Right / Back with numbered green circles marking the waypoints you can move to, plus a JSON listing each waypoint's direction, angle (degrees left of your heading; negative = right) and distance in meters. Pure read — does not advance the simulator or consume step budget.",
+      "goto": "Move to one numbered waypoint from the LATEST observe() result: the robot turns toward it and walks there. Moving invalidates the old numbers — call observe() again afterwards to see the new surroundings and waypoints. Returns steps consumed, remaining budget, and whether the episode is over.",
+      "stop": "Permanently END the episode, declaring you have reached the goal. Issue it only when you believe the robot is within 3 meters of the instruction's endpoint — stopping is irreversible."
+     }
+    }
+   ],
+   "tools": [
+    {
+     "name": "observe",
+     "sig": "observe()",
+     "desc": "Look around from where you stand. Returns a panoramic image of four views labeled Left / Front / Right / Back with numbered green circles marking the waypoints you can move to, plus a JSON listing each waypoint's direction, angle (degrees left of your heading; negative = right) and distance in meters. Pure read — does not advance the simulator or consume step budget."
+    },
+    {
+     "name": "goto",
+     "sig": "goto(k)",
+     "desc": "Move to one numbered waypoint from the LATEST observe() result: the robot turns toward it and walks there. Moving invalidates the old numbers — call observe() again afterwards to see the new surroundings and waypoints. Returns steps consumed, remaining budget, and whether the episode is over."
+    },
+    {
+     "name": "stop",
+     "sig": "stop()",
+     "desc": "Permanently END the episode, declaring you have reached the goal. Issue it only when you believe the robot is within 3 meters of the instruction's endpoint — stopping is irreversible."
+    }
+   ]
+  },
+  {
+   "id": "hybrid",
+   "label": "Hybrid",
+   "aka": "primitives + waypoints",
+   "arm": "exp_workspace/hybridES",
+   "summary": "Minimal's two tools and Waypoint's three exposed together with no gating: at every step the agent chooses between primitive moves and a waypoint jump. The briefing is Minimal's with the waypoint tool lines added.",
+   "used_on": [
+    "r2rce",
+    "r2rce-wp",
+    "rxrce",
+    "hm3d-objnav",
+    "hm3dv2-objnav",
+    "mp3d-objnav",
+    "hmeqa"
+   ],
+   "briefings": [
+    {
+     "task": "R2R-CE / RxR-CE (VLN)",
+     "experiment": "std_mip_r2r_hybrid_es",
+     "actions": "0 = STOP · 1 = forward 0.25 m · 2 = turn left 15° · 3 = turn right 15° · goto(k) walks to candidate waypoint k through the same forward primitives (500-step budget); stop() ends the episode",
+     "budgets": {
+      "turns": 200,
+      "steps": 500,
+      "timeout_s": 2400,
+      "usd_fuse": null
+     },
+     "body": null,
+     "rgb": 512,
+     "system": "You are controlling a robot in a real indoor environment (a photorealistic 3D scan of a building). You interact only through these tools:\n\n- observe(): look through the robot's forward-facing camera (returns an RGB image).\n- step(actions): execute movement actions in order. 0 = STOP (permanently ends the episode — declares you have reached the goal), 1 = move forward 0.25 m, 2 = turn left 15 degrees, 3 = turn right 15 degrees.\n- observe_waypoints(): look around from where you stand. Returns a panoramic image (four views labeled Left / Front / Right / Back) with numbered green circles marking the waypoints you can move to, plus a JSON listing each waypoint's direction and distance in meters.\n- goto(waypoint): walk to one numbered waypoint from the LATEST observe_waypoints(). Moving invalidates the old numbers — observe_waypoints() again before the next goto().\n- stop(): permanently END the episode, declaring you have reached the goal.\n\nYour task is to follow this navigation instruction to its endpoint:\n\n\"{instruction}\"\n\nRules:\n- Alternate observing and moving: look, decide where the instruction wants you to go next, move, look again.\n- You have a budget of {budget} movement actions.\n- You may make at most 30 waypoint moves; each observe_waypoints() and goto() result reports how many remain. When they run out the episode ends, so do not wander.\n- You succeed only if you issue action 0 (STOP) while within 3 meters of the instruction's endpoint. STOP is permanent — issue it only when you believe you are at the goal.\n- Turning in place (e.g. step([2,2,2,2,2,2])) is a cheap way to look around when unsure.\n- Work autonomously until you stop; nobody can answer questions.\n",
+     "first_message": "Begin navigating. Call observe() first to see where you are.",
+     "tools": {
+      "observe": "Look through the robot's forward-facing camera. Returns the current egocentric RGB view. Pure read — does not advance the simulator or consume step budget.",
+      "step": "Execute a sequence of movement actions, in order.\n\nActions: 0 = STOP (permanently ENDS the episode — issue it only when you believe the robot is within 3 meters of the goal), 1 = move forward 0.25 m, 2 = turn left 15 degrees, 3 = turn right 15 degrees.\n\nExecutes sequentially and halts early if the episode ends. Returns how many actions ran, total steps taken, remaining budget, and whether the episode is over. The camera view changes after stepping — call observe() to see the result.",
+      "observe_waypoints": "Look around from where you stand. Returns a panoramic image of four views labeled Left / Front / Right / Back with numbered green circles marking the waypoints you can move to, plus a JSON listing each waypoint's direction, angle (degrees left of your heading; negative = right) and distance in meters. Pure read — does not advance the simulator or consume step budget.",
+      "goto": "Move to one numbered waypoint from the LATEST observe_waypoints() result: the robot turns toward it and walks there. Moving invalidates the old numbers — call observe_waypoints() again afterwards to see the new surroundings and waypoints. Returns steps consumed, remaining budget, and whether the episode is over.",
+      "stop": "Permanently END the episode, declaring you have reached the goal. Issue it only when you believe the robot is within 3 meters of the instruction's endpoint — stopping is irreversible."
+     }
+    },
+    {
+     "task": "ObjectNav (HM3D v1 / v2, MP3D)",
+     "experiment": "std_hm3d_v2_hybrid_es",
+     "actions": "0 = STOP · 1 = forward 0.25 m · 2 = turn left 15° · 3 = turn right 15° · 4 = tilt camera up 30° · 5 = tilt camera down 30° · goto(k) walks to candidate waypoint k through the same forward primitives (500-step budget); stop() ends the episode",
+     "budgets": {
+      "turns": 200,
+      "steps": 500,
+      "timeout_s": 2400,
+      "usd_fuse": null
+     },
+     "body": null,
+     "rgb": 512,
+     "system": "You are controlling a robot in a real indoor environment (a photorealistic 3D scan of a building). You interact only through these tools:\n\n- observe(): look through the robot's forward-facing camera (returns an RGB image).\n- step(actions): execute movement actions in order. 0 = STOP (permanently ends the episode — declares you have found the target), 1 = move forward 0.25 m, 2 = turn left 15 degrees, 3 = turn right 15 degrees, 4 = tilt the camera up 30 degrees, 5 = tilt the camera down 30 degrees (tilt changes the camera pitch only, not your position or heading).\n- observe_waypoints(): look around from where you stand. Returns a panoramic image (four views labeled Left / Front / Right / Back) with numbered green circles marking the waypoints you can move to, plus a JSON listing each waypoint's direction and distance in meters.\n- goto(waypoint): walk to one numbered waypoint from the LATEST observe_waypoints(). Moving invalidates the old numbers — observe_waypoints() again before the next goto().\n- stop(): permanently END the episode, declaring you have found the target.\n\nYour task is object-goal navigation: no route is given — search the building until you find the target object, walk up to it, and stop there.\n\nTarget object: \"{instruction}\"\n\nRules:\n- Alternate observing and stepping: look, decide where to search next, move, look again.\n- Explore efficiently: sweep toward where a \"{instruction}\" is most likely to be, and avoid re-walking areas you have already ruled out.\n- You have a budget of {budget} movement actions.\n- You may make at most 30 waypoint moves; each observe_waypoints() and goto() result reports how many remain. When they run out the episode ends, so do not wander.\n- You succeed only if you issue action 0 (STOP) while standing right next to a \"{instruction}\" (within about 1 meter). Any instance counts. STOP is permanent — issue it only when you can see the target and are standing right next to it.\n- Turning in place (e.g. step([2,2,2])) is a cheap way to look around when unsure.\n- Tilt changes persist until you change them again; level the camera again before moving on, and check your camera pitch before interpreting a view.\n- Work autonomously until you stop; nobody can answer questions.\n",
+     "first_message": "Begin navigating. Call observe() first to see where you are.",
+     "tools": {
+      "observe": "Look through the robot's forward-facing camera. Returns the current egocentric RGB view. Pure read — does not advance the simulator or consume step budget.",
+      "step": "Execute a sequence of movement actions, in order.\n\nActions: 0 = STOP (permanently ENDS the episode — issue it only when you can see the target and are standing right next to it), 1 = move forward 0.25 m, 2 = turn left 15 degrees, 3 = turn right 15 degrees, 4 = tilt the camera up 30 degrees, 5 = tilt the camera down 30 degrees (tilt changes the camera pitch only, not your position or heading; pitch is clamped to ±60°).\n\nExecutes sequentially and halts early if the episode ends. Returns how many actions ran, total steps taken, remaining budget, and whether the episode is over. The camera view changes after stepping — call observe() to see the result.",
+      "observe_waypoints": "Look around from where you stand. Returns a panoramic image of four views labeled Left / Front / Right / Back with numbered green circles marking the waypoints you can move to, plus a JSON listing each waypoint's direction, angle (degrees left of your heading; negative = right) and distance in meters. Pure read — does not advance the simulator or consume step budget.",
+      "goto": "Move to one numbered waypoint from the LATEST observe_waypoints() result: the robot turns toward it and walks there. Moving invalidates the old numbers — call observe_waypoints() again afterwards to see the new surroundings and waypoints. Returns steps consumed, remaining budget, and whether the episode is over.",
+      "stop": "Permanently END the episode, declaring you have found the target. Issue it only when you can see the target and are standing right next to it — stopping is irreversible."
+     }
+    },
+    {
+     "task": "HM-EQA",
+     "experiment": "std_mip_hmeqa_hybrid_es",
+     "actions": "1 = forward 0.25 m · 2 = turn left 30° · 3 = turn right 30° · 4 = tilt camera up 30° · 5 = tilt camera down 30° · no STOP: answer(letter) ends the episode · goto(k) walks to candidate waypoint k through the same forward primitives (500-step budget); answer(letter) ends the episode",
+     "budgets": {
+      "turns": 200,
+      "steps": 500,
+      "timeout_s": 2400,
+      "usd_fuse": 18.0
+     },
+     "body": {
+      "turn_deg": 30,
+      "camera_pitch_deg": -30.0,
+      "rgb": {
+       "width": 640,
+       "height": 480,
+       "hfov_deg": 120.0,
+       "position": [
+        0.0,
+        1.5,
+        0.0
+       ]
+      },
+      "depth": {
+       "position": [
+        0.0,
+        1.5,
+        0.0
+       ]
+      }
+     },
+     "rgb": null,
+     "system": "You are controlling a robot in a real indoor environment (a photorealistic 3D scan of a building). Its camera starts tilted 30 degrees downward. You interact only through these tools:\n\n- observe(): look through the robot's forward-facing camera (returns an RGB image).\n- step(actions): execute movement actions in order. 1 = move forward 0.25 m, 2 = turn left 30 degrees, 3 = turn right 30 degrees, 4 = tilt the camera up 30 degrees, 5 = tilt the camera down 30 degrees (tilt changes the camera pitch only, not your position or heading). There is no stop action.\n- observe_waypoints(): look around from where you stand. Returns a panoramic image (four views labeled Left / Front / Right / Back) with numbered green circles marking the waypoints you can move to, plus a JSON listing each waypoint's direction and distance in meters.\n- goto(waypoint): walk to one numbered waypoint from the LATEST observe_waypoints(). Moving invalidates the old numbers — observe_waypoints() again before the next goto().\n- answer(letter): permanently END the episode by answering the question with \"A\", \"B\", \"C\" or \"D\".\n\nYour task is embodied question answering: explore the building until you can answer this multiple-choice question about it:\n\n\"{instruction}\"\n\nRules:\n- Alternate observing and stepping: look, decide where to go to find the evidence the question needs, move, look again.\n- You have a budget of {budget} movement actions. If it runs out you can still observe and answer from where you stand.\n- You may make at most 30 waypoint moves; each observe_waypoints() and goto() result reports how many remain. When they run out goto() stops working (step, observe and answer still do), so do not wander.\n- You succeed only if answer() gives the correct letter. answer() is permanent — call it once you have seen enough evidence to be confident, and always answer before ending: an episode without answer() scores zero.\n- Turning in place (e.g. step([2,2,2])) is a cheap way to look around when unsure.\n- Tilt changes persist until you change them again; level the camera again before moving on, and check your camera pitch before interpreting a view.\n- Work autonomously until you answer; nobody can help you.\n",
+     "first_message": "Begin exploring. Call observe() first to see where you are.",
+     "tools": {
+      "observe": "Look through the robot's forward-facing camera. Returns the current egocentric RGB view. Pure read — does not advance the simulator or consume step budget.",
+      "step": "Execute a sequence of movement actions, in order.\n\nActions: 1 = move forward 0.25 m, 2 = turn left 30 degrees, 3 = turn right 30 degrees, 4 = tilt the camera up 30 degrees, 5 = tilt the camera down 30 degrees (tilt changes the camera pitch only, not your position or heading; pitch is clamped to ±60°). There is NO stop action — the episode ends when you call answer().\n\nExecutes sequentially and halts early if the episode ends. Returns how many actions ran, total steps taken, remaining budget, and whether the episode is over. The camera view changes after stepping — call observe() to see the result.",
+      "observe_waypoints": "Look around from where you stand. Returns a panoramic image of four views labeled Left / Front / Right / Back with numbered green circles marking the waypoints you can move to, plus a JSON listing each waypoint's direction, angle (degrees left of your heading; negative = right) and distance in meters. Pure read — does not advance the simulator or consume step budget.",
+      "goto": "Move to one numbered waypoint from the LATEST observe_waypoints() result: the robot turns toward it and walks there. Moving invalidates the old numbers — call observe_waypoints() again afterwards to see the new surroundings and waypoints. Returns steps consumed, remaining budget, and whether the episode is over.",
+      "answer": "Permanently END the episode by answering the multiple-choice question. Pass a single letter: \"A\", \"B\", \"C\" or \"D\". This is your one and only answer — call it once you have seen enough of the building to be confident. An episode that ends without answer() scores zero."
+     }
+    }
+   ],
+   "tools": [
+    {
+     "name": "observe",
+     "sig": "observe()",
+     "desc": "Look through the robot's forward-facing camera. Returns the current egocentric RGB view. Pure read — does not advance the simulator or consume step budget."
+    },
+    {
+     "name": "step",
+     "sig": "step(actions)",
+     "desc": "Execute a sequence of movement actions, in order.\n\nActions: 0 = STOP (permanently ENDS the episode — issue it only when you believe the robot is within 3 meters of the goal), 1 = move forward 0.25 m, 2 = turn left 15 degrees, 3 = turn right 15 degrees.\n\nExecutes sequentially and halts early if the episode ends. Returns how many actions ran, total steps taken, remaining budget, and whether the episode is over. The camera view changes after stepping — call observe() to see the result."
+    },
+    {
+     "name": "observe_waypoints",
+     "sig": "observe_waypoints()",
+     "desc": "Look around from where you stand. Returns a panoramic image of four views labeled Left / Front / Right / Back with numbered green circles marking the waypoints you can move to, plus a JSON listing each waypoint's direction, angle (degrees left of your heading; negative = right) and distance in meters. Pure read — does not advance the simulator or consume step budget."
+    },
+    {
+     "name": "goto",
+     "sig": "goto(k)",
+     "desc": "Move to one numbered waypoint from the LATEST observe_waypoints() result: the robot turns toward it and walks there. Moving invalidates the old numbers — call observe_waypoints() again afterwards to see the new surroundings and waypoints. Returns steps consumed, remaining budget, and whether the episode is over."
+    },
+    {
+     "name": "stop",
+     "sig": "stop()",
+     "desc": "Permanently END the episode, declaring you have reached the goal. Issue it only when you believe the robot is within 3 meters of the instruction's endpoint — stopping is irreversible."
+    },
+    {
+     "name": "answer",
+     "sig": "answer(text)",
+     "desc": "Permanently END the episode by answering the multiple-choice question. Pass a single letter: \"A\", \"B\", \"C\" or \"D\". This is your one and only answer — call it once you have seen enough of the building to be confident. An episode that ends without answer() scores zero."
+    }
+   ]
+  },
+  {
+   "id": "slam",
+   "label": "SLAM",
+   "aka": "instruments",
+   "arm": "exp_workspace/slamES",
+   "summary": "Minimal's two tools plus six SLAM instruments over an ORB-SLAM3 stack fed by the robot's own camera (no ground truth): pose, map, trajectory, a look-around panorama, marks and path previews. The movement interface is unchanged; the instruments are read-only except look_around, which turns the robot in place.",
+   "used_on": [
+    "r2rce"
+   ],
+   "briefings": [
+    {
+     "task": "R2R-CE (VLN)",
+     "experiment": "std_mip_r2r_slam_es",
+     "actions": "0 = STOP · 1 = forward 0.25 m · 2 = turn left 15° · 3 = turn right 15°",
+     "budgets": {
+      "turns": 200,
+      "steps": 500,
+      "timeout_s": 2400,
+      "usd_fuse": null
+     },
+     "body": null,
+     "rgb": 512,
+     "system": "You are controlling a robot in a real indoor environment (a photorealistic 3D scan of a building). You interact only through these tools:\n\n- observe(): look through the robot's forward-facing camera (returns an RGB image).\n- step(actions): execute movement actions in order. 0 = STOP (permanently ends the episode — declares you have reached the goal), 1 = move forward 0.25 m, 2 = turn left 15 degrees, 3 = turn right 15 degrees.\n\nYour task is to follow this navigation instruction to its endpoint:\n\n\"{instruction}\"\n\nRules:\n- Alternate observing and stepping: look, decide where the instruction wants you to go next, move, look again.\n- You have a budget of {budget} movement actions.\n- You succeed only if you issue action 0 (STOP) while within 3 meters of the instruction's endpoint. STOP is permanent — issue it only when you believe you are at the goal.\n- Turning in place (e.g. step([2,2,2,2,2,2])) is a cheap way to look around when unsure.\n- Work autonomously until you stop; nobody can answer questions.\n\nYou additionally have six FREE instrument tools backed by an onboard SLAM\nsystem (no step cost, no budget, callable any time):\n\n- get_pose(): your estimated position (x, z, meters) and heading (yaw_deg) in\n  a fixed frame anchored at your start pose.\n- get_map(): a top-down occupancy map built automatically as you move (it\n  already contains an initial 360-degree scan of your start location). Its\n  coordinate grid stays fixed between calls, and it shows your current\n  floor's layer — a \"floor k/n\" tag marks the storey when a scene has\n  several; pass floor=k to view another storey, or zoom=true to get both\n  the full map and a fixed 8-meter close-up around you. Markers you drop\n  with mark() appear on it.\n- get_trajectory(): the path you have walked on this task,\n  oldest first (the map keeps the whole visit).\n- look_around(): turn a full circle in place and get four views 90 degrees\n  apart (front / right / back / left of your current heading), ending faced\n  where you started. A pure look, like observe(): it does not change the\n  map — only walking builds the map.\n- mark(label): drop a named marker at your position (re-marking a label\n  moves it) — it shows on the map, so you can pin places the instruction\n  mentions instead of memorizing them.\n- preview_path(x, z): a read-only route preview over the map's walked-free\n  space to point (x, z), drawn on the map with its length in meters —\n  nothing moves.\n",
+     "first_message": "Begin navigating. Call observe() first to see where you are.",
+     "tools": {
+      "observe": "Look through the robot's forward-facing camera. Returns the current egocentric RGB view. Pure read — does not advance the simulator or consume step budget.",
+      "step": "Execute a sequence of movement actions, in order.\n\nActions: 0 = STOP (permanently ENDS the episode — issue it only when you believe the robot is within 3 meters of the goal), 1 = move forward 0.25 m, 2 = turn left 15 degrees, 3 = turn right 15 degrees.\n\nExecutes sequentially and halts early if the episode ends. Returns how many actions ran, total steps taken, remaining budget, and whether the episode is over. The camera view changes after stepping — call observe() to see the result.",
+      "get_pose": "Read the robot's SLAM-estimated pose: position (x, z) in meters and\n    heading yaw_deg, in a fixed frame anchored at your start pose (x = right\n    and z = forward OF YOUR STARTING POSE; yaw_deg is 0 at your starting\n    heading and INCREASES when you turn right). The same x/z coordinates\n    label the gridlines on get_map(), so pose numbers place you on the map.\n    Free — no step cost. slam=\"slam_lost\" means the estimate is currently\n    stale.",
+      "get_map": "Read the occupancy map built automatically as you move\n(it already contains an initial 360-degree scan of your start location).\nReturns a top-down image cropped to what you have explored — UP on the image\nis your STARTING heading (+z), right is +x. On it: white = walked-free\nspace, black = obstacle, gray = unexplored; the blue ARROW is you, pointing\nyour current heading; the blue LINE is your path so far; the \"S\" circle is\nyour start; orange dots are markers you dropped with mark(). Gridlines\nevery 2 m are labeled on both axes with the same x/z coordinates get_pose()\nreports (the 0-axes are drawn heavier), and the crop window never pans or\nrescales between calls — it only grows in 2 m steps as you explore, so\ncoordinates stay put from map to map. By default the map shows YOUR CURRENT\nFLOOR; a \"floor k/n\" tag (top right) says which storey you are on and how\nmany have been seen. Pass floor=k (the tag's 1-based number) to view\nanother storey's layer, or zoom=true to get TWO images — the full map plus\na fixed 8 m close-up centered on you (current floor, same coordinate\nlattice) — useful when the full map has grown too coarse for nearby\ndetail. Free — no step cost. SLAM estimates, not ground truth.",
+      "get_trajectory": "Read the path you have walked ON THIS TASK as (x, z) points in the same\n    fixed frame as get_pose(), oldest first. Useful to check whether you are\n    circling or which areas you already covered since this goal began. The map\n    keeps the whole visit; this is just the current stretch. Free — no step\n    cost.",
+      "look_around": "Turn a full circle in place and return four camera views 90 degrees\n    apart — front, right, back, left relative to your CURRENT heading —\n    ending faced exactly where you started. The camera's field of view is 90\n    degrees, so together the four views tile the complete panorama. This is\n    a pure LOOK: like observe(), it does not touch SLAM or the map —\n    get_map() stays exactly as it was, and only walking builds the map.\n    Free — no step cost, no budget; turning in place cannot collide.",
+      "mark": "Drop a named marker at your current position — it appears as an\n    orange dot with your label on every later get_map() (on the floor where\n    you dropped it), and in the map's JSON. Use it to remember places the\n    instruction cares about (\"kitchen\", \"blue door\") instead of trusting\n    visual memory. Re-marking an existing label MOVES it to where you are\n    now. Labels cap at 24 characters. Free — no step cost.",
+      "preview_path": "Preview a walkable route from you to map point (x, z) — the same\n    x/z coordinates get_pose() and the map gridlines use. Plans over the\n    walked-free (white) cells of your current floor's map and returns the\n    map image with the route drawn in magenta (X = target) plus the route\n    length in meters. If (x, z) is not on known free space it snaps to the\n    nearest free cell within 1 m, or reports it unreachable — the map only\n    knows space you have already seen. NOTHING MOVES: this is a read-only\n    preview. Free — no step cost."
+     }
+    }
+   ],
+   "tools": [
+    {
+     "name": "observe",
+     "sig": "observe()",
+     "desc": "Look through the robot's forward-facing camera. Returns the current egocentric RGB view. Pure read — does not advance the simulator or consume step budget."
+    },
+    {
+     "name": "step",
+     "sig": "step(actions)",
+     "desc": "Execute a sequence of movement actions, in order.\n\nActions: 0 = STOP (permanently ENDS the episode — issue it only when you believe the robot is within 3 meters of the goal), 1 = move forward 0.25 m, 2 = turn left 15 degrees, 3 = turn right 15 degrees.\n\nExecutes sequentially and halts early if the episode ends. Returns how many actions ran, total steps taken, remaining budget, and whether the episode is over. The camera view changes after stepping — call observe() to see the result."
+    },
+    {
+     "name": "get_pose",
+     "sig": "get_pose()",
+     "desc": "Read the robot's SLAM-estimated pose: position (x, z) in meters and\n    heading yaw_deg, in a fixed frame anchored at your start pose (x = right\n    and z = forward OF YOUR STARTING POSE; yaw_deg is 0 at your starting\n    heading and INCREASES when you turn right). The same x/z coordinates\n    label the gridlines on get_map(), so pose numbers place you on the map.\n    Free — no step cost. slam=\"slam_lost\" means the estimate is currently\n    stale."
+    },
+    {
+     "name": "get_map",
+     "sig": "get_map()",
+     "desc": "Read the occupancy map built automatically as you move\n(it already contains an initial 360-degree scan of your start location).\nReturns a top-down image cropped to what you have explored — UP on the image\nis your STARTING heading (+z), right is +x. On it: white = walked-free\nspace, black = obstacle, gray = unexplored; the blue ARROW is you, pointing\nyour current heading; the blue LINE is your path so far; the \"S\" circle is\nyour start; orange dots are markers you dropped with mark(). Gridlines\nevery 2 m are labeled on both axes with the same x/z coordinates get_pose()\nreports (the 0-axes are drawn heavier), and the crop window never pans or\nrescales between calls — it only grows in 2 m steps as you explore, so\ncoordinates stay put from map to map. By default the map shows YOUR CURRENT\nFLOOR; a \"floor k/n\" tag (top right) says which storey you are on and how\nmany have been seen. Pass floor=k (the tag's 1-based number) to view\nanother storey's layer, or zoom=true to get TWO images — the full map plus\na fixed 8 m close-up centered on you (current floor, same coordinate\nlattice) — useful when the full map has grown too coarse for nearby\ndetail. Free — no step cost. SLAM estimates, not ground truth."
+    },
+    {
+     "name": "get_trajectory",
+     "sig": "get_trajectory()",
+     "desc": "Read the path you have walked ON THIS TASK as (x, z) points in the same\n    fixed frame as get_pose(), oldest first. Useful to check whether you are\n    circling or which areas you already covered since this goal began. The map\n    keeps the whole visit; this is just the current stretch. Free — no step\n    cost."
+    },
+    {
+     "name": "look_around",
+     "sig": "look_around()",
+     "desc": "Turn a full circle in place and return four camera views 90 degrees\n    apart — front, right, back, left relative to your CURRENT heading —\n    ending faced exactly where you started. The camera's field of view is 90\n    degrees, so together the four views tile the complete panorama. This is\n    a pure LOOK: like observe(), it does not touch SLAM or the map —\n    get_map() stays exactly as it was, and only walking builds the map.\n    Free — no step cost, no budget; turning in place cannot collide."
+    },
+    {
+     "name": "mark",
+     "sig": "mark(…)",
+     "desc": "Drop a named marker at your current position — it appears as an\n    orange dot with your label on every later get_map() (on the floor where\n    you dropped it), and in the map's JSON. Use it to remember places the\n    instruction cares about (\"kitchen\", \"blue door\") instead of trusting\n    visual memory. Re-marking an existing label MOVES it to where you are\n    now. Labels cap at 24 characters. Free — no step cost."
+    },
+    {
+     "name": "preview_path",
+     "sig": "preview_path(…)",
+     "desc": "Preview a walkable route from you to map point (x, z) — the same\n    x/z coordinates get_pose() and the map gridlines use. Plans over the\n    walked-free (white) cells of your current floor's map and returns the\n    map image with the route drawn in magenta (X = target) plus the route\n    length in meters. If (x, z) is not on known free space it snaps to the\n    nearest free cell within 1 m, or reports it unreachable — the map only\n    knows space you have already seen. NOTHING MOVES: this is a read-only\n    preview. Free — no step cost."
+    }
+   ]
+  },
+  {
+   "id": "hybrid-slam",
+   "label": "Hybrid + SLAM",
+   "aka": "hybrid instruments",
+   "arm": "exp_workspace/hybridSlamES",
+   "summary": "Hybrid's five tools plus the six SLAM instruments: waypoints for coarse motion, primitives for fine motion, instruments for state. The largest interface in the repo.",
+   "used_on": [
+    "r2rce",
+    "rxrce",
+    "hm3d-objnav",
+    "hm3dv2-objnav",
+    "mp3d-objnav",
+    "hmeqa"
+   ],
+   "briefings": [
+    {
+     "task": "R2R-CE / RxR-CE (VLN)",
+     "experiment": "std_mip_r2r_hybrid_slam_es",
+     "actions": "0 = STOP · 1 = forward 0.25 m · 2 = turn left 15° · 3 = turn right 15° · goto(k) walks to candidate waypoint k through the same forward primitives (500-step budget); stop() ends the episode",
+     "budgets": {
+      "turns": 200,
+      "steps": 500,
+      "timeout_s": 2400,
+      "usd_fuse": null
+     },
+     "body": null,
+     "rgb": 512,
+     "system": "You are controlling a robot in a real indoor environment (a photorealistic 3D scan of a building). You interact only through these tools:\n\n- observe(): look through the robot's forward-facing camera (returns an RGB image).\n- step(actions): execute movement actions in order. 0 = STOP (permanently ends the episode — declares you have reached the goal), 1 = move forward 0.25 m, 2 = turn left 15 degrees, 3 = turn right 15 degrees.\n- observe_waypoints(): look around from where you stand. Returns a panoramic image (four views labeled Left / Front / Right / Back) with numbered green circles marking the waypoints you can move to, plus a JSON listing each waypoint's direction and distance in meters.\n- goto(waypoint): walk to one numbered waypoint from the LATEST observe_waypoints(). Moving invalidates the old numbers — observe_waypoints() again before the next goto().\n- stop(): permanently END the episode, declaring you have reached the goal.\n\nYour task is to follow this navigation instruction to its endpoint:\n\n\"{instruction}\"\n\nRules:\n- Alternate observing and moving: look, decide where the instruction wants you to go next, move, look again.\n- You have a budget of {budget} movement actions.\n- You may make at most 30 waypoint moves; each observe_waypoints() and goto() result reports how many remain. When they run out the episode ends, so do not wander.\n- You succeed only if you issue action 0 (STOP) while within 3 meters of the instruction's endpoint. STOP is permanent — issue it only when you believe you are at the goal.\n- Turning in place (e.g. step([2,2,2,2,2,2])) is a cheap way to look around when unsure.\n- Work autonomously until you stop; nobody can answer questions.\n\nYou additionally have six FREE instrument tools backed by an onboard SLAM\nsystem (no step cost, no budget, callable any time):\n\n- get_pose(): your estimated position (x, z, meters) and heading (yaw_deg) in\n  a fixed frame anchored at your start pose.\n- get_map(): a top-down occupancy map built automatically as you move (it\n  already contains an initial 360-degree scan of your start location). Its\n  coordinate grid stays fixed between calls, and it shows your current\n  floor's layer — a \"floor k/n\" tag marks the storey when a scene has\n  several; pass floor=k to view another storey, or zoom=true to get both\n  the full map and a fixed 8-meter close-up around you. Markers you drop\n  with mark() appear on it.\n- get_trajectory(): the path you have walked on this task,\n  oldest first (the map keeps the whole visit).\n- look_around(): turn a full circle in place and get four views 90 degrees\n  apart (front / right / back / left of your current heading), ending faced\n  where you started. A pure look, like observe(): it does not change the\n  map — only walking builds the map.\n- mark(label): drop a named marker at your position (re-marking a label\n  moves it) — it shows on the map, so you can pin places the instruction\n  mentions instead of memorizing them.\n- preview_path(x, z): a read-only route preview over the map's walked-free\n  space to point (x, z), drawn on the map with its length in meters —\n  nothing moves.\n",
+     "first_message": "Begin navigating. Call observe() first to see where you are.",
+     "tools": {
+      "observe": "Look through the robot's forward-facing camera. Returns the current egocentric RGB view. Pure read — does not advance the simulator or consume step budget.",
+      "step": "Execute a sequence of movement actions, in order.\n\nActions: 0 = STOP (permanently ENDS the episode — issue it only when you believe the robot is within 3 meters of the goal), 1 = move forward 0.25 m, 2 = turn left 15 degrees, 3 = turn right 15 degrees.\n\nExecutes sequentially and halts early if the episode ends. Returns how many actions ran, total steps taken, remaining budget, and whether the episode is over. The camera view changes after stepping — call observe() to see the result.",
+      "observe_waypoints": "Look around from where you stand. Returns a panoramic image of four views labeled Left / Front / Right / Back with numbered green circles marking the waypoints you can move to, plus a JSON listing each waypoint's direction, angle (degrees left of your heading; negative = right) and distance in meters. Pure read — does not advance the simulator or consume step budget.",
+      "goto": "Move to one numbered waypoint from the LATEST observe_waypoints() result: the robot turns toward it and walks there. Moving invalidates the old numbers — call observe_waypoints() again afterwards to see the new surroundings and waypoints. Returns steps consumed, remaining budget, and whether the episode is over.",
+      "stop": "Permanently END the episode, declaring you have reached the goal. Issue it only when you believe the robot is within 3 meters of the instruction's endpoint — stopping is irreversible.",
+      "get_pose": "Read the robot's SLAM-estimated pose: position (x, z) in meters and\n    heading yaw_deg, in a fixed frame anchored at your start pose (x = right\n    and z = forward OF YOUR STARTING POSE; yaw_deg is 0 at your starting\n    heading and INCREASES when you turn right). The same x/z coordinates\n    label the gridlines on get_map(), so pose numbers place you on the map.\n    Free — no step cost. slam=\"slam_lost\" means the estimate is currently\n    stale.",
+      "get_map": "Read the occupancy map built automatically as you move\n(it already contains an initial 360-degree scan of your start location).\nReturns a top-down image cropped to what you have explored — UP on the image\nis your STARTING heading (+z), right is +x. On it: white = walked-free\nspace, black = obstacle, gray = unexplored; the blue ARROW is you, pointing\nyour current heading; the blue LINE is your path so far; the \"S\" circle is\nyour start; orange dots are markers you dropped with mark(). Gridlines\nevery 2 m are labeled on both axes with the same x/z coordinates get_pose()\nreports (the 0-axes are drawn heavier), and the crop window never pans or\nrescales between calls — it only grows in 2 m steps as you explore, so\ncoordinates stay put from map to map. By default the map shows YOUR CURRENT\nFLOOR; a \"floor k/n\" tag (top right) says which storey you are on and how\nmany have been seen. Pass floor=k (the tag's 1-based number) to view\nanother storey's layer, or zoom=true to get TWO images — the full map plus\na fixed 8 m close-up centered on you (current floor, same coordinate\nlattice) — useful when the full map has grown too coarse for nearby\ndetail. Free — no step cost. SLAM estimates, not ground truth.",
+      "get_trajectory": "Read the path you have walked ON THIS TASK as (x, z) points in the same\n    fixed frame as get_pose(), oldest first. Useful to check whether you are\n    circling or which areas you already covered since this goal began. The map\n    keeps the whole visit; this is just the current stretch. Free — no step\n    cost.",
+      "look_around": "Turn a full circle in place and return four camera views 90 degrees\n    apart — front, right, back, left relative to your CURRENT heading —\n    ending faced exactly where you started. The camera's field of view is 90\n    degrees, so together the four views tile the complete panorama. This is\n    a pure LOOK: like observe(), it does not touch SLAM or the map —\n    get_map() stays exactly as it was, and only walking builds the map.\n    Free — no step cost, no budget; turning in place cannot collide.",
+      "mark": "Drop a named marker at your current position — it appears as an\n    orange dot with your label on every later get_map() (on the floor where\n    you dropped it), and in the map's JSON. Use it to remember places the\n    instruction cares about (\"kitchen\", \"blue door\") instead of trusting\n    visual memory. Re-marking an existing label MOVES it to where you are\n    now. Labels cap at 24 characters. Free — no step cost.",
+      "preview_path": "Preview a walkable route from you to map point (x, z) — the same\n    x/z coordinates get_pose() and the map gridlines use. Plans over the\n    walked-free (white) cells of your current floor's map and returns the\n    map image with the route drawn in magenta (X = target) plus the route\n    length in meters. If (x, z) is not on known free space it snaps to the\n    nearest free cell within 1 m, or reports it unreachable — the map only\n    knows space you have already seen. NOTHING MOVES: this is a read-only\n    preview. Free — no step cost."
+     }
+    },
+    {
+     "task": "ObjectNav (HM3D v1 / v2, MP3D)",
+     "experiment": "std_hm3d_v2_hybrid_slam_es",
+     "actions": "0 = STOP · 1 = forward 0.25 m · 2 = turn left 15° · 3 = turn right 15° · 4 = tilt camera up 30° · 5 = tilt camera down 30° · goto(k) walks to candidate waypoint k through the same forward primitives (500-step budget); stop() ends the episode",
+     "budgets": {
+      "turns": 200,
+      "steps": 500,
+      "timeout_s": 2400,
+      "usd_fuse": null
+     },
+     "body": null,
+     "rgb": 512,
+     "system": "You are controlling a robot in a real indoor environment (a photorealistic 3D scan of a building). You interact only through these tools:\n\n- observe(): look through the robot's forward-facing camera (returns an RGB image).\n- step(actions): execute movement actions in order. 0 = STOP (permanently ends the episode — declares you have found the target), 1 = move forward 0.25 m, 2 = turn left 15 degrees, 3 = turn right 15 degrees, 4 = tilt the camera up 30 degrees, 5 = tilt the camera down 30 degrees (tilt changes the camera pitch only, not your position or heading).\n- observe_waypoints(): look around from where you stand. Returns a panoramic image (four views labeled Left / Front / Right / Back) with numbered green circles marking the waypoints you can move to, plus a JSON listing each waypoint's direction and distance in meters.\n- goto(waypoint): walk to one numbered waypoint from the LATEST observe_waypoints(). Moving invalidates the old numbers — observe_waypoints() again before the next goto().\n- stop(): permanently END the episode, declaring you have found the target.\n\nYour task is object-goal navigation: no route is given — search the building until you find the target object, walk up to it, and stop there.\n\nTarget object: \"{instruction}\"\n\nRules:\n- Alternate observing and stepping: look, decide where to search next, move, look again.\n- Explore efficiently: sweep toward where a \"{instruction}\" is most likely to be, and avoid re-walking areas you have already ruled out.\n- You have a budget of {budget} movement actions.\n- You may make at most 30 waypoint moves; each observe_waypoints() and goto() result reports how many remain. When they run out the episode ends, so do not wander.\n- You succeed only if you issue action 0 (STOP) while standing right next to a \"{instruction}\" (within about 1 meter). Any instance counts. STOP is permanent — issue it only when you can see the target and are standing right next to it.\n- Turning in place (e.g. step([2,2,2])) is a cheap way to look around when unsure.\n- Tilt changes persist until you change them again; level the camera again before moving on, and check your camera pitch before interpreting a view.\n- Work autonomously until you stop; nobody can answer questions.\n\nYou additionally have six FREE instrument tools backed by an onboard SLAM\nsystem (no step cost, no budget, callable any time):\n\n- get_pose(): your estimated position (x, z, meters) and heading (yaw_deg) in\n  a fixed frame anchored at your start pose.\n- get_map(): a top-down occupancy map built automatically as you move (it\n  already contains an initial 360-degree scan of your start location). Its\n  coordinate grid stays fixed between calls, and it shows your current\n  floor's layer — a \"floor k/n\" tag marks the storey when a building has\n  several; pass floor=k to view another storey, or zoom=true to get both\n  the full map and a fixed 8-meter close-up around you. Markers you drop\n  with mark() appear on it.\n- get_trajectory(): the path you have walked on this task,\n  oldest first (the map keeps the whole visit).\n- look_around(): turn a full circle in place and get four views 90 degrees\n  apart (front / right / back / left of your current heading), ending faced\n  where you started. A pure look, like observe(): it does not change the\n  map — only walking builds the map.\n- mark(label): drop a named marker at your position (re-marking a label\n  moves it) — it shows on the map, so you can pin rooms you have checked\n  and spots worth returning to instead of memorizing them.\n- preview_path(x, z): a read-only route preview over the map's walked-free\n  space to point (x, z), drawn on the map with its length in meters —\n  nothing moves.\n",
+     "first_message": "Begin navigating. Call observe() first to see where you are.",
+     "tools": {
+      "observe": "Look through the robot's forward-facing camera. Returns the current egocentric RGB view. Pure read — does not advance the simulator or consume step budget.",
+      "step": "Execute a sequence of movement actions, in order.\n\nActions: 0 = STOP (permanently ENDS the episode — issue it only when you can see the target and are standing right next to it), 1 = move forward 0.25 m, 2 = turn left 15 degrees, 3 = turn right 15 degrees, 4 = tilt the camera up 30 degrees, 5 = tilt the camera down 30 degrees (tilt changes the camera pitch only, not your position or heading; pitch is clamped to ±60°).\n\nExecutes sequentially and halts early if the episode ends. Returns how many actions ran, total steps taken, remaining budget, and whether the episode is over. The camera view changes after stepping — call observe() to see the result.",
+      "observe_waypoints": "Look around from where you stand. Returns a panoramic image of four views labeled Left / Front / Right / Back with numbered green circles marking the waypoints you can move to, plus a JSON listing each waypoint's direction, angle (degrees left of your heading; negative = right) and distance in meters. Pure read — does not advance the simulator or consume step budget.",
+      "goto": "Move to one numbered waypoint from the LATEST observe_waypoints() result: the robot turns toward it and walks there. Moving invalidates the old numbers — call observe_waypoints() again afterwards to see the new surroundings and waypoints. Returns steps consumed, remaining budget, and whether the episode is over.",
+      "stop": "Permanently END the episode, declaring you have found the target. Issue it only when you can see the target and are standing right next to it — stopping is irreversible.",
+      "get_pose": "Read the robot's SLAM-estimated pose: position (x, z) in meters and\n    heading yaw_deg, in a fixed frame anchored at your start pose (x = right\n    and z = forward OF YOUR STARTING POSE; yaw_deg is 0 at your starting\n    heading and INCREASES when you turn right). The same x/z coordinates\n    label the gridlines on get_map(), so pose numbers place you on the map.\n    Free — no step cost. slam=\"slam_lost\" means the estimate is currently\n    stale.",
+      "get_map": "Read the occupancy map built automatically as you move\n(it already contains an initial 360-degree scan of your start location).\nReturns a top-down image cropped to what you have explored — UP on the image\nis your STARTING heading (+z), right is +x. On it: white = walked-free\nspace, black = obstacle, gray = unexplored; the blue ARROW is you, pointing\nyour current heading; the blue LINE is your path so far; the \"S\" circle is\nyour start; orange dots are markers you dropped with mark(). Gridlines\nevery 2 m are labeled on both axes with the same x/z coordinates get_pose()\nreports (the 0-axes are drawn heavier), and the crop window never pans or\nrescales between calls — it only grows in 2 m steps as you explore, so\ncoordinates stay put from map to map. By default the map shows YOUR CURRENT\nFLOOR; a \"floor k/n\" tag (top right) says which storey you are on and how\nmany have been seen. Pass floor=k (the tag's 1-based number) to view\nanother storey's layer, or zoom=true to get TWO images — the full map plus\na fixed 8 m close-up centered on you (current floor, same coordinate\nlattice) — useful when the full map has grown too coarse for nearby\ndetail. Free — no step cost. SLAM estimates, not ground truth.",
+      "get_trajectory": "Read the path you have walked ON THIS TASK as (x, z) points in the same\n    fixed frame as get_pose(), oldest first. Useful to check whether you are\n    circling or which areas you already covered since this goal began. The map\n    keeps the whole visit; this is just the current stretch. Free — no step\n    cost.",
+      "look_around": "Turn a full circle in place and return four camera views 90 degrees\n    apart — front, right, back, left relative to your CURRENT heading —\n    ending faced exactly where you started. The camera's field of view is 90\n    degrees, so together the four views tile the complete panorama. This is\n    a pure LOOK: like observe(), it does not touch SLAM or the map —\n    get_map() stays exactly as it was, and only walking builds the map.\n    Free — no step cost, no budget; turning in place cannot collide.",
+      "mark": "Drop a named marker at your current position — it appears as an orange dot with your label on every later get_map() (on the floor where you dropped it), and in the map's JSON. Use it to remember places that matter to your search (\"kitchen\", \"bedroom door\", \"unchecked hallway\") instead of trusting visual memory. Re-marking an existing label MOVES it to where you are now. Labels cap at 24 characters. Free — no step cost.",
+      "preview_path": "Preview a walkable route from you to map point (x, z) — the same\n    x/z coordinates get_pose() and the map gridlines use. Plans over the\n    walked-free (white) cells of your current floor's map and returns the\n    map image with the route drawn in magenta (X = target) plus the route\n    length in meters. If (x, z) is not on known free space it snaps to the\n    nearest free cell within 1 m, or reports it unreachable — the map only\n    knows space you have already seen. NOTHING MOVES: this is a read-only\n    preview. Free — no step cost."
+     }
+    },
+    {
+     "task": "HM-EQA",
+     "experiment": "std_mip_hmeqa_hybrid_slam_es",
+     "actions": "1 = forward 0.25 m · 2 = turn left 30° · 3 = turn right 30° · 4 = tilt camera up 30° · 5 = tilt camera down 30° · no STOP: answer(letter) ends the episode · goto(k) walks to candidate waypoint k through the same forward primitives (500-step budget); answer(letter) ends the episode",
+     "budgets": {
+      "turns": 200,
+      "steps": 500,
+      "timeout_s": 2400,
+      "usd_fuse": 18.0
+     },
+     "body": {
+      "turn_deg": 30,
+      "rgb": {
+       "width": 640,
+       "height": 480,
+       "hfov_deg": 120.0,
+       "position": [
+        0.0,
+        1.5,
+        0.0
+       ]
+      }
+     },
+     "rgb": null,
+     "system": "You are controlling a robot in a real indoor environment (a photorealistic 3D scan of a building). Its camera starts tilted 30 degrees downward. You interact only through these tools:\n\n- observe(): look through the robot's forward-facing camera (returns an RGB image).\n- step(actions): execute movement actions in order. 1 = move forward 0.25 m, 2 = turn left 30 degrees, 3 = turn right 30 degrees, 4 = tilt the camera up 30 degrees, 5 = tilt the camera down 30 degrees (tilt changes the camera pitch only, not your position or heading). There is no stop action.\n- observe_waypoints(): look around from where you stand. Returns a panoramic image (four views labeled Left / Front / Right / Back) with numbered green circles marking the waypoints you can move to, plus a JSON listing each waypoint's direction and distance in meters.\n- goto(waypoint): walk to one numbered waypoint from the LATEST observe_waypoints(). Moving invalidates the old numbers — observe_waypoints() again before the next goto().\n- answer(letter): permanently END the episode by answering the question with \"A\", \"B\", \"C\" or \"D\".\n\nYour task is embodied question answering: explore the building until you can answer this multiple-choice question about it:\n\n\"{instruction}\"\n\nRules:\n- Alternate observing and stepping: look, decide where to go to find the evidence the question needs, move, look again.\n- You have a budget of {budget} movement actions. If it runs out you can still observe and answer from where you stand.\n- You may make at most 30 waypoint moves; each observe_waypoints() and goto() result reports how many remain. When they run out goto() stops working (step, observe and answer still do), so do not wander.\n- You succeed only if answer() gives the correct letter. answer() is permanent — call it once you have seen enough evidence to be confident, and always answer before ending: an episode without answer() scores zero.\n- Turning in place (e.g. step([2,2,2])) is a cheap way to look around when unsure.\n- Tilt changes persist until you change them again; level the camera again before moving on, and check your camera pitch before interpreting a view.\n- Work autonomously until you answer; nobody can help you.\n\nYou additionally have six FREE instrument tools backed by an onboard SLAM\nsystem (no step cost, no budget, callable any time):\n\n- get_pose(): your estimated position (x, z, meters) and heading (yaw_deg) in\n  a fixed frame anchored at your start pose.\n- get_map(): a top-down occupancy map built automatically as you move (it\n  already contains an initial 360-degree scan of your start location). Its\n  coordinate grid stays fixed between calls, and it shows your current\n  floor's layer — a \"floor k/n\" tag marks the storey when a building has\n  several; pass floor=k to view another storey, or zoom=true to get both\n  the full map and a fixed 8-meter close-up around you. Markers you drop\n  with mark() appear on it.\n- get_trajectory(): the path you have walked on this task,\n  oldest first (the map keeps the whole visit).\n- look_around(): turn a full circle in place and get four views 90 degrees\n  apart (front / right / back / left of your current heading, at your\n  current camera pitch), ending faced where you started. A pure look, like\n  observe(): it does not change the map — only walking builds the map.\n- mark(label): drop a named marker at your position (re-marking a label\n  moves it) — it shows on the map, so you can pin rooms and objects that\n  matter to the question instead of memorizing them.\n- preview_path(x, z): a read-only route preview over the map's walked-free\n  space to point (x, z), drawn on the map with its length in meters —\n  nothing moves.\n",
+     "first_message": "Begin exploring. Call observe() first to see where you are.",
+     "tools": {
+      "observe": "Look through the robot's forward-facing camera. Returns the current egocentric RGB view. Pure read — does not advance the simulator or consume step budget.",
+      "step": "Execute a sequence of movement actions, in order.\n\nActions: 1 = move forward 0.25 m, 2 = turn left 30 degrees, 3 = turn right 30 degrees, 4 = tilt the camera up 30 degrees, 5 = tilt the camera down 30 degrees (tilt changes the camera pitch only, not your position or heading; pitch is clamped to ±60°). There is NO stop action — the episode ends when you call answer().\n\nExecutes sequentially and halts early if the episode ends. Returns how many actions ran, total steps taken, remaining budget, and whether the episode is over. The camera view changes after stepping — call observe() to see the result.",
+      "observe_waypoints": "Look around from where you stand. Returns a panoramic image of four views labeled Left / Front / Right / Back with numbered green circles marking the waypoints you can move to, plus a JSON listing each waypoint's direction, angle (degrees left of your heading; negative = right) and distance in meters. Pure read — does not advance the simulator or consume step budget.",
+      "goto": "Move to one numbered waypoint from the LATEST observe_waypoints() result: the robot turns toward it and walks there. Moving invalidates the old numbers — call observe_waypoints() again afterwards to see the new surroundings and waypoints. Returns steps consumed, remaining budget, and whether the episode is over.",
+      "answer": "Permanently END the episode by answering the multiple-choice question. Pass a single letter: \"A\", \"B\", \"C\" or \"D\". This is your one and only answer — call it once you have seen enough of the building to be confident. An episode that ends without answer() scores zero.",
+      "get_pose": "Read the robot's SLAM-estimated pose: position (x, z) in meters and\n    heading yaw_deg, in a fixed frame anchored at your start pose (x = right\n    and z = forward OF YOUR STARTING POSE; yaw_deg is 0 at your starting\n    heading and INCREASES when you turn right). The same x/z coordinates\n    label the gridlines on get_map(), so pose numbers place you on the map.\n    Free — no step cost. slam=\"slam_lost\" means the estimate is currently\n    stale.",
+      "get_map": "Read the occupancy map built automatically as you move\n(it already contains an initial 360-degree scan of your start location).\nReturns a top-down image cropped to what you have explored — UP on the image\nis your STARTING heading (+z), right is +x. On it: white = walked-free\nspace, black = obstacle, gray = unexplored; the blue ARROW is you, pointing\nyour current heading; the blue LINE is your path so far; the \"S\" circle is\nyour start; orange dots are markers you dropped with mark(). Gridlines\nevery 2 m are labeled on both axes with the same x/z coordinates get_pose()\nreports (the 0-axes are drawn heavier), and the crop window never pans or\nrescales between calls — it only grows in 2 m steps as you explore, so\ncoordinates stay put from map to map. By default the map shows YOUR CURRENT\nFLOOR; a \"floor k/n\" tag (top right) says which storey you are on and how\nmany have been seen. Pass floor=k (the tag's 1-based number) to view\nanother storey's layer, or zoom=true to get TWO images — the full map plus\na fixed 8 m close-up centered on you (current floor, same coordinate\nlattice) — useful when the full map has grown too coarse for nearby\ndetail. Free — no step cost. SLAM estimates, not ground truth.",
+      "get_trajectory": "Read the path you have walked ON THIS TASK as (x, z) points in the same\n    fixed frame as get_pose(), oldest first. Useful to check whether you are\n    circling or which areas you already covered since this goal began. The map\n    keeps the whole visit; this is just the current stretch. Free — no step\n    cost.",
+      "look_around": "Turn a full circle in place and return four camera views 90 degrees apart — front, right, back, left relative to your CURRENT heading, at your current camera pitch — ending faced exactly where you started. The camera's field of view is 120 degrees, so the four views overlap and together cover the complete panorama. This is a pure LOOK: like observe(), it does not touch SLAM or the map — get_map() stays exactly as it was, and only walking builds the map. Free — no step cost, no budget; turning in place cannot collide.",
+      "mark": "Drop a named marker at your current position — it appears as an orange dot with your label on every later get_map() (on the floor where you dropped it), and in the map's JSON. Use it to remember places that matter to the question (\"kitchen\", \"grill\", \"unchecked door\") instead of trusting visual memory. Re-marking an existing label MOVES it to where you are now. Labels cap at 24 characters. Free — no step cost.",
+      "preview_path": "Preview a walkable route from you to map point (x, z) — the same\n    x/z coordinates get_pose() and the map gridlines use. Plans over the\n    walked-free (white) cells of your current floor's map and returns the\n    map image with the route drawn in magenta (X = target) plus the route\n    length in meters. If (x, z) is not on known free space it snaps to the\n    nearest free cell within 1 m, or reports it unreachable — the map only\n    knows space you have already seen. NOTHING MOVES: this is a read-only\n    preview. Free — no step cost."
+     }
+    }
+   ],
+   "tools": [
+    {
+     "name": "observe",
+     "sig": "observe()",
+     "desc": "Look through the robot's forward-facing camera. Returns the current egocentric RGB view. Pure read — does not advance the simulator or consume step budget."
+    },
+    {
+     "name": "step",
+     "sig": "step(actions)",
+     "desc": "Execute a sequence of movement actions, in order.\n\nActions: 0 = STOP (permanently ENDS the episode — issue it only when you believe the robot is within 3 meters of the goal), 1 = move forward 0.25 m, 2 = turn left 15 degrees, 3 = turn right 15 degrees.\n\nExecutes sequentially and halts early if the episode ends. Returns how many actions ran, total steps taken, remaining budget, and whether the episode is over. The camera view changes after stepping — call observe() to see the result."
+    },
+    {
+     "name": "observe_waypoints",
+     "sig": "observe_waypoints()",
+     "desc": "Look around from where you stand. Returns a panoramic image of four views labeled Left / Front / Right / Back with numbered green circles marking the waypoints you can move to, plus a JSON listing each waypoint's direction, angle (degrees left of your heading; negative = right) and distance in meters. Pure read — does not advance the simulator or consume step budget."
+    },
+    {
+     "name": "goto",
+     "sig": "goto(k)",
+     "desc": "Move to one numbered waypoint from the LATEST observe_waypoints() result: the robot turns toward it and walks there. Moving invalidates the old numbers — call observe_waypoints() again afterwards to see the new surroundings and waypoints. Returns steps consumed, remaining budget, and whether the episode is over."
+    },
+    {
+     "name": "stop",
+     "sig": "stop()",
+     "desc": "Permanently END the episode, declaring you have reached the goal. Issue it only when you believe the robot is within 3 meters of the instruction's endpoint — stopping is irreversible."
+    },
+    {
+     "name": "get_pose",
+     "sig": "get_pose()",
+     "desc": "Read the robot's SLAM-estimated pose: position (x, z) in meters and\n    heading yaw_deg, in a fixed frame anchored at your start pose (x = right\n    and z = forward OF YOUR STARTING POSE; yaw_deg is 0 at your starting\n    heading and INCREASES when you turn right). The same x/z coordinates\n    label the gridlines on get_map(), so pose numbers place you on the map.\n    Free — no step cost. slam=\"slam_lost\" means the estimate is currently\n    stale."
+    },
+    {
+     "name": "get_map",
+     "sig": "get_map()",
+     "desc": "Read the occupancy map built automatically as you move\n(it already contains an initial 360-degree scan of your start location).\nReturns a top-down image cropped to what you have explored — UP on the image\nis your STARTING heading (+z), right is +x. On it: white = walked-free\nspace, black = obstacle, gray = unexplored; the blue ARROW is you, pointing\nyour current heading; the blue LINE is your path so far; the \"S\" circle is\nyour start; orange dots are markers you dropped with mark(). Gridlines\nevery 2 m are labeled on both axes with the same x/z coordinates get_pose()\nreports (the 0-axes are drawn heavier), and the crop window never pans or\nrescales between calls — it only grows in 2 m steps as you explore, so\ncoordinates stay put from map to map. By default the map shows YOUR CURRENT\nFLOOR; a \"floor k/n\" tag (top right) says which storey you are on and how\nmany have been seen. Pass floor=k (the tag's 1-based number) to view\nanother storey's layer, or zoom=true to get TWO images — the full map plus\na fixed 8 m close-up centered on you (current floor, same coordinate\nlattice) — useful when the full map has grown too coarse for nearby\ndetail. Free — no step cost. SLAM estimates, not ground truth."
+    },
+    {
+     "name": "get_trajectory",
+     "sig": "get_trajectory()",
+     "desc": "Read the path you have walked ON THIS TASK as (x, z) points in the same\n    fixed frame as get_pose(), oldest first. Useful to check whether you are\n    circling or which areas you already covered since this goal began. The map\n    keeps the whole visit; this is just the current stretch. Free — no step\n    cost."
+    },
+    {
+     "name": "look_around",
+     "sig": "look_around()",
+     "desc": "Turn a full circle in place and return four camera views 90 degrees\n    apart — front, right, back, left relative to your CURRENT heading —\n    ending faced exactly where you started. The camera's field of view is 90\n    degrees, so together the four views tile the complete panorama. This is\n    a pure LOOK: like observe(), it does not touch SLAM or the map —\n    get_map() stays exactly as it was, and only walking builds the map.\n    Free — no step cost, no budget; turning in place cannot collide."
+    },
+    {
+     "name": "mark",
+     "sig": "mark(…)",
+     "desc": "Drop a named marker at your current position — it appears as an\n    orange dot with your label on every later get_map() (on the floor where\n    you dropped it), and in the map's JSON. Use it to remember places the\n    instruction cares about (\"kitchen\", \"blue door\") instead of trusting\n    visual memory. Re-marking an existing label MOVES it to where you are\n    now. Labels cap at 24 characters. Free — no step cost."
+    },
+    {
+     "name": "preview_path",
+     "sig": "preview_path(…)",
+     "desc": "Preview a walkable route from you to map point (x, z) — the same\n    x/z coordinates get_pose() and the map gridlines use. Plans over the\n    walked-free (white) cells of your current floor's map and returns the\n    map image with the route drawn in magenta (X = target) plus the route\n    length in meters. If (x, z) is not on known free space it snaps to the\n    nearest free cell within 1 m, or reports it unreachable — the map only\n    knows space you have already seen. NOTHING MOVES: this is a read-only\n    preview. Free — no step cost."
+    },
+    {
+     "name": "answer",
+     "sig": "answer(text)",
+     "desc": "Permanently END the episode by answering the multiple-choice question. Pass a single letter: \"A\", \"B\", \"C\" or \"D\". This is your one and only answer — call it once you have seen enough of the building to be confident. An episode that ends without answer() scores zero."
+    }
+   ]
+  }
+ ]
+}
