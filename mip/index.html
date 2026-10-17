@@ -204,9 +204,8 @@
         .vchip:focus-visible { outline: 2px solid var(--blue-2); outline-offset: 1px; }
         table.lb tbody td { padding: 9px 7px; border-bottom: 1px solid #1a2338; vertical-align: middle; color: #ccd4e3; white-space: nowrap; }
         table.lb tbody tr:last-child td { border-bottom: none; }
-        table.lb tbody tr { cursor: pointer; transition: background-color .15s var(--ease); }
+        table.lb tbody tr { transition: background-color .15s var(--ease); }
         table.lb tbody tr:hover td { background: #5b8cff12; }
-        table.lb tbody tr.open td { background: #5b8cff18; }
         table.lb tbody tr.ref td { color: var(--faint); background: repeating-linear-gradient(135deg, transparent 0 6px, rgba(255,255,255,.015) 6px 12px); font-style: italic; }
         table.lb tbody tr.ref .mname { color: var(--muted); font-weight: 500; }
         .col-rank { width: 30px; font-family: var(--mono); color: var(--faint); }
@@ -281,15 +280,13 @@
         .badge.rerun { color: #1a0f08; background: var(--amber); border-color: var(--amber-d); font-weight: 700; text-transform: uppercase; letter-spacing: .12em; margin-left: 8px; vertical-align: 2px; box-shadow: 0 0 0 2px #ff8a5c33; }
         table.lb tbody tr.rerun td { background: #ff8a5c14; }
         table.lb tbody tr.rerun td:first-child { box-shadow: inset 3px 0 0 var(--amber); }
-        table.lb tbody tr.rerun:hover td, table.lb tbody tr.rerun.open td { background: #ff8a5c22; }
+        table.lb tbody tr.rerun:hover td { background: #ff8a5c22; }
         table.lb tbody tr.rerun .col-rank { color: var(--amber); }
         .rerun-why { color: var(--amber); }
         .col-eff { font-family: var(--mono); font-size: 12.5px; color: #b6c0d4; }
         .col-eff .unit { font-size: 10px; color: var(--faint); margin-left: 2px; }
         .col-eff .tmo { color: var(--amber); font-size: 10px; margin-left: 2px; cursor: help; }
         .col-cost { font-family: var(--mono); font-size: 12.5px; }
-        table.lb tbody tr.details td { background: #0b101c !important; padding: 0 12px 12px; white-space: normal; cursor: default; }
-        .details__in { border-left: 2px solid var(--blue); padding: 8px 14px; display: grid; gap: 4px; font-size: 12.5px; color: #bfc8da; }
         .dline .k { font-family: var(--mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--faint); margin-right: 10px; }
         .dline code { font-family: var(--mono); font-size: 12px; color: var(--blue-2); }
         .empty { padding: 28px; text-align: center; color: var(--faint); font-family: var(--mono); font-size: 12.5px; }

@@ -18,7 +18,7 @@
   // (which only ever ran on mini-swe-agent) stays visible through `keep`; touching any Harness chip drops the exception
   const defaultFilters = () => ({ interface: new Set(["minimal"]), harness: new Set(["Claude Agent SDK", "Codex CLI"]) });
   const defaultKeep = () => new Set(["qwen3.8-max", "qwen3.7-plus", "qwen3.6-plus", "qwen3.5-plus"]); // 2026-10-16: the 3.5–3.7-plus rows too (in the paper's cost appendix)
-  const state = { tab: null, sort: { key: "sr", dir: "desc" }, miniOnly: false, filters: defaultFilters(), keep: defaultKeep(), paper: true, saved: null, open: new Set(), unfolded: new Set(),
+  const state = { tab: null, sort: { key: "sr", dir: "desc" }, miniOnly: false, filters: defaultFilters(), keep: defaultKeep(), paper: true, saved: null, unfolded: new Set(),
                   setupOpen: /[?&]setup\b/.test(location.search), // ?setup opens the experiment-setup panel on load (shareable link)
                   // 2026-10-09 (user): the Effort column is retired — every board row is the vendor-default effort, and the
                   // Interface column (minimal / waypoint / hybrid) takes its place. Rows with a pinned effort (max / low /
@@ -36,8 +36,8 @@
     { key: "model", label: "Model", order: [], fmt: v => v, fold: true } // 2026-10-15 (user: model 那一栏折叠掉，太多了晃眼睛): folded until clicked
   ];
   // 2026-10-06 (user): a row may carry `rerun: "<reason>"` — a dev-time flag, the board is not public yet. The row stays
-  // ranked but is tinted, its model name wears a RERUN badge whose tooltip is the reason, the reason opens with the
-  // details. Remove the key when the replacement row lands.
+  // ranked but is tinted, its model name wears a RERUN badge whose tooltip is the reason. Remove the key when the
+  // replacement row lands.
   let DATA = null, IFACES = null;
   // data files sit next to this script, so the board renders on /mip/ (the project page, 2026-10-15) and here alike
   const BASE = new URL(".", document.currentScript.src);
@@ -69,7 +69,7 @@
       const n = t.rows.filter(r => !r.ref && passes(r)).length; // the count follows the VIEW switches
       b.appendChild(el("span", "count", String(n)));
       b.appendChild(el("span", "sub", t.sub || parts.slice(1).join(" · ") || ""));
-      b.addEventListener("click", () => { state.tab = t.id; state.filters = defaultFilters(); state.keep = defaultKeep(); state.paper = true; state.saved = null; state.open.clear(); state.sort = { key: "sr", dir: "desc" }; writeHash(); renderAll(); });
+      b.addEventListener("click", () => { state.tab = t.id; state.filters = defaultFilters(); state.keep = defaultKeep(); state.paper = true; state.saved = null; state.sort = { key: "sr", dir: "desc" }; writeHash(); renderAll(); });
       list.appendChild(b);
     });
   }
@@ -198,7 +198,7 @@
 
     const tbody = el("tbody");
     const rowHTML = (r, i) => {
-      const tr = el("tr", (r.ref ? "ref" : "") + (r.rerun ? " rerun" : "") + (state.open.has(r) ? " open" : ""));
+      const tr = el("tr", (r.ref ? "ref" : "") + (r.rerun ? " rerun" : ""));
       const orgCls = ORG_CLASS[r.model_org] || "org-other";
       let h = `<td class="col-rank">${r.ref ? "<span class=\"refmark\" title=\"Reference row, not ranked\">ref</span>" : rank.get(r)}</td>`;
       h += `<td class="col-model"><div class="model"><span class="orgdot ${orgCls}"></span><div><div class="mname${VENDOR_TEXT[r.model_org] ? " mid " + VENDOR_TEXT[r.model_org] : ""}">${r.model}${r.rerun ? badge("rerun", "rerun", r.rerun) : ""}</div><div class="morg">${r.model_org || ""}</div></div></div></td>`;
@@ -209,21 +209,7 @@
       h += `<td class="col-eff num">${r.ref || r.calls == null ? "—" : r.calls}</td>`;
       h += `<td class="col-cost num">${r.ref ? "—" : costHTML(r)}</td>`;
       tr.innerHTML = h;
-      tr.addEventListener("click", e => { if (e.target.closest("a")) return; state.open.has(r) ? state.open.delete(r) : state.open.add(r); renderTable(); });
       tbody.appendChild(tr);
-      if (state.open.has(r)) {
-        const d = el("tr", "details");
-        const bits = [];
-        if (r.rerun) bits.push(`<span class="k">rerun</span><span class="rerun-why">${r.rerun}</span>`);
-        if (r.cell) bits.push(`<span class="k">cell</span><code>${r.cell}</code>`);
-        if (r.date) bits.push(`<span class="k">date</span>${r.date}`); // 2026-10-15 (user): Date column dropped, kept in the details line
-        bits.push(`<span class="k">n</span>${r.reps > 1 ? r.reps + " × " : ""}${r.n || 100} episodes`);
-        if (r.steps != null) bits.push(`<span class="k">mean steps</span>${r.steps}`);
-        if (r.timeouts) bits.push(`<span class="k">† timeouts</span>${tmoTip(r)}`);
-        if (r.note) bits.push(`<span class="k">note</span>${r.note}`);
-        d.innerHTML = `<td colspan="${cols.length}"><div class="details__in">${bits.map(b => `<div class="dline">${b}</div>`).join("")}</div></td>`;
-        tbody.appendChild(d);
-      }
     };
     refs.forEach(rowHTML);
     ranked.forEach(rowHTML);
