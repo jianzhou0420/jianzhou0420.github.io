@@ -4,19 +4,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Embodied Agents Take Control — Minimal-Interface Probe</title>
+    <title>Embodied Agents Take Control — MIP · Minimal-Interface Probe</title>
     <meta name="author" content="Jian Zhou">
     <meta name="description"
         content="Agentic embodied control through a minimal interface: fourteen frontier multimodal models, given one monocular RGB camera and primitive actions, ranked zero-shot on six navigation and embodied-QA benchmarks — R2R-CE, RxR-CE, HM3D-ObjectNav v1 and v2, MP3D-ObjectNav and HM-EQA.">
 
     <meta property="og:type" content="website">
-    <meta property="og:title" content="Embodied Agents Take Control — Minimal-Interface Probe">
+    <meta property="og:title" content="Embodied Agents Take Control — MIP · Minimal-Interface Probe">
     <meta property="og:description"
         content="One camera. Primitive actions. No map, no memory, no navigation training. Fourteen frontier models ranked on six embodied benchmarks — the best approach or surpass a human tester.">
     <meta property="og:image" content="https://jianzhou0420.github.io/mip/fig1_arr.png">
     <meta property="og:url" content="https://jianzhou0420.github.io/mip/">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Embodied Agents Take Control — Minimal-Interface Probe">
+    <meta name="twitter:title" content="Embodied Agents Take Control — MIP · Minimal-Interface Probe">
     <meta name="twitter:image" content="https://jianzhou0420.github.io/mip/fig1_arr.png">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -314,6 +314,8 @@
         .btn.primary small { color: #37507e; }
         .sitenav a.cur { color: var(--ink); }
         .hero__brandline { font-family: var(--mono); font-size: 11.5px; letter-spacing: .22em; text-transform: uppercase; color: var(--blue-2); margin-bottom: 14px; }
+        .hero__sub { font-family: var(--display); font-weight: 700; font-size: clamp(1.15rem, 2vw, 1.5rem); letter-spacing: -.02em; color: #cfd6e6; margin: -2px 0 16px; }
+        .hero__sub .em { color: var(--blue); }
         .hero__tldr { color: #cfd6e6; font-size: clamp(1rem, 1.5vw, 1.12rem); max-width: 80ch; margin-bottom: 18px; }
         .hero__tldr strong { color: var(--ink); font-weight: 600; }
         .links { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
@@ -496,8 +498,9 @@
         <div class="layout">
             <main>
                 <header class="page-header" id="top">
-                    <div class="hero__brandline reveal" style="animation-delay:.02s" data-eid="hero-brand">Minimal-Interface Probe · agentic embodied control</div>
+                    <div class="hero__brandline reveal" style="animation-delay:.02s" data-eid="hero-brand">Agentic embodied control</div>
                     <h1 class="reveal" style="animation-delay:.06s" data-eid="hero-title">Embodied agents <span class="em">take control</span></h1>
+                    <div class="hero__sub reveal" style="animation-delay:.09s" data-eid="hero-sub"><span class="em">MIP</span> · Minimal-Interface Probe</div>
                     <p class="hero__tldr reveal" style="animation-delay:.12s" data-eid="hero-tldr">We give <strong>fourteen frontier multimodal models</strong>, as their vendors provide them, one monocular RGB camera and primitive actions — no map, no memory, no planner, no navigation training — and let each model decide when to observe, act, recover and stop. Across <strong>six navigation and embodied question-answering benchmarks</strong>, the best agents approach or surpass our human tester. Every run is ranked below.</p>
                     <div class="links reveal" style="animation-delay:.16s">
                         <a class="btn primary" href="https://arxiv.org/abs/2607.26148" target="_blank" rel="noopener"><span class="pdot"></span>arXiv <small>2607.26148</small></a>
