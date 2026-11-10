@@ -84,7 +84,7 @@
   function viewOK(r) { return effortOK(r); }
   // a row passes every chip group except `skip` (faceted counts: a chip's count is over the rows the OTHER groups let through)
   function filtersOK(r, skip) {
-    if (state.paper && !r.paper_main) return false;
+    if (state.paper && !(r.paper_main || r.show_default)) return false;
     for (const k in state.filters) { if (k === skip) continue; if (!groupOK(r, k)) return false; }
     return true;
   }
@@ -94,7 +94,7 @@
     if (r.ref) return true;
     if (!viewOK(r)) return false;
     if (state.miniOnly && r.harness !== "mini-swe-agent") return false;
-    if (state.paper && !r.paper_main) return false; // 2026-10-15 (user): the paper's main table, on by default
+    if (state.paper && !(r.paper_main || r.show_default)) return false; // 2026-10-15 (user): the paper's main table, on by default
     for (const k in state.filters) {
       if (k.startsWith("prop:")) { if (!rowProp(r, k.slice(5))) return false; }
       else if (!groupOK(r, k)) return false;
@@ -247,7 +247,7 @@
     // chip groups to their defaults, turning it off leaves them and shows every run they let through
     const pline = el("div", "view-row__g");
     pline.appendChild(el("span", "view-row__k", "Preset"));
-    const nPaper = t.rows.filter(r => !r.ref && r.paper_main).length;
+    const nPaper = t.rows.filter(r => !r.ref && (r.paper_main || r.show_default)).length  // show_default: a row added after the paper that stays in the default view;
     pline.appendChild(chip(state.paper, "Paper main table", nPaper, state.paper
         ? "Showing exactly the rows of the paper's main table (Minimal interface, one row per model), plus the R2R-CE Qwen rows of its cost appendix. Click to show every run the chips below let through."
         : "Show exactly the rows of the paper's main table (Minimal interface, one row per model), plus the R2R-CE Qwen rows of its cost appendix", () => {

@@ -87,7 +87,8 @@
      "note": "Mean ± s.d. over three replications (88 / 87 / 90; cells std_mip_r2r_cc_fable-5.2_default_minimal, _rep2, _rep3). Paper protocol std_mip_r2r_minimal: four actions, 200 turns, 500 steps, 2400 s, 512-px RGB, rand100. New simulator stack (EmbodiedScore-envs v1.0.1, habitat-sim 0.3.3), MipRunner v1.0.6. Claude Fable 5.2 (claude-fable-5-2) on Claude Code CLI 2.1.322 pinned by path, with its own prompt injections switched off in the adapter, subscription auth. Effort: nothing sent (the CLI's per-model default; the level it applied was not read back). 300 episodes scored, 0 errors, 0 refusals or model fallbacks; $27.16 / $21.98 / $27.97 per board at list prices.",
      "interface": "minimal",
      "tmed": 28,
-     "calls": 19
+     "calls": 19,
+     "show_default": true
     },
     {
      "model": "fable-5.1",
@@ -1741,7 +1742,8 @@
      "spl": 72.36,
      "ne": 2.98,
      "osr": 86,
-     "ndtw": 76.7
+     "ndtw": 76.7,
+     "show_default": true
     },
     {
      "model": "fable-5.1",
@@ -2216,7 +2218,8 @@
      "sr025": 81,
      "sr01": 64,
      "spl": 45.92,
-     "ne": 1.26
+     "ne": 1.26,
+     "show_default": true
     },
     {
      "model": "fable-5.1",
@@ -3076,7 +3079,8 @@
      "sr025": 87,
      "sr01": 50,
      "spl": 31.4,
-     "ne": 0.97
+     "ne": 0.97,
+     "show_default": true
     },
     {
      "model": "fable-5.1",
@@ -3315,7 +3319,8 @@
      "sr025": 57,
      "sr01": 45,
      "spl": 27.03,
-     "ne": 3.03
+     "ne": 3.03,
+     "show_default": true
     },
     {
      "model": "fable-5.1",
@@ -4005,7 +4010,8 @@
      "calls": 15,
      "note": "Single run, mip100 (100 of the 500 questions). Cell std_mip_hmeqa_minimal: the paper HM-EQA rig, briefing eqa_6, 200 turns, 500 steps, answer(letter) ends the episode. All 100 questions answered; the longest episode took 125 turns. New simulator stack (EmbodiedScore-envs v1.0.1, habitat-sim 0.3.3), MipRunner v1.0.6. Claude Fable 5.2 (claude-fable-5-2) on Claude Code CLI 2.1.322 pinned by path, its own prompt injections switched off in the adapter, subscription auth, effort: nothing sent (the CLI's per-model default; the level it applied was not read back). One scripted (api=fake) episode before the board; no real-model probe on this cell. 100 episodes scored, 0 errors, 0 refusals or model fallbacks; $30.80 for the board at list prices.",
      "sr": 78.0,
-     "turns": 200
+     "turns": 200,
+     "show_default": true
     },
     {
      "model": "fable-5.1",
